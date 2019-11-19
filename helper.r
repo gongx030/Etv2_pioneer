@@ -1,91 +1,4 @@
-library(ComplexHeatmap)
-library(SummarizedExperiment)
-library(ChIPpeakAnno)
-library(futile.logger)
-library(parallel)
-library(EnrichedHeatmap)
-library(circlize)
-library(motifmatchr)
-library(BSgenome.Mmusculus.UCSC.mm10)
-library(TxDb.Mmusculus.UCSC.mm10.knownGene)
-library(org.Mm.eg.db)
-source('chipseq.r')
-source('sra.r'); 
-
-PROJECT_DIR <- sprintf('%s/etv2_pioneer', Sys.getenv('TMPDIR'))
-
-# touch everything in the project dir
-# find /panfs/roc/scratch/gongx030/etv2_pioneer  -type f -exec touch {} +
-
-flog.info(sprintf('PROJECT_DIR: %s', PROJECT_DIR))
-flog.info(sprintf('MACS2 results: %s/macs2', PROJECT_DIR))
-
-atacseq_group2bg <- function(group){
-	g2bg <- c(
-		"MEF_NoDox_rep1" = 'black', 
-		"MEF_NoDox_rep2" = 'black',
-		"MEF_Dox_D1_rep1" = 'blue',
-		"MEF_Dox_D1_rep2" = 'blue',
-		"MEF_Dox_D2_rep1" = 'purple',
-		"MEF_Dox_D2_rep2" = 'purple',
-		"MEF_Dox_D7_rep1" = 'red',
-		"MEF_Dox_D7_rep2" = 'red',
-		"MEF_Dox_D7_Flk1pos_rep1" = 'pink',
-		"MEF_Dox_D7_Flk1pos_rep2" = 'pink',
-		"EB_Dox_D25_rep1" = 'red',
-		"EB_Dox_D25_rep2" = 'red',
-		"EB_Dox_D25_Flk1pos_rep1" = 'pink',
-		"EB_Dox_D25_Flk1pos_rep2" = 'pink',
-		"EB_NoDox_D25_rep1" = 'gray',
-		"EB_NoDox_D25_rep2" = 'gray'
-	)
-	g2bg[group]
-}
-
-atacseq_group2pch <- function(group){
-	g2pch <- c(
-		"MEF_NoDox_rep1" = 21,
-		"MEF_NoDox_rep2" = 21,
-		"MEF_Dox_D1_rep1" = 21,
-		"MEF_Dox_D1_rep2" = 21,
-		"MEF_Dox_D2_rep1" = 21,
-		"MEF_Dox_D2_rep2" = 21,
-		"MEF_Dox_D7_rep1" = 21,
-		"MEF_Dox_D7_rep2" = 21,
-		"MEF_Dox_D7_Flk1pos_rep1" = 21,
-		"MEF_Dox_D7_Flk1pos_rep2" = 21,
-		"EB_Dox_D25_rep1" = 3,
-		"EB_Dox_D25_rep2" = 3,
-		"EB_Dox_D25_Flk1pos_rep1" = 3,
-		"EB_Dox_D25_Flk1pos_rep2" = 3,
-		"EB_NoDox_D25_rep1" = 3,
-		"EB_NoDox_D25_rep2" = 3
-	)
-	g2pch[group]
-}
-
-atacseq_group2col <- function(group){
-	g2col <- c(
-		"MEF_NoDox_rep1" = 'gray', 
-		"MEF_NoDox_rep2" = 'gray',
-		"MEF_Dox_D1_rep1" = 'black',
-		"MEF_Dox_D1_rep2" = 'black',
-		"MEF_Dox_D2_rep1" = 'black',
-		"MEF_Dox_D2_rep2" = 'black',
-		"MEF_Dox_D7_rep1" = 'black',
-		"MEF_Dox_D7_rep2" = 'black',
-		"MEF_Dox_D7_Flk1pos_rep1" = 'black',
-		"MEF_Dox_D7_Flk1pos_rep2" = 'black',
-		"EB_Dox_D25_rep1" = 'red',
-		"EB_Dox_D25_rep2" = 'red',
-		"EB_Dox_D25_Flk1pos_rep1" = 'pink',
-		"EB_Dox_D25_Flk1pos_rep2" = 'pink',
-		"EB_NoDox_D25_rep1" = 'green',
-		"EB_NoDox_D25_rep2" = 'green'
-	)
-	g2col[group]
-}
-
+devtools::load_all('packages/compbio')
 
 # --------------------------------------------------------------------------------
 # [2019-05-03] Read Etv2 ChIP-seq peaks in MEF
@@ -134,34 +47,27 @@ read_Etv2_peaks_in_MEF <- function(exclude_promoter = TRUE, exclude_exons = TRUE
 
 # --------------------------------------------------------------------------------
 # [2019-05-03] Read Etv2 ChIP-seq peaks in MEF
+# [2019-09-06] Updated analysis using compbio package
 # --------------------------------------------------------------------------------
 read_Etv2_peaks_in_D1_MEF <- function(width = 200, exclude_promoter = TRUE, exclude_exons = TRUE, MEF_H3K27ac = NULL){
 
 	library(BSgenome.Mmusculus.UCSC.mm10)
   library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 
-	peak_file <- sprintf('%s/macs2/MEF_Dox_D1_Etv2_summits.bed', PROJECT_DIR)
-	flog.info(sprintf('reading %s', peak_file))	
-	gr <- read.table(peak_file, header = FALSE, sep = '\t')
-	gr <- GRanges(seqnames = gr[, 1], range = IRanges(gr[, 2], gr[, 3]))
-	gr <- reCenterPeaks(gr, width = width)
-	gr <- add.seqinfo(gr, genome = 'mm10')
-
 	if (exclude_promoter){
 		pmt <- promoters(TxDb.Mmusculus.UCSC.mm10.knownGene)
-		is_promoter <- 1:length(gr) %in% as.matrix(findOverlaps(gr, pmt))[, 1]
-		gr <- gr[!is_promoter]
+		gr <- gr[!gr %over% pmt]
 		flog.info(sprintf('get %d intervals after removing promoter region', length(gr)))
 	}
 
 	if (exclude_exons){
 		ex <- exons(TxDb.Mmusculus.UCSC.mm10.knownGene)
-		is_exon <- 1:length(gr) %in% as.matrix(findOverlaps(gr, ex))[, 1]
-		gr <- gr[!is_exon]
+		gr <- gr[!gr %over% ex]
 		flog.info(sprintf('get %d intervals after removing exon region', length(gr)))
 	}
 
 	if (!is.null(MEF_H3K27ac)){
+		stop('modify here!')
 		bw_files <- get_bigwig_files()
 		bw_files <- bw_files['MEF_H3K27ac']
 		bed_files <- gsub('_treat_pileup.bw', '_peaks.broadPeak', bw_files)
@@ -659,4 +565,13 @@ matrix2normalizedMatrix <- function(X, center = 300, extend = 250){
 
 }
 
-
+#' Add MNase-seq in MEF
+#'
+add_mnase_in_MEF <- function(peaks){
+	mnase_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw'
+	mnase <- rtracklayer::import(mnase_file, format = 'BigWig', which = reduce(peaks))
+	mnase <- resize(mnase, width = 1, fix = 'center')
+	mnase <- add.seqinfo(mnase, 'mm10')
+	cvg <- coverage(mnase, weight = mcols(mnase)$score)
+	mcols(peaks)$mnase_signal <- mean(cvg[peaks]) # the nucleosome signal with 200bp of Etv2 submmit
+}

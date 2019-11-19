@@ -101,23 +101,6 @@ breaks <- c(-10, seq(-0.25, 0.25, length.out = 99), 10)
 pheatmap(Z, cluster_rows = TRUE, show_rownames = TRUE, cluster_cols = TRUE, breaks = breaks, color = col, cellheight = 7, cellwidth = 30, fontsize_col = 15, fontsize_row = 7, show_colnames = TRUE, border_color = 'black', annotation_names_row = FALSE, annotation_names_col = FALSE)
 
 
-# visualize the sample PCA plot
-library(irlba); y <- irlba(assay(dev)[, m], nu = 1, nv = 2)$v
-col <- c(
-	'D2_EB' = 'green', 			'D2_EB_DOX' = 'green', 
-	'D3_EB' = 'darkgreen', 	'D3_EB_DOX' = 'darkgreen', 	
-	'ESC' = 'yellow', 			'ESC_DOX' = 'yellow', 
-	'MEF' = 'blue', 				'MEF_DOX' = 'blue', 	'MEF_SRR1930168' = 'blue',
-	'Tie2pos' = 'black', 			'mesoderm' = 'lightgreen'
-)
-pch <- c(
-	'D2_EB' = 21,	'D2_EB_DOX' = 22, 			
-	'D3_EB' = 21,	'D3_EB_DOX' = 22,
-	'ESC' = 21, 'ESC_DOX' = 22, 
-	'MEF' = 21, 'MEF_DOX' = 22, 'MEF_SRR1930168' = 21,
-	'Tie2pos' = 21, 			'mesoderm' = 21
-)
-plot(y[, 1], y[, 2], col = 'black', bg = col[d[m, 'group']], pch = pch[d[m, 'group']], cex = 2)
 
 
 x1 <- rowMeans(assay(dev)[, d[, 'group'] == 'MEF'])
@@ -1019,7 +1002,7 @@ source('aux.r'); se <- local({get(load(sprintf('analysis/datasets/%s.rda', datas
 dds.file <- sprintf('%s/%s.dds.rda', project.dir, dataset)	# preprocessed data from DESeq2
 
 register(MulticoreParam(4)) 
-dds <- DESeqDataSet(se, design = ~ group)
+dds <- DESeq
 dds <- DESeq(dds, parallel = TRUE)
 save(dds, file = dds.file)
 dds <- local({get(load(dds.file))})
@@ -2272,265 +2255,6 @@ image(t(Y), col = colorpanel(100, low = 'black', mid = 'red', high = 'yellow'), 
 plot(y_mean)
 
 
-# ----------------------------------------------------------------------------
-# [2019-04-07] Calling Brg1 peaks in MEF using MACS2 
-# This is the Brg1 ChIP-seq data downlaoded form https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE90893
-# ----------------------------------------------------------------------------
-dataset <- 'dataset=Chronis_version=20190405a'
-source('sra.r'); d <- read.dataset(dataset, touch = TRUE)
-d <- transform(d, sra.run.dir = sra.run.dir(run), bam.file = sprintf('%s/%s.dedup.bam', sra.run.result.dir(run), run))
-treatment <- d[, 'group'] %in% c('MEF_Brg1')
-control <- d[, 'group'] %in% c('MEF_input')
-base.name <- sprintf('analysis/etv2_pioneer/results/MEF_Brg1_GSE90893')
-pileup_file <- sprintf('%s_treat_pileup.bw', base.name)
-
-treatment_files <- d[treatment, 'bam.file']
-control_files <- d[control, 'bam.file']
-source('chipseq.r'); macs2.callpeak(treatment_files, base.name, control_files, format = 'BAM', genome = 'mm10', broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE , update = TRUE, call.summits = TRUE)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-08] Calling Brg1 peaks in MEF using MACS2 
-# This is the Brg1 ChIP-seq data downlaoded form https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE71507
-# ----------------------------------------------------------------------------
-dataset <- 'dataset=Alver_version=20190407a'
-source('sra.r'); d <- read.dataset(dataset, touch = TRUE)
-d <- transform(d, sra.run.dir = sra.run.dir(run), bam.file = sprintf('%s/%s.dedup.bam', sra.run.result.dir(run), run))
-treatment <- d[, 'group'] %in% c('MEF_Brg1')
-control <- d[, 'group'] %in% c('MEF_input')
-base.name <- sprintf('analysis/etv2_pioneer/results/MEF_Brg1_GSE71507')
-pileup_file <- sprintf('%s_treat_pileup.bw', base.name)
-
-treatment_files <- d[treatment, 'bam.file']
-control_files <- d[control, 'bam.file']
-source('chipseq.r'); macs2.callpeak(treatment_files, base.name, control_files, format = 'BAM', genome = 'mm10', broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE , update = TRUE, call.summits = TRUE)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-12] Uploading two public Brg1 ChIP-seq tracks
-# ----------------------------------------------------------------------------
-source('s3.r');s3.backup('analysis/etv2_pioneer/results/MEF_Brg1_GSE90893_treat_pileup.bw', 's3://etv2_pioneer/data/MEF_Brg1_GSE90893_treat_pileup.bw', make_public = TRUE)
-source('s3.r');s3.backup('analysis/etv2_pioneer/results/MEF_Brg1_GSE71507_treat_pileup.bw', 's3://etv2_pioneer/data/MEF_Brg1_GSE71507_treat_pileup.bw', make_public = TRUE)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-12] Comparing two Brg1 ChIP-seq peaks and see the consistency between them
-# If they are largely consistent, this will reduce the difficulities of re-doing the Brg1 ChIP-seq
-# ----------------------------------------------------------------------------
-library(GenomicRanges); 
-source('chipseq.r')
-peak1_file <- 'analysis/etv2_pioneer/results/MEF_Brg1_GSE71507_summits.bed'
-peak2_file <- 'analysis/etv2_pioneer/results/MEF_Brg1_GSE90893_summits.bed'
-gr1 <- read.table(peak1_file, header = FALSE, sep = '\t')
-gr2 <- read.table(peak2_file, header = FALSE, sep = '\t')
-gr1 <- gr1[gr1[, 5] > 10, ]
-gr2 <- gr2[gr2[, 5] > 10, ]
-gr1 <- GRanges(seqnames = gr1[, 1], range = IRanges(gr1[, 2], gr1[, 3]))
-gr2 <- GRanges(seqnames = gr2[, 1], range = IRanges(gr2[, 2], gr2[, 3]))
-gr1 <- resize(gr1, width = 500, fix = 'center')  # extending centered at the summit
-gr2 <- resize(gr2, width = 500, fix = 'center')  # extending centered at the summit
-gr1 <- add.seqinfo(gr1, genome = 'mm10')
-gr2 <- add.seqinfo(gr2, genome = 'mm10')
-mm <- as.matrix(findOverlaps(gr1, gr2))
-table(1:length(gr1) %in% mm[, 1])
-table(1:length(gr2) %in% mm[, 2])
-
-
-bw_files <- c(
-	'analysis/etv2_pioneer/results/MEF_NoDox_Brg1_treat_pileup.bw',	# our Brg1 ChIP-seq in MEF
-	'analysis/etv2_pioneer/results/MEF_Brg1_GSE90893_treat_pileup.bw',		# Brg1 ChIP-seq from GSE90893
-	'analysis/etv2_pioneer/results/MEF_Brg1_GSE71507_treat_pileup.bw'		# Brg1 ChIP-seq from GSE71507
-)
-Y <- do.call('cbind', lapply(bw_files, function(bw_file){
-	cat(sprintf('processing %s\n', bw_file))
-	cvg <- import(bw_file, which = trim(reduce(gr2)), as = 'RleList')
-	mean(cvg[gr2])
-}))
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-16] Preprocessing the Etv2 scRNA-seq data
-# Need to run on lab queue, will fail on the k40
-# ----------------------------------------------------------------------------
-dataset <- 'dataset=Etv2scRNAseq_version=20190416a'
-se <- readRDS(sprintf('analysis/datasets/%s.rds', dataset))
-library(BiocParallel)
-register(MulticoreParam(4))
-source('sctools.r'); se <- scran.preprocess(se)
-se2 <- as(se, 'SummarizedExperiment')
-rowData(se2) <- rowData(se)
-dataset2 <- 'dataset=Etv2scRNAseq_version=20190416b'
-saveRDS(se2, file = sprintf('analysis/datasets/%s.rds', dataset2))
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-17] scVI analysis of the scRNA-seq of Etv2 induction in mouse
-# Run this on k40
-# [2019-04-23] SCRAN gives less HVGs
-# ----------------------------------------------------------------------------
-library(SummarizedExperiment)
-dataset <- 'dataset=Etv2scRNAseq_version=20190416b'
-se <- readRDS(sprintf('analysis/datasets/%s.rds', dataset))
-n <- rowData(se)$FDR < 0.05
-latent <- 10; dataset3 <- sprintf('dataset=Etv2scRNAseq_latent=%d_version=20190416c', latent)
-#latent <- 20; dataset3 <- sprintf('dataset=Etv2scRNAseq_latent=%d_version=20190416c', latent)
-devtools::load_all('analysis/ias/packages/RscVI'); se2 <- VAE(se[n, ], n_latent = latent)
-colData(se)$latent <- colData(se2)$latent
-saveRDS(se, file = sprintf('analysis/datasets/%s.rds', dataset3))
-
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-17] Analyze the data by VAE
-# ----------------------------------------------------------------------------
-library(Seurat)
-library(SummarizedExperiment)
-dataset <- 'dataset=Etv2scRNAseq_version=20190416a'
-se <- readRDS(sprintf('analysis/datasets/%s.rds', dataset))
-source('sctools.r'); set.seed(1); se <- seurat.preprocess(se)
-n_latent <- 10; dataset3 <- sprintf('dataset=Etv2scRNAseq_latent=%d_version=20190416d', n_latent)  # the filtered genes/cells after Seurat
-devtools::load_all('analysis/ias/packages/RscVI'); se2 <- VAE(se, n_latent = n_latent)
-saveRDS(se2, file = sprintf('analysis/datasets/%s.rds', dataset3))
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-23] TSNE of the Etv2 scRNA-seq on MEF
-# TSNE runs on the latent space obtained by scVI
-# ----------------------------------------------------------------------------
-library(SummarizedExperiment)
-library(SingleCellExperiment)
-latent <- 10; dataset <- sprintf('dataset=Etv2scRNAseq_latent=%d_version=20190416c', latent)
-se <- readRDS(sprintf('analysis/datasets/%s.rds', dataset))
-
-library(Rtsne); set.seed(1); y_tsne <- Rtsne(colData(se)$latent)$Y
-group2bg <- c(
-	'MEF_Dox_D1' = 'black', 
-	'MEF_NoDox' = 'blue', 
-	'MEF_Dox_D2' = 'purple', 
-	'MEF_Dox_D7a' = 'red', 
-	'MEF_Dox_D7b' = 'pink'
-)
-bg <- group2bg[colData(se)$group]
-plot(y_tsne, cex = 0.5, pch = 21, bg  = bg, col = bg, xaxt = 'n', yaxt = 'n', main = 'cell2vec', xlab = '', ylab = '')
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-25] Infer the pseudotime by slingshot
-# clustering of cells on the TSNE space using Mclust
-# It appears that the results of Mclust depend on the seed
-# Mclust is used by slingshot and MST (see the Nat Biotechnol paper on comparing 
-# different TI tools)
-# [2019-04-05] examine the relationship cluster # and time points
-# The cluster that has the most cells from NoDox will be used as the start
-# [2019-04-27] Adding the cluster # to the t-SNE plot
-# [2019-04-28] The Mclust results are not stable regarding the seeds; Use Louvain clustering instead
-# ----------------------------------------------------------------------------
-G_min <- 15; G_max <- 15 
-library(mclust); set.seed(5); mc <- Mclust(y_tsne, G = G_min:G_max)
-colData(se)$GMM <- mc$classification
-library(RColorBrewer); plot(y_tsne, col = colorRampPalette(brewer.pal(11,'Spectral'))(G_max)[mc$classification], pch = 16, asp = 1, xaxt = 'n', yaxt = 'n', main = 'cluster', xlab = '', ylab = '')
-set.seed(1); y_centers <- do.call('rbind', lapply(1:G_max, function(i) y_tsne[sample(which(mc$classification == i), 1), ]))
-text(y_centers[, 1], y_centers[, 2], 1:G_max, cex = 3)
-table(colData(se)$group, mc$classification)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-28] KNN graph and Louvain clustering
-# ----------------------------------------------------------------------------
-library(igraph)
-library(FNN)
-k <- 200
-knn <- get.knn(y_tsne, k = k)
-knn <- data.frame(from = rep(1:nrow(knn$nn.index), k), to = as.vector(knn$nn.index), weight = 1/(1 + as.vector(knn$nn.dist)))
-g <- graph_from_data_frame(knn, directed = FALSE)
-g <- simplify(g)
-lc <- cluster_louvain(g)
-clust <- as.numeric(as.factor(membership(lc)))
-G_max <- max(unique(clust))
-library(RColorBrewer); plot(y_tsne, col = colorRampPalette(brewer.pal(11,'Spectral'))(G_max)[clust], pch = 16, asp = 1, xaxt = 'n', yaxt = 'n', main = 'cluster', xlab = '', ylab = '')
-set.seed(1); y_centers <- do.call('rbind', lapply(1:G_max, function(i) y_tsne[sample(which(clust == i), 1), ]))
-text(y_centers[, 1], y_centers[, 2], 1:G_max, cex = 3)
-table(colData(se)$group, clust)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-25] Use slingshot to get the lineages (a MST on the Mclust clusters)
-# ----------------------------------------------------------------------------
-start.clus <- '7'
-library(slingshot); set.seed(1); lin <- getLineages(y_tsne, clust, start.clus = start.clus)
-plot(y_tsne, col = bg, asp = 1, pch = 16, xaxt = 'n', yaxt = 'n', main = 'Lineages', xlab = '', ylab = '')
-lines(lin, lwd = 3, show.constraints = TRUE)
-
-library(RColorBrewer); plot(y_tsne, col = colorRampPalette(brewer.pal(11,'Spectral'))(G_max)[clust], pch = 16, asp = 1, xaxt = 'n', yaxt = 'n', main = 'cluster', xlab = '', ylab = '')
-lines(lin, lwd = 3, show.constraints = TRUE)
-text(y_centers[, 1], y_centers[, 2], 1:G_max, cex = 3)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-25] Get the smooth curve for each lineage
-# This step takes roughly ~2 hours; the intermediate results are saved and re-used later
-# [2019-04-30] Setting extend to 'n' is critical for stablize the curve, otherwise some 
-# curve may go back to the start points and form a loop
-# ----------------------------------------------------------------------------
-set.seed(1); crv <- getCurves(lin, extend = 'n')	# this step takes a long time
-crv_file <- sprintf('analysis/etv2_pioneer/results/scRNA-seq_Etv2_MEF_slingshot_curve.rds')
-saveRDS(crv, file = crv_file)
-
-
-crv_file <- sprintf('analysis/etv2_pioneer/results/scRNA-seq_Etv2_MEF_slingshot_curve.rds')
-crv <- readRDS(crv_file)
-plot(y_tsne, col = bg, asp = 1, pch = 16, xaxt = 'n', yaxt = 'n', main = 'trajectory', xlab = '', ylab = '')
-library(slingshot)
-lines(crv, lwd = 3, show.constraints = TRUE)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-28] Visualize gene expression levels by density plot
-# ----------------------------------------------------------------------------
-library(roxygen2); library(devtools); devtools::document('packages/denviz')
-
-
-X <- assays(se)$logcounts; rownames(X) <- rowData(se)$name
-devtools::load_all('packages/denviz'); denviz(X, y_tsne, g = 'Etv2', grid_points = 20)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-30] Get the density plot for dynamic genes
-# ----------------------------------------------------------------------------
-library(BiocParallel)
-register(MulticoreParam(4)) # Use 8 cores
-library(futile.logger); flog.threshold(TRACE)
-X <- assays(se)$logcounts; rownames(X) <- rowData(se)$name; 
-n <- rowData(se)$FDR < 0.05
-grid_points <- 200
-devtools::load_all('packages/denviz'); Z <- denmap(X[n, ], y_tsne, grid_points = grid_points)
-rownames(Z) <- rownames(X)[n]
-Z_file <- sprintf('analysis/etv2_pioneer/results/gene_cluster_grid=%d.rds', grid_points)
-saveRDS(Z, Z_file)
-
-
-# ----------------------------------------------------------------------------
-# [2019-04-30] Clustering the genes based on their density
-# ----------------------------------------------------------------------------
-library(igraph)
-library(FNN)
-library(irlba); V <- prcomp_irlba(t(Z), n = 20)$rotation
-k <- 50
-grid_points <- 200
-knn <- get.knn(Z, k = k)
-knn <- data.frame(from = rep(1:nrow(knn$nn.index), k), to = as.vector(knn$nn.index), weight = 1/(1 + as.vector(knn$nn.dist)))
-g <- graph_from_data_frame(knn, directed = FALSE)
-g <- simplify(g)
-lc <- cluster_louvain(g)
-clust <- as.numeric(as.factor(membership(lc)))
-names(clust) <- rownames(Z)
-
-clust2 <- rep(NA, nrow(se))
-clust2[n] <- clust
-rowData(se)$cluster <- clust2
-se_file <- sprintf('analysis/etv2_pioneer/data/%s_grid=%d_knn=%d.rds', dataset, grid_points, k)
-saveRDS(se, se_file)
-
 
 # ----------------------------------------------------------------------------
 # [2019-04-30] t-SNE view of genes
@@ -3165,106 +2889,298 @@ system(command)
 # [2019-05-12] Use EnrichedHeatmap for drawing heatmap
 # [2019-05-23] Cluster the data based on the histone code
 # [2019-05-27]  Remove the central dotted line
+# [2019-09-06] Update the analysis 
 # ----------------------------------------------------------------------------
-source('analysis/etv2_pioneer/helper.r'); etv2 <- read_Etv2_peaks_in_D1_MEF(exclude_promoter = TRUE, exclude_exons = FALSE)
-nucleosome <- readRDS('analysis/etv2_pioneer/data/Chronis/MNase.smooth.positions.rds')
-nucleosome <- GRanges(seqnames = seqnames(nucleosome), range = IRanges(mcols(nucleosome)$smt_pos, mcols(nucleosome)$smt_pos))
-# the nucleosome summit with 200bp of Etv2 submmit
-peaks <- subsetByOverlaps(nucleosome, reCenterPeaks(etv2, width = 200))
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+devtools::load_all('packages/compbio')
+peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed'; peakset <- 'MEF_Dox_D1_Etv2'
+peaks <- macs2.read_summits(peak_file)
 peaks <- add.seqinfo(peaks, genome = 'mm10')
+peaks <- peaks[!peaks %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
+peaks <- resize(peaks, fix = 'center', width = 200)
 
-# cluster the intervals based on histone modification peaks
-gs <- c('MEF_H3K27ac', 'MEF_Brg1')
-source('analysis/etv2_pioneer/helper.r'); bw_files <- get_bigwig_files()
-bw_files <- bw_files[gs]
-bed_files <- rep(NA, length(bw_files)); names(bed_files) <- gs
-i <- gs %in% c('MEF_Brg1', 'MEF_P300')
-bed_files[i] <- gsub('_treat_pileup.bw', '_peaks.narrowPeak', bw_files[i])
-i <- gs %in% c('MEF_H3K9me3', 'MEF_H3K27me3', 'MEF_H3K27ac')
-bed_files[i] <- gsub('_treat_pileup.bw', '_peaks.broadPeak', bw_files[i])
+source('analysis/etv2_pioneer/helper.r'); peaks <- add_mnase_in_MEF(peaks)
 
-S <- do.call('cbind', lapply(1:length(gs), function(i){
-	gr <- read.table(bed_files[i], header = FALSE, sep = '\t')
-	gr <- GRanges(seqnames = gr[, 1], range = IRanges(gr[, 2], gr[, 3]))
-	gr <- add.seqinfo(gr, genome = 'mm10')
-	1:length(peaks) %in% as.matrix(findOverlaps(reCenterPeaks(peaks, width = 100 * 2), gr))[, 1]
-}))
-class(S) <- 'numeric'; colnames(S) <- gs
-code <- Reduce('paste0', lapply(1:ncol(S), function(i) S[, i]))
-#set.seed(1); km <- kmeans(S, 4)$cluster
-set.seed(1); km <- S[, 'MEF_H3K27ac'] > 0
+# --- whether or not overlapping with H3K27ac in MEF
+h3k27ac_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_NoDox_H3K27ac_peaks.broadPeak'
+devtools::load_all('packages/compbio'); h3k27ac <- macs2.read_broadPeak(h3k27ac_file)
+mcols(peaks)$H2K27ac <- peaks %over% h3k27ac
+
+# --- whether or not overlapping with Brg1 peaks
+brg1_files <- c(
+	'Alver' = '/panfs/roc/scratch/gongx030/datasets/dataset=Alver_version=20190407a/Brg1_summits.bed',
+	'Chronis' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20190405a/Brg1_summits.bed',
+	'NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_NoDox_Brg1_summits.bed',
+	'Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D1_Brg1_summits.bed'
+)
+devtools::load_all('packages/compbio'); brg1 <- lapply(brg1_files, function(brg1_file) macs2.read_summits(brg1_file))
+mcols(peaks)$brg1 <- do.call('cbind', lapply(brg1, function(x) peaks %over% resize(x, fix = 'center', width = 200)))
+colnames(mcols(peaks)$brg1) <- names(brg1_files)
+
+# --- whether or not overlapping with ATAC peaks
+atac_files <- c(
+	'NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed',
+	'Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
+	'Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_summits.bed',
+	'Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_summits.bed',
+	'Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed'
+)
+devtools::load_all('packages/compbio'); atac <- lapply(atac_files, function(atac_file) macs2.read_summits(atac_file))
+mcols(peaks)$atac <- do.call('cbind', lapply(atac, function(x) peaks %over% resize(x, fix = 'center', width = 200)))
 
 
-extend <- 1000; w <- 50
-gs2 <- c('MEF_Dox_D1_Etv2', 'MEF_nucleosome', 'MEF_Brg1', 'MEF_H3K9me3', 'MEF_H3K27me3', 'MEF_MNase', 'MEF_H3K27ac', 'MEF_P300', 'MEF_H3', 'MEF_ATAC')
-source('analysis/etv2_pioneer/helper.r'); bw_files <- get_bigwig_files()
-source('analysis/etv2_pioneer/helper.r'); n2m_files <- normalizeToMatrix_batch(peaks, peak_set = 'MEF_nucleosome_near_Etv2_peaks', bw_files[gs2], extend = extend, w = w, mc.cores = 4)
+# --- prepare normalizeToMatrix files (take a few minutes for each dataset at the first run,
+# the resulting normalizeToMatrix files will be used for later runs)
+extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 4
+bw_files <- c(
+	'MNase' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw',
+	'MEF_Dox_D1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_FE.bw',
+	'MEF_Dox_D2_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D2_Etv2_FE.bw',
+	'MEF_Dox_D7_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_FE.bw',
+	'Brg1_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_NoDox_Brg1_FE.bw',
+	'Brg1_Alver' = '/panfs/roc/scratch/gongx030/datasets/dataset=Alver_version=20190407a/Brg1_FE.bw',
+	'Brg1_Chronis' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20190405a/Brg1_FE.bw',
+	'Brg1_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D1_Brg1_FE.bw',
+	'Brg1_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D2_Brg1_FE.bw',
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_treat_pileup.bw',
+	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_treat_pileup.bw',
+	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_treat_pileup.bw',
+	'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_treat_pileup.bw',
+	'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_treat_pileup.bw',
+	'NoDox_H3K27ac' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_NoDox_H3K27ac_FE.bw',
+	'D1_H3K27ac' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_H3K27ac_FE.bw',
+	'D2_H3K27ac' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D2_H3K27ac_FE.bw',
+	'D7_H3K27ac' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_H3K27ac_FE.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, peakset, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
 
-
+# --- prepare the matrix and the color function for the heatmap
+group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
+group_cols[names(group_cols) %in% c('MEF_Dox_D1_Etv2', 'MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2')] <- 'red'
+group_cols[names(group_cols) %in% c('MEF_NoDox', 'MEF_Dox_D1', 'MEF_Dox_D2', 'MEF_Dox_D7', 'MEF_Dox_D7_Flk1pos')] <- 'orange'
+group_cols[names(group_cols) %in% c('MEF_H3K27ac', 'NoDox_H3K27ac', 'D1_H3K27ac', 'D2_H3K27ac', 'D7_H3K27ac')] <- 'purple'
+group_cols['MNase'] <- 'green'
 mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
-col_fun <- lapply(mat, function(m) colorRamp2(quantile(m, c(0, 0.99)), c('white', 'blue')))
+col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.005, 0.995)), c('white', group_cols[i])))
 names(col_fun) <- names(n2m_files)
 
-#i <- sample.int(nrow(mat[[1]]), 5000)
-i <- 1:nrow(mat[[1]])
-ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(col = 1:2, lty = 1), yaxis_facing = 'left'))
-axis_name <- c('-1k', 'summit', '+1k')
-h <- EnrichedHeatmap(mat[['MEF_H3']][i, ], split = factor(km[i], c(FALSE, TRUE)), col = col_fun[['MEF_H3']], name = 'H3', top_annotation = ta, axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_nucleosome']][i, ], col = col_fun[['MEF_nucleosome']], name = 'DANPOS', top_annotation = ta, axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_MNase']][i, ], col = col_fun[['MEF_MNase']], name = 'Mnase', top_annotation = ta, axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_H3K27ac']][i, ], col = col_fun[['MEF_H3K27ac']], name = 'H3K27ac', top_annotation = ta, axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_H3K9me3']][i, ], col = col_fun[['MEF_H3K9me3']], name = 'H3K9me3', top_annotation = ta, axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_ATAC']][i, ], col = col_fun[['MEF_ATAC']], name = 'ATAC', top_annotation = ta, axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_Dox_D1_Etv2']][i, ], col = colorRamp2(quantile(mat[['MEF_Dox_D1_Etv2']], c(0, 0.99)), c('white', 'red')), name = 'Etv2', top_annotation = ta, axis_name = axis_name, pos_line = FALSE)
-draw(h, heatmap_legend_side = 'right')
+# --- Plot: Look at the Brg1 changes
+#set.seed(1); i <- sample.int(nrow(mat[[1]]), 2000)
+#set.seed(1); i <- 1:length(peaks)
+set.seed(1); i <- sample(which(!mcols(peaks)$H2K27ac), 2000)
+#set.seed(1); i <- which(!mcols(peaks)$H2K27ac)
+sp <- factor(sprintf('%d%d', peaks$brg1[, 'Alver'], peaks$brg1[, 'Dox_D1']))
+
+library(grid); ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
+h <- EnrichedHeatmap(mat[['MEF_Dox_D1_Etv2']][i, ], col = col_fun[['MEF_Dox_D1_Etv2']], split = sp[i], name = 'MEF_Dox_D1_Etv2', top_annotation = ta, pos_line = FALSE)
+ss <- c('MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2', 'Brg1_Alver', 'Brg1_Dox_D1')
+for (s in ss[ss %in% names(bw_files)]){
+	h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
+}
+draw(h, heatmap_legend_side = 'bottom')
+
+
+# ----------------------------------------------------------------------------
+# [2019-09-13] compare the fold change of Etv2 fold change peaks w/ or w/o Brg1 at D1
+# add the FE for each Etv2 peaks at D1
+# ----------------------------------------------------------------------------
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+devtools::load_all('packages/compbio')
+peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed'; peakset <- 'MEF_Dox_D1_Etv2'
+peaks <- macs2.read_summits(peak_file)
+peaks <- add.seqinfo(peaks, genome = 'mm10')
+peaks <- peaks[!peaks %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
+peaks <- resize(peaks, fix = 'center', width = 200)
+
+
+# --- whether or not overlapping with Brg1 peaks
+brg1_files <- c(
+	'Alver' = '/panfs/roc/scratch/gongx030/datasets/dataset=Alver_version=20190407a/Brg1_summits.bed',
+	'Chronis' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20190405a/Brg1_summits.bed',
+	'NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_NoDox_Brg1_summits.bed',
+	'Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D1_Brg1_summits.bed'
+)
+devtools::load_all('packages/compbio'); brg1 <- lapply(brg1_files, function(brg1_file) macs2.read_summits(brg1_file))
+mcols(peaks)$brg1 <- do.call('cbind', lapply(brg1, function(x) peaks %over% resize(x, fix = 'center', width = 200)))
+colnames(mcols(peaks)$brg1) <- names(brg1_files)
+
+fe_files <- c(
+	D1 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_FE.bw',
+	D2 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D2_Etv2_FE.bw',
+	D7 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_FE.bw'
+)
+FE <- do.call('cbind', lapply(fe_files, function(fe_file){
+	  fe <- rtracklayer::import(fe_file, format = 'BigWig', which = reduce(peaks))
+		fe <- resize(fe, width = 1, fix = 'center')
+		fe <- add.seqinfo(fe, 'mm10')
+		cvg <- coverage(fe, weight = mcols(fe)$score)
+		mean(cvg[peaks]) 
+}))
+FE <- FE + 1e-5
+colnames(FE) <- names(fe_files)
+
+black <- !mcols(peaks)$brg1[, 'Alver'] & !mcols(peaks)$brg1[, 'Dox_D1']
+red <- !mcols(peaks)$brg1[, 'Alver'] & mcols(peaks)$brg1[, 'Dox_D1']
+green <- mcols(peaks)$brg1[, 'Alver'] & !mcols(peaks)$brg1[, 'Dox_D1']
+blue <- mcols(peaks)$brg1[, 'Alver'] & mcols(peaks)$brg1[, 'Dox_D1']
+
+boxplot(list(
+	log(FE[black, 'D1']) - log(mean(FE[, 'D1'])), 
+	log(FE[black, 'D7']) - log(mean(FE[, 'D7'])),
+	log(FE[red, 'D1']) - log(mean(FE[, 'D1'])), 
+	log(FE[red, 'D7']) - log(mean(FE[, 'D7'])),
+	log(FE[green, 'D1']) - log(mean(FE[, 'D1'])), 
+	log(FE[green, 'D7']) - log(mean(FE[, 'D7'])),
+	log(FE[blue, 'D1']) - log(mean(FE[, 'D1'])), 
+	log(FE[blue, 'D7']) - log(mean(FE[, 'D7']))
+), col = rep(c('black', 'red', 'green', 'blue'), each = 2),  medcol = 'yellow')
+
+
+# ----------------------------------------------------------------------------
+# [2019-09-13] 
+# ----------------------------------------------------------------------------
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+devtools::load_all('packages/compbio')
+peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed'; peakset <- 'MEF_Dox_D1_Etv2'
+peaks <- macs2.read_summits(peak_file)
+peaks <- add.seqinfo(peaks, genome = 'mm10')
+peaks <- peaks[!peaks %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
+peaks <- resize(peaks, fix = 'center', width = 200)
+
+brg1_files <- c(
+	'Alver' = '/panfs/roc/scratch/gongx030/datasets/dataset=Alver_version=20190407a/Brg1_summits.bed',
+	'Chronis' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20190405a/Brg1_summits.bed',
+	'NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_NoDox_Brg1_summits.bed',
+	'Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D1_Brg1_summits.bed'
+)
+devtools::load_all('packages/compbio'); brg1 <- lapply(brg1_files, function(brg1_file) macs2.read_summits(brg1_file))
+mcols(peaks)$brg1 <- do.call('cbind', lapply(brg1, function(x) peaks %over% resize(x, fix = 'center', width = 200)))
+colnames(mcols(peaks)$brg1) <- names(brg1_files)
+
+peaks2 <- resize(peaks, fix = 'center', width = 2000)
+h3k27ac_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_NoDox_H3K27ac_FE.bw'
+cvg <- rtracklayer::import(h3k27ac_file, which = trim(reduce(peaks2)), as = 'RleList')
+X <- as(as(cvg[peaks2], 'RleViews'), 'matrix')
+
+h3k27ac_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_H3K27ac_FE.bw'
+cvg <- rtracklayer::import(h3k27ac_file, which = trim(reduce(peaks2)), as = 'RleList')
+X_D7 <- as(as(cvg[peaks2], 'RleViews'), 'matrix')
+
+black <- !mcols(peaks)$brg1[, 'Alver'] & !mcols(peaks)$brg1[, 'Dox_D1']
+red <- !mcols(peaks)$brg1[, 'Alver'] & mcols(peaks)$brg1[, 'Dox_D1']
+green <- mcols(peaks)$brg1[, 'Alver'] & !mcols(peaks)$brg1[, 'Dox_D1']
+blue <- mcols(peaks)$brg1[, 'Alver'] & mcols(peaks)$brg1[, 'Dox_D1']
+
+plot(colMeans(X[black, ]), ylim = c(0, 8))
+lines(colMeans(X[red, ]), col = 'red', lwd = 2)
+lines(colMeans(X[green, ]), col = 'green', lwd = 2)
+lines(colMeans(X[blue, ]), col = 'blue', lwd = 2)
+
+plot(colMeans(X_D7[black, ]), ylim = c(0, 12))
+lines(colMeans(X_D7[red, ]), col = 'red', lwd = 2)
+lines(colMeans(X_D7[green, ]), col = 'green', lwd = 2)
+lines(colMeans(X_D7[blue, ]), col = 'blue', lwd = 2)
+
+
+# ----------------------------------------------------------------------------
+# [2019-09-13] Genomic distribution of three groups
+# ----------------------------------------------------------------------------
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+devtools::load_all('packages/compbio')
+peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed'; peakset <- 'MEF_Dox_D1_Etv2'
+peaks <- macs2.read_summits(peak_file)
+peaks <- add.seqinfo(peaks, genome = 'mm10')
+peaks <- peaks[!peaks %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
+peaks <- resize(peaks, fix = 'center', width = 200)
+
+brg1_files <- c(
+	'Alver' = '/panfs/roc/scratch/gongx030/datasets/dataset=Alver_version=20190407a/Brg1_summits.bed',
+	'Chronis' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20190405a/Brg1_summits.bed',
+	'NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_NoDox_Brg1_summits.bed',
+	'Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D1_Brg1_summits.bed'
+)
+devtools::load_all('packages/compbio'); brg1 <- lapply(brg1_files, function(brg1_file) macs2.read_summits(brg1_file))
+mcols(peaks)$brg1 <- do.call('cbind', lapply(brg1, function(x) peaks %over% resize(x, fix = 'center', width = 200)))
+colnames(mcols(peaks)$brg1) <- names(brg1_files)
+
+black <- !mcols(peaks)$brg1[, 'Alver'] & !mcols(peaks)$brg1[, 'Dox_D1']
+red <- !mcols(peaks)$brg1[, 'Alver'] & mcols(peaks)$brg1[, 'Dox_D1']
+green <- mcols(peaks)$brg1[, 'Alver'] & !mcols(peaks)$brg1[, 'Dox_D1']
+blue <- mcols(peaks)$brg1[, 'Alver'] & mcols(peaks)$brg1[, 'Dox_D1']
+
+devtools::load_all('packages/compbio'); annot <- lapply(list(black, red, green, blue), function(i) homer_annotatePeaks(peaks[i], 'mm10'))
+
+y <- lapply(annot, function(x) x$genomeAnnotation[order(x$genomeAnnotation$Name), ])
+w <- do.call('cbind', lapply(y, function(z) z$Pvalue))
+rownames(w) <- y[[1]]$Name
+
+Z <- do.call('cbind', lapply(annot[1:2], function(x){
+	y <- x$reactome$Enrichment
+	names(y) <- x$reactome$Term
+	y[order(names(y))]
+}))
+i <- rowSums(Z < 1e-4) > 0 & rowSums(Z > 0.001) > 0
+Z <- Z[i, ]
+Z <- Z[order(Z[, 2], decreasing = TRUE), ]
+gs <- c('Insulin receptor signalling cascade', 'Toll Like Receptor 10 (TLR10) Cascade', 'Signalling to ERKs', 'VEGFR2 mediated cell proliferation', 'Signaling by Hippo', 'Signaling by BMP', 'Netrin-1 signaling', 'G alpha (s) signalling events', 'Neuronal System')
+Z <- Z[rownames(Z) %in% gs, ]
+
+barplot(-log(t(Z)), beside = TRUE, horiz = TRUE, las = 2, col = c('black', 'red'))
+
 
 
 # ----------------------------------------------------------------------------
 # [2019-05-29] Address Ken's question
 # I hate to ask you to do more work, but just so we can compare things directly with what we have done, could you please try centering on ETV sites but rank ordered by MNase tags +/- 100 base pairs from the centers?  
 # That is what we have found to reliably predict in vitro nucleosome binding.
+# [2019-09-15] Re-analysis
 # ----------------------------------------------------------------------------
-source('analysis/etv2_pioneer/helper.r'); peaks <- read_Etv2_peaks_in_D1_MEF(exclude_promoter = TRUE, exclude_exons = FALSE)
-peaks <- reCenterPeaks(peaks, width = 1)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+devtools::load_all('packages/compbio')
+peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed'; peakset <- 'MEF_Dox_D1_Etv2'
+peaks <- macs2.read_summits(peak_file)
+peaks <- add.seqinfo(peaks, genome = 'mm10')
+peaks <- peaks[!peaks %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
+peaks <- resize(peaks, fix = 'center', width = 200)
 
-gs <- c('MEF_H3K27ac')
-source('analysis/etv2_pioneer/helper.r'); bw_files <- get_bigwig_files()
-bw_files <- bw_files[gs]
-bed_files <- gsub('_treat_pileup.bw', '_peaks.broadPeak', bw_files)
-gr <- read.table(bed_files, header = FALSE, sep = '\t')
-gr <- GRanges(seqnames = gr[, 1], range = IRanges(gr[, 2], gr[, 3]))
-gr <- add.seqinfo(gr, genome = 'mm10')
-with_H3K27ac <- 1:length(peaks) %in% as.matrix(findOverlaps(reCenterPeaks(peaks, width = 500 * 2), gr))[, 1]
+# --- whether or not overlapping with H3K27ac in MEF
+h3k27ac_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_NoDox_H3K27ac_peaks.broadPeak'
+devtools::load_all('packages/compbio'); h3k27ac <- macs2.read_broadPeak(h3k27ac_file)
+mcols(peaks)$H2K27ac <- peaks %over% h3k27ac
 
+# --- prepare the normalizeToMatrix files
+#extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 4
+extend <- 900; w <- 50; smooth <- FALSE; target_ratio <- 0.1; mc.cores <- 4
+bw_files <- c(
+	'MEF_Dox_D1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_FE.bw',
+	'MNase' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, peakset, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
 
-extend <- 1000; w <- 50
-gs <- c('MEF_H3', 'MEF_Dox_D1_Etv2', 'MEF_nucleosome', 'MEF_MNase', 'MEF_MNase2', 'MEF_H3K4me2', 'MEF_H3K4me1', 'MEF_H3K27ac', 'MEF_ATAC')
-source('analysis/etv2_pioneer/helper.r'); bw_files <- get_bigwig_files()
-source('analysis/etv2_pioneer/helper.r'); n2m_files <- normalizeToMatrix_batch(peaks, peak_set = 'Etv2_peaks_D1', bw_files[gs], extend = extend, w = w, mc.cores = 4)
-
+# --- prepare the matrix and the color function for the heatmap
+group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
+group_cols[names(group_cols) %in% c('MEF_Dox_D1_Etv2', 'MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2')] <- 'red'
+group_cols['MNase'] <- 'green'
 mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
-col_fun <- lapply(mat, function(m) colorRamp2(quantile(m, c(0, 0.99)), c('white', 'blue')))
+col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0, 0.99)), c('white', group_cols[i])))
 names(col_fun) <- names(n2m_files)
 
 #i <- sample.int(nrow(mat[[1]]), 5000)
 #i <- (!with_H3K27ac)
-#i <- which(!with_H3K27ac)
+#i <- sample(which(!mcols(peaks)$H2K27ac), 5000)
 #order_by <- order(rowSums(mat[['MEF_nucleosome']][!with_H3K27ac, (20 - 2):(20 + 2)]), decreasing = TRUE)
-#i <- sample.int(nrow(mat[[1]]), 5000)
+#i <- sample.int(nrow(mat[[1]]), 2000)
 i <- 1:nrow(mat[[1]])
-order_by <- order(rowSums(mat[['MEF_nucleosome']][i, (20 - 2):(20 + 2)]), decreasing = TRUE)
+order_by <- order(rowSums(mat[['MNase']][i, (20 - 2):(20 + 2)]), decreasing = TRUE)
 
-axis_name <- c('-1k', 'summit', '+1k')
-h <- EnrichedHeatmap(mat[['MEF_Dox_D1_Etv2']][i, ], row_order = order_by, col = colorRamp2(quantile(mat[['MEF_Dox_D1_Etv2']], c(0, 0.99)), c('white', 'red')), name = 'Etv2', axis_name = axis_name, pos_line = FALSE) +
-EnrichedHeatmap(mat[['MEF_H3']][i, ], col = col_fun[['MEF_H3']], name = 'H3', axis_name = axis_name, pos_line = FALSE) +
-EnrichedHeatmap(mat[['MEF_nucleosome']][i, ], col = col_fun[['MEF_nucleosome']], name = 'DANPOS', axis_name = axis_name, pos_line = FALSE) +
-EnrichedHeatmap(mat[['MEF_MNase']][i, ], col = col_fun[['MEF_MNase']], name = 'Mnase', axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_MNase2']][i, ], col = col_fun[['MEF_MNase2']], name = 'Mnase2', axis_name = axis_name, pos_line = FALSE) + 
-EnrichedHeatmap(mat[['MEF_H3K27ac']][i, ], col = col_fun[['MEF_H3K27ac']], name = 'H3K27ac', axis_name = axis_name, pos_line = FALSE)
-#EnrichedHeatmap(mat[['MEF_ATAC']][i, ], col = col_fun[['MEF_ATAC']], name = 'ATAC', axis_name = axis_name, pos_line = FALSE) + 
-#EnrichedHeatmap(mat[['MEF_H3K4me2']][i, ], col = col_fun[['MEF_H3K4me2']], name = 'H3K4me2', axis_name = axis_name, pos_line = FALSE) + 
-#EnrichedHeatmap(mat[['MEF_H3K4me1']][i, ], col = col_fun[['MEF_H3K4me1']], name = 'H3K4me1', axis_name = axis_name, pos_line = FALSE) 
-draw(h, heatmap_legend_side = 'right')
+library(grid); ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 'black'), axis_param = list(facing = 'inside', at = -1000)))
+h <- EnrichedHeatmap(mat[['MNase']][i, ], top_annotation = ta, row_order = order_by, col = col_fun[['MNase']], name = 'MNase', pos_line = FALSE)
+ss <- c('MEF_Dox_D1_Etv2')
+for (s in ss[ss %in% names(bw_files)]){
+	h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], top_annotation = ta, name = s, pos_line = FALSE)
+}
+draw(h, heatmap_legend_side = 'bottom')
+
 
 
 # ----------------------------------------------------------------------------
@@ -3296,21 +3212,38 @@ EnrichedHeatmap(mat[['MEF_H3']][i, ], col = col_fun[['MEF_H3']], name = 'H3', ax
 draw(h, heatmap_legend_side = 'right')
 
 
-
-
-
-
 # ----------------------------------------------------------------------------
-# [2019-05-14] Add Choi's Etv2 peaks to S3
-# [2019-05-14] The bigbed (bb) format is not supported by rtracklayer.  Use bed format instead
+# [2019-09-16] Compare the Etv2 ChIP-seq peaks from D1 to D7, as well as ES/EB
 # ----------------------------------------------------------------------------
-#v5_file <- 'analysis/single_cell/etv2_chipseq_V5_mm10.bb'
-v5_file <- 'analysis/single_cell/etv2_chipseq_V5_mm10.sorted.bed'
-source('s3.r');  s3.backup(v5_file, 's3://etv2_pioneer', make_public = TRUE)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+devtools::load_all('packages/compbio')
+bed_files <- list(
+	D1 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed',
+	D7 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_summits.bed',
+	EB = c('/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_polyab_mm10.sorted.bed', '/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_V5_mm10.sorted.bed')
+)
+grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
+grs <- lapply(grs, function(gr) resize(gr, width = 20, fix = 'center'))
+grs <- lapply(grs, function(gr) gr[!duplicated(gr)])
+names(grs) <- names(bed_files)
+ol <- findOverlapsOfPeaks(grs[['D1']], grs[['D7']], grs[['EB']])
+peaks <- Reduce('c', ol$peaklist)
+G <- do.call('cbind', lapply(grs, function(gr) peaks %over% gr))
+mcols(peaks)$peak_group <- G 
+mcols(peaks)$peak_group2 <- sprintf('%s%s%s', as.numeric(peaks$peak_group[, 1]), as.numeric(peaks$peak_group[, 2]), as.numeric(peaks$peak_group[, 3]))
+peaks <- peaks[!peaks %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
+peaks <- resize(peaks, fix = 'center', width = 200)
 
-#pab_file <- 'analysis/single_cell/etv2_chipseq_polyab_mm10.bb'
-pab_file <- 'analysis/single_cell/etv2_chipseq_polyab_mm10.sorted.bed'
-source('s3.r');  s3.backup(pab_file, 's3://etv2_pioneer', make_public = TRUE)
+# --- prepare normalizeToMatrix files (take a few minutes for each dataset at the first run,
+peakset <- 'Etv2_D1_D2_D7_EB'; extend <- 900; w <- 50; smooth <- FALSE; target_ratio <- 0.1; mc.cores <- 4
+bw_files <- c(
+	'MEF_Dox_D1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_FE.bw',
+	'MEF_Dox_D2_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D2_Etv2_FE.bw',
+	'MEF_Dox_D7_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_FE.bw',
+	'EB' = '/panfs/roc/scratch/gongx030/datasets/dataset=Liu_version=20170306a/Etv2_pAb_FE.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, peakset, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+
 
 
 # ----------------------------------------------------------------------------
@@ -4004,32 +3937,6 @@ write.table(as.data.frame(peaks)[without_MNase, 1:3], without_MNase_peak_file, s
 
 
 # ----------------------------------------------------------------------------
-# [2019-05-30] Use MEME to find the enriched motif in Etv2 peaks with or without MNase peaks
-# ----------------------------------------------------------------------------
-source('analysis/etv2_pioneer/helper.r');
-#peak_file <- sprintf('%s/macs2/Etv2_with_MNase_D1.bed', PROJECT_DIR)
-peak_file <- 'analysis/single_cell/etv2_chipseq_V5_mm10.sorted.bed'
-#peak_file <- sprintf('%s/macs2/Etv2_without_MNase_D1.bed', PROJECT_DIR)
-fasta_file <- gsub('.bed', '.fa', peak_file)
-output_dir <- gsub('.bed', '.meme', peak_file)
-centrimo_output_dir <- gsub('.bed', '.centrimo', peak_file)
-motif_file <- gsub('.bed', '.meme/dreme.txt', peak_file)
-
-gr <- read.table(peak_file, header = FALSE, sep = '\t')
-gr <- GRanges(seqnames = gr[, 1], range = IRanges(gr[, 2], gr[, 3]))
-gr <- reCenterPeaks(gr, width = 200)
-s <- getSeq(BSgenome.Mmusculus.UCSC.mm10, gr)
-names(s) <- 1:length(s)
-writeXStringSet(s, fasta_file)
-command <- sprintf('dreme -p %s -oc %s -png -mink 6 -maxk 7 -m 20', fasta_file, output_dir)
-system(command)
-
-command <- sprintf('centrimo %s %s --oc %s', fasta_file, motif_file, centrimo_output_dir)
-system(command)
-
-# Get the canonical Etv2 motif from Choi's data
-
-# ----------------------------------------------------------------------------
 # [2019-05-31] Make the sample level ATAC-seq data on S3
 # ----------------------------------------------------------------------------
 source('analysis/etv2_pioneer/helper.r'); d <- read_ATAC_dataset(sample_level = TRUE)
@@ -4125,9 +4032,291 @@ draw(h, heatmap_legend_side = 'right')
 
 
 # ----------------------------------------------------------------------------
-# [2019-08-22] Calling nucleosome on MEF ATAC-seq data
+# [2019-08-22] Look at the Brg1 signal in ES/EB
 # ----------------------------------------------------------------------------
+# --- Etv2 ChIP-seq peaks in EB
+bed_files <- c(
+	'/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_polyab_mm10.sorted.bed',
+	'/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_V5_mm10.sorted.bed'
+)
+x <- read.table(bed_files[2], sep = '\t')
+devtools::load_all('packages/compbio'); peaks <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]))
+peaks <- resize(peaks, width = 200, fix = 'center')
+peaks <- add.seqinfo(peaks, 'mm10')
+
+# --- check whether or not the Etv2 peaks is overlapped with the Brg1 peak
+bed_files <- c(
+	'/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/EB_Dox_12h_Brg1_summits.bed',
+	'/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/EB_NoDox_12h_Brg1_summits.bed'
+)
+devtools::load_all('packages/compbio'); brg1 <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
 
 
+# --- prepare normalizeToMatrix files (take a few minutes for each dataset at the first run,
+#gs <- 'Choi_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.3; mc.cores <- 2
+gs <- 'Choi_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 2
+bw_files <- c(
+	'Choi_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_V5_mm10.sorted.bw',
+	'Choi_Etv2_polyab' = '/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_polyab_mm10.sorted.bw',
+	'EB_Dox_12h_Brg1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/EB_Dox_12h_Brg1_treat_pileup.bw',
+	'EB_NoDox_12h_Brg1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/EB_NoDox_12h_Brg1_treat_pileup.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores)
+
+# --- prepare the color and the matrix
+group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
+group_cols[names(group_cols) %in% c('Choi_Etv2', 'Choi_Etv2_polyab')] <- 'red'
+mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
+col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.01, 0.99), na.rm = TRUE), c('white', group_cols[i])))
+names(col_fun) <- names(n2m_files)
+
+
+
+# --- Plot 1: look overlap between nucleosome positions
+i <- 1:nrow(mat[[1]])
+library(grid); ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1), axis_param = list(facing = 'inside')))
+h <- EnrichedHeatmap(mat[['EB_NoDox_12h_Brg1']][i, ], col = col_fun[['EB_NoDox_12h_Brg1']], name = 'EB_NoDox_12h_Brg1', top_annotation = ta, pos_line = FALSE) + 
+EnrichedHeatmap(mat[['Choi_Etv2']][i, ], col = col_fun[['Choi_Etv2']], name = 'Choi_Etv2', top_annotation = ta, pos_line = FALSE) +
+EnrichedHeatmap(mat[['EB_Dox_12h_Brg1']][i, ], col = col_fun[['EB_Dox_12h_Brg1']], name = 'EB_Dox_12h_Brg1', top_annotation = ta, pos_line = FALSE)
+draw(h, heatmap_legend_side = 'right')
+
+
+# ----------------------------------------------------------------------------
+# [2019-09-29] Look at the ATAC-seq peaks at MEF D7 and EBD2.5
+# ----------------------------------------------------------------------------
+# --- ATAC-seq peaks in D7 and EB
+bed_files <- c(
+	'D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed',
+	'EB25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_summits.bed'
+)
+devtools::load_all('packages/compbio'); grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
+grs <- lapply(grs, function(gr) resize(gr, width = 250, fix = 'center'))
+names(grs) <- names(bed_files)
+ol <- findOverlapsOfPeaks(grs[['D7_Flk1pos']], grs[['EB25_Flk1pos']])
+peaks <- Reduce('c', ol$peaklist)
+G <- do.call('cbind', lapply(grs, function(gr) peaks %over% gr))
+mcols(peaks)$peak_group <- G
+mcols(peaks)$cluster <- factor(sprintf('%d%d', G[, 1], G[, 2]), c('11', '01', '10'))
+
+# --- prepare normalizeToMatrix files (take a few minutes for each dataset at the first run,
+gs <- 'ATAC_Flk1pos'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 2
+bw_files <- c(
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_treat_pileup.bw',
+	'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_treat_pileup.bw',
+	'EB_Dox_D25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_treat_pileup.bw',
+	'MEF_Dox_D7_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_FE.bw',
+	'Etv2_pAb' = '/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_polyab_mm10.sorted.bw',
+	'Etv2_V5' = '/panfs/roc/scratch/gongx030/datasets/dataset=ChoiEtv2ChIP-seq_version=20190909a/etv2_chipseq_V5_mm10.sorted.bw',
+	'MEF_Dox_D7_H3K27ac' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_H3K27ac_FE.bw',
+	'EB_Dox_12h_H3K27ac' = '/panfs/roc/scratch/gongx030/datasets/dataset=PioneerEB_version=20190501a/EB_Dox_12h_H3K27ac_FE.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+
+
+# --- prepare the color and the matrix
+group_cols <- rep('purple', length(bw_files)); names(group_cols) <- names(bw_files)	# purple for ATAC-seq
+group_cols[names(group_cols) %in% c('MEF_Dox_D7_Etv2', 'Etv2_pAb', 'Etv2_V5')] <- 'red'
+group_cols[names(group_cols) %in% c('MEF_Dox_D7_H3K27ac', 'EB_Dox_12h_H3K27ac')] <- 'darkgreen'
+mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
+col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.01, 0.99), na.rm = TRUE), c('white', group_cols[i])))
+names(col_fun) <- names(n2m_files)
+
+
+# --- Plot 
+i <- 1:nrow(mat[[1]])
+#set.seed(1); i <- sample(1:nrow(mat[[1]]), 2000)
+split_by <- mcols(peaks)$cluster[i]
+library(grid); ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(col = 1:3, lty = 1), axis_param = list(facing = 'inside', at = -1000)))
+#h <- EnrichedHeatmap(mat[['MEF_NoDox']][i, ], split = split_by, col = col_fun[['MEF_NoDox']], name = 'MEF_NoDox', pos_line = FALSE, top_annotation = ta) +
+h <- EnrichedHeatmap(mat[['MEF_Dox_D7_Flk1pos']][i, ], split = split_by, col = col_fun[['MEF_Dox_D7_Flk1pos']], name = 'MEF_Dox_D7_Flk1pos', pos_line = FALSE, top_annotation = ta) +
+EnrichedHeatmap(mat[['EB_Dox_D25_Flk1pos']][i, ], col = col_fun[['EB_Dox_D25_Flk1pos']], name = 'EB_Dox_D25_Flk1pos', pos_line = FALSE, top_annotation = ta) + 
+EnrichedHeatmap(mat[['MEF_Dox_D7_Etv2']][i, ], col = col_fun[['MEF_Dox_D7_Etv2']], name = 'MEF_Dox_D7_Etv2', pos_line = FALSE, top_annotation = ta) + 
+EnrichedHeatmap(mat[['Etv2_V5']][i, ], col = col_fun[['Etv2_V5']], name = 'Etv2_V5', pos_line = FALSE, top_annotation = ta) + 
+EnrichedHeatmap(mat[['MEF_Dox_D7_H3K27ac']][i, ], col = col_fun[['MEF_Dox_D7_H3K27ac']], name = 'MEF_Dox_D7_H3K27ac', pos_line = FALSE, top_annotation = ta) +
+EnrichedHeatmap(mat[['EB_Dox_12h_H3K27ac']][i, ], col = col_fun[['EB_Dox_12h_H3K27ac']], name = 'EB_Dox_12h_H3K27ac', pos_line = FALSE, top_annotation = ta)
+draw(h, heatmap_legend_side = 'right')
+
+
+# -- Annotate the peaks groups in 11, 01 and 10 groups
+for (g in c('11', '01', '10')){
+	i <- peaks$cluster == g
+	bed_file  <- sprintf('%s/ATAC_Flk1pos_group=%s.bed', dataset_dir('dataset=Etv2ATAC_version=20190228a'), g)
+	write.table(as.data.frame(peaks[i])[, 1:3], bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
+	homer(bed_file, genome = 'mm10', mc.cores = 4)
+}
+
+# ---
+base.names <- sprintf('%s/ATAC_Flk1pos_group=%s', dataset_dir('dataset=Etv2ATAC_version=20190228a'), c('11', '01', '10'))
+bp_files <- sprintf('%s.bed_homer/biological_process.txt', base.names)
+x <- lapply(bp_files, function(bp_file){
+	y <- read.table(bp_file, sep = '\t', header = TRUE, comment.char = '', quote = '', fill = TRUE)
+	rownames(y) <- y[, 1]
+	y
+})
+id2term <- x[[1]][, 2]; names(id2term) <- x[[1]][, 1]
+
+go <- Reduce('intersect', lapply(x, function(y) y[, 1]))
+P <- do.call('cbind', lapply(x, function(y) y[go, 3]))
+ng <- x[[1]][go, 5]
+rownames(P) <- id2term[go]
+P <- P[ng < 1000, ]
+
+gs <- c(
+	'regulation of I-kappaB kinase/NF-kappaB signaling',
+	'circulatory system development',
+	'regulation of stress-activated MAPK cascade',
+	'cell death',
+	'angiogenesis',
+	'cell-cell signaling',
+	'pattern specification process',
+	'neuron differentiation',
+	'embryonic morphogenesis',
+	'mesenchyme development'
+)
+
+par(mar = c(5, 15, 3, 3))
+barplot(t(-log10(P[gs[order(P[gs, 2], decreasing = TRUE)], 2:3])), beside = TRUE, col = c('red', 'green'), horiz = TRUE, las = 2)
+
+
+
+# ----------------------------------------------------------------------------
+# [2019-09-29] chromVAR of all ATAC-seq data
+# ----------------------------------------------------------------------------
+# --- prepare for the peaks
+bed_files <- c(
+	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
+	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_summits.bed',
+	'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_summits.bed',
+	'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed',
+	'EB_Dox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_summits.bed',
+	'EB_Dox_D25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_summits.bed',
+	'EB_NoDox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25_summits.bed',
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed'
+)
+devtools::load_all('packages/compbio'); grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
+grs <- lapply(grs, function(gr) resize(gr, width = 100, fix = 'center'))
+peaks <- grs[[1]]
+for (i in 2:length(grs)){
+	peaks <- c(peaks, grs[[i]][!grs[[i]] %over% peaks])
+}
+mcols(peaks)$group <- do.call('cbind', lapply(grs, function(gr) peaks %over% gr))
+peaks <- add.seqinfo(peaks, 'mm10')
+
+bw_files <- c(
+	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_treat_pileup.bw',
+	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_treat_pileup.bw',
+	'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_treat_pileup.bw',
+	'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_treat_pileup.bw',
+	'EB_Dox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_treat_pileup.bw',
+	'EB_Dox_D25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_treat_pileup.bw',
+	'EB_NoDox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25_treat_pileup.bw',
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_treat_pileup.bw'
+)
+X <- do.call('cbind', mclapply(bw_files, function(bw_file){
+	flog.info(sprintf('reading %s', bw_file))
+	ga <- rtracklayer::import(bw_file, format = 'BigWig', which = reduce(peaks))
+	ga <- add.seqinfo(ga, 'mm10')
+	cvg <- coverage(ga, weight = as.numeric(mcols(ga)$score))
+	sum(cvg[peaks])
+}, mc.cores = 2))
+
+library(chromVARmotifs) # https://github.com/GreenleafLab/chromVARmotifs
+library(chromVAR)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(motifmatchr)
+library(BiocParallel)
+library(SummarizedExperiment)
+register(MulticoreParam(4)) # Use 8 cores
+motif.set <- 'homer_pwms'
+data(list = motif.set, package = 'chromVARmotifs')
+se <- SummarizedExperiment(assays = SimpleList(counts = X), rowRanges = peaks)
+se <- addGCBias(se, genome = BSgenome.Mmusculus.UCSC.mm10)
+motif_ix <- matchMotifs(get(motif.set), peaks, genome = 'mm10')
+dev <- computeDeviations(object = se, annotations = motif_ix)
+v <- computeVariability(dev)
+
+# visualize the sample PCA plot
+m <- v$p_value_adj < 1e-10
+s <- prcomp(assays(dev)$z[m, ])
+col <- c(
+	'MEF_NoDox' = 'black',
+	'MEF_Dox_D1' = 'blue',
+	'MEF_Dox_D2' = 'purple',
+	'MEF_Dox_D7' = 'red',
+	'MEF_Dox_D7_Flk1pos' = 'pink',
+	'EB_NoDox_D25' = 'green',
+	'EB_Dox_D25' = 'red',
+	'EB_Dox_D25_Flk1pos' = 'pink'
+)
+pch <- c(
+	'MEF_NoDox' = 21,
+	'MEF_Dox_D1' = 21,
+	'MEF_Dox_D2' = 21,
+	'MEF_Dox_D7' = 21,
+	'MEF_Dox_D7_Flk1pos' = 21,
+	'EB_NoDox_D25' = 4,
+	'EB_Dox_D25' = 4,
+	'EB_Dox_D25_Flk1pos' = 4
+)
+plot(s$rotation[, 1], s$rotation[, 2], pch = pch[colnames(se)], bg = col[colnames(se)], col = col[colnames(se)], cex = 2)
+
+
+Z <- assays(dev)$z
+rownames(Z) <- v$name
+i <- unique(unlist(lapply(1:ncol(Z), function(i) order(Z[, i], decreasing = TRUE)[1:10])))
+library(ComplexHeatmap)
+col_fun <- colorRamp2(quantile(Z[i, ], c(0.05, 0.5, 0.95), na.rm = TRUE), c('blue', 'white', 'red'))
+col_fun <- colorRamp2(c(-25, 0, 25), c('blue', 'white', 'red'))
+Heatmap(Z[i, ], col = col_fun)
+
+pheatmap(Z, cluster_rows = TRUE, show_rownames = TRUE, cluster_cols = TRUE, breaks = breaks, color = col, cellheight = 7, cellwidth = 30, fontsize_col = 15, fontsize_row = 7, show_colnames = TRUE, border_color = 'black', annotation_names_row = FALSE, annotation_names_col = FALSE)
+												                                  
+
+# ----------------------------------------------------------------------------
+# [2019-10-04] Use MEME to find the enriched motif canonical Etv2 peaks 
+# ----------------------------------------------------------------------------
+peak_file <- 'analysis/single_cell/etv2_chipseq_V5_mm10.sorted.bed'
+gr <- read.table(peak_file, header = FALSE, sep = '\t')
+gr <- GRanges(seqnames = gr[, 1], range = IRanges(gr[, 2], gr[, 3]))
+
+base.name <- sprintf('%s/Etv2_peaks_Choi', project_dir('etv2_pionner'))
+fasta_file <- sprintf('%s.fa', base.name)
+output_dir <- sprintf('%s.meme', base.name)
+s <- getSeq(BSgenome.Mmusculus.UCSC.mm10, gr)
+names(s) <- 1:length(s)
+writeXStringSet(s, fasta_file)
+command <- sprintf('dreme -p %s -oc %s -png -mink 8 -maxk 8 -m 10', fasta_file, output_dir)
+system(command)
+
+motif_file <- sprintf('%s.meme/dreme.txt', base.name)
+fasta_file <- sprintf('%s.fa', base.name)
+centrimo_output_dir <- sprintf('%s.centrimo', base.name)
+command <- sprintf('centrimo %s %s --oc %s', fasta_file, motif_file, centrimo_output_dir)
+system(command)
+
+
+# ----------------------------------------------------------------------------
+# [2019-11-16] Find a union set of ATAC-seq peaks and save as a bed file:
+# /panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed
+# ----------------------------------------------------------------------------
+bed_files <- c(
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed',
+	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
+	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_summits.bed',
+	'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_summits.bed',
+	'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed',
+	'EB_Dox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_summits.bed',
+	'EB_Dox_D25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_summits.bed',
+	'EB_NoDox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25_summits.bed'
+)
+devtools::load_all('packages/compbio'); grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
+grs <- lapply(grs, function(gr) resize(gr, width = 100, fix = 'center'))
+peaks <- grs[[1]]
+for (i in 2:length(grs)){
+  peaks <- c(peaks, grs[[i]][!grs[[i]] %over% peaks])
+}
+peaks <- add.seqinfo(peaks, 'mm10')
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
+write.table(as.data.frame(peaks), bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
 
 
