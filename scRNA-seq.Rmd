@@ -51,11 +51,10 @@ saveRDS(se, se_file)
 ```
 
 
-# ----------------------------------------------------------------------------
-# [2019-04-23] TSNE of the Etv2 scRNA-seq on MEF
-# TSNE runs on the latent space obtained by scVI
-# [2019-11-18] Updated visualization using umap
-# ----------------------------------------------------------------------------
+[2019-04-23] TSNE of the Etv2 scRNA-seq on MEF
+TSNE runs on the latent space obtained by scVI
+[2019-11-18] Updated visualization using umap
+```{r}
 library(SummarizedExperiment)
 library(SingleCellExperiment)
 se_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2scRNAseq_version=20190416a/filtered_5000_fivegenes_noDoublets_scran_scVI.rds'
@@ -79,12 +78,11 @@ plot(colData(se)$tsne, cex = 0.5, pch = 21, bg  = bg, col = bg, xaxt = 'n', yaxt
 
 se_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2scRNAseq_version=20190416a/filtered_5000_fivegenes_noDoublets_scran_scVI_umap.rds'
 saveRDS(se, se_file)
+```
 
-
-# ----------------------------------------------------------------------------
-# [2019-04-28] KNN graph and Louvain clustering
-# [2019-11-18] Updated analysis based on umap results
-# ----------------------------------------------------------------------------
+[2019-04-28] KNN graph and Louvain clustering
+[2019-11-18] Updated analysis based on umap results
+```{r}
 library(igraph)
 library(FNN)
 devtools::load_all('packages/compbio')
@@ -103,17 +101,18 @@ dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
 library(RColorBrewer); plot(colData(se)$umap, col = colorRampPalette(brewer.pal(11,'Spectral'))(G_max)[clust], pch = 16, asp = 1, xaxt = 'n', yaxt = 'n', main = 'cluster', xlab = '', ylab = '')
 y_centers <- do.call('rbind', lapply(1:G_max, function(i) apply(colData(se)$umap[clust == i, ], 2, median)))
 text(y_centers[, 1], y_centers[, 2], 1:G_max, cex = 1.25)
+```
 
 
-# ----------------------------------------------------------------------------
-# [2019-04-25] Use slingshot to get the lineages (a MST on the Mclust clusters)
-# [2019-11-18] Updated analysis by using umap
-# ----------------------------------------------------------------------------
+[2019-04-25] Use slingshot to get the lineages (a MST on the Mclust clusters)
+[2019-11-18] Updated analysis by using umap
+```{r}
 start.clus <- '5'
 library(slingshot); set.seed(1); lin <- getLineages(colData(se)$umap, colData(se)$cluster, start.clus = start.clus)
 dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
 plot(colData(se)$umap, col = bg, asp = 1, pch = 16, xaxt = 'n', yaxt = 'n', main = 'Lineages', xlab = '', ylab = '', cex = 0.5)
 lines(lin, lwd = 3, show.constraints = TRUE)
+```
 
 
 
