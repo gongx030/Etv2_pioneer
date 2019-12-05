@@ -1,4 +1,22 @@
 
+
+# ----------------------------------------------------------------------------
+# [2019-04-12] Comparing two Brg1 ChIP-seq peaks and see the consistency between them
+# If they are largely consistent, this will reduce the difficulities of re-doing the Brg1 ChIP-seq
+# [2019-09-06] Update the analysis using latest Brg1 ChIP-seq data
+# ----------------------------------------------------------------------------
+devtools::load_all('packages/compbio')
+bed_files <- c(
+	'/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20190405a/Brg1_summits.bed',
+	'/panfs/roc/scratch/gongx030/datasets/dataset=Alver_version=20190407a/Brg1_summits.bed',
+	'/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_NoDox_Brg1_summits.bed',
+	'/panfs/roc/scratch/gongx030/datasets/dataset=Brg1_version=20190820a/MEF_Dox_D1_Brg1_summits.bed'
+)
+grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file, score_threshold = -log10(0.001)))
+grs <- lapply(grs, function(gr) resize(gr, fix = 'center', width = 500))
+library(ChIPpeakAnno); ol <- findOverlapsOfPeaks(grs[[1]], grs[[2]], grs[[3]], grs[[4]])
+makeVennDiagram(ol)
+
 # [2017-11-20] Prepare the ATAC-seq data
 project <- 'Etv2_MEFs'
 project.dir <- sprintf('%s/projects/%s', Sys.getenv('SHARED'), project)
@@ -4319,4 +4337,81 @@ peaks <- add.seqinfo(peaks, 'mm10')
 bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
 write.table(as.data.frame(peaks), bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
 
+
+# ------------------------------------------------------------------------
+# [2019-11-24] GRanges of all Etv2 motifs within all ATAC-seq peaks
+# ------------------------------------------------------------------------
+#bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
+#bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_summits.bed'
+
+devtools::load_all('packages/compbio')
+bed_files <- c(
+	D1 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D1_Etv2_summits.bed',
+	D2 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D2_Etv2_summits.bed',
+	D7 = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ChIPseq_version=20190307a/MEF_Dox_D7_Etv2_summits.bed'
+)
+grs <- lapply(bed_files, function(bed_file){
+	gr <- macs2.read_summits(bed_file)
+	gr <- gr[mcols(gr)$score > 3] # q-value < 0.001
+})
+grs <- lapply(grs, function(gr) resize(gr, width = 20, fix = 'center'))
+names(grs) <- names(bed_files)
+ol <- findOverlapsOfPeaks(grs[['D1']], grs[['D2']], grs[['D7']])
+gr <- Reduce('c', ol$peaklist)
+
+
+# --- Find the Etv2 motifs that are overlapped with all ATAC-seq peaks
+library(chromVARmotifs) # https://github.com/GreenleafLab/chromVARmotifs
+library(motifmatchr)
+motif.set <- 'homer_pwms'
+data(list = motif.set, package = 'chromVARmotifs')
+etv2_pwm <- get(motif.set)[82]
+motif_ix <- matchMotifs(etv2_pwm, resize(gr, fix = 'center', width = 100), genome = 'mm10', out = 'position', p.cutoff = 0.001)
+peaks <- motif_ix[[1]]
+
+# --- Remove peaks that overlapped with the open accessible regions in MEF
+# there are many Etv2 binding sites that is already open in MEF
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed'
+mef <- macs2.read_summits(bed_file)
+mef <- resize(mef, width = 500, fix = 'center')
+peaks <- peaks[!peaks %over% mef]
+
+
+# --- prepare normalizeToMatrix files (take a few minutes for each dataset at the first run,
+gs <- 'Phasing_at_Etv2_sites'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 5
+bw_files <- c(
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_20170314f.nucleoatac_signal.smooth.bw',
+	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_20170314g.nucleoatac_signal.smooth.bw',
+	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_20170314h.nucleoatac_signal.smooth.bw',
+	'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_20170314i.nucleoatac_signal.smooth.bw',
+	'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_20170314j.nucleoatac_signal.smooth.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+
+
+# --- prepare the color and the matrix
+group_cols <- rep('purple', length(bw_files)); names(group_cols) <- names(bw_files)	# purple for ATAC-seq
+mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
+
+group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files) # purple for ATAC-seq
+group_cols[names(group_cols) %in% c('ChIP_PHF7', 'd2_5F_PHF7-3xTy1-1', 'd2_5F_PHF7-3xTy1-2', 'ChIP_Mock')] <- 'purple'
+group_cols[names(group_cols) %in% c('ATAC_5F', 'ATAC_5F_PHF7', 'ATAC_Mock', 'ATAC_PHF7')] <- 'red'
+mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
+col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.01, 0.99), na.rm = TRUE), c('white', group_cols[i])))
+names(col_fun) <- names(n2m_files)
+
+
+# --- Plot
+pdf(sprintf('%s/phf7_heatmap.pdf', project_dir('phf7')), width = 50, height = 20)
+
+i <- 1:nrow(mat[[1]])
+#set.seed(1); i <- sample(1:nrow(mat[[1]]), 10000)
+split_by <- factor(mcols(peaks)$cluster[i], c('11', '01', '10'))
+library(grid); ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(col = 1:3, lty = 1), axis_param = list(facing = 'inside')))
+gs <- c('ChIP_PHF7', 'd2_5F_PHF7-3xTy1-1', 'd2_5F_PHF7-3xTy1-2', 'ChIP_Mock', 'ATAC_PHF7', 'ATAC_5F', 'ATAC_5F_PHF7', 'ATAC_Mock', 'MNase', 'H3K27ac', 'H3', 'H3K9me3', 'H3K27me3', 'H3K36me3', 'H3K9ac', 'H3K79me2', 'H3K4me2', 'Hdac1', 'H3.3', 'Brg1')
+h1 <- Heatmap(split_by, col = structure(1:3, names = c('11', '01', '10')), name = "partition", show_row_names = FALSE, width = unit(3, "mm"), split = split_by)
+h_list <- lapply(gs, function(h) EnrichedHeatmap(mat[[h]][i, ], col = col_fun[[h]], name = h, top_annotation = ta, column_title = h))
+draw(h1 + Reduce('+', h_list), heatmap_legend_side = 'bottom')
+
+dev.off()
 
