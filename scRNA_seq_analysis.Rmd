@@ -1,0 +1,13 @@
+---
+title: 'Analysis of scRNA-seq data'
+date: "12/05/2019"
+output: html_document
+---
+
+```{r}
+dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
+plot(colData(se)$umap, col = bg, asp = 1, pch = 16, xaxt = 'n', yaxt = 'n', main = 'trajectory', xlab = '', ylab = '', cex = 0.5)
+cols <- rep('gray', 6); cols[5] <- 'green'
+lines(metadata(se)$curves, lwd = 3, show.constraints = TRUE, col = cols)
+```
+

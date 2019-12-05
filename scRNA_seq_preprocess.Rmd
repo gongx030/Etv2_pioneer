@@ -1,8 +1,14 @@
 ---
 title: 'Preprocessing of scRNA-seq'
-date: "12/05/2019"
+author: 
+- name: 'Wuming Gong'
+created: '12/05/2019'
+updated: '12/05/2019'
 output: html_document
 ---
+
+This document covers the preprocessing steps of the scRNA-seq of Etv2 reprogramming in MEF
+The script for analyzing the resulting scRNA-seq data can be found at scRNA_seq_analysis.Rmd
 
 ```{r}
 devtools::load_all('packages/compbio')
@@ -11,6 +17,7 @@ library(igraph)
 library(FNN)
 library(slingshot)
 library(RColorBrewer)
+library(umap)
 dataset <- 'dataset=Etv2scRNAseq_version=20190416a'
 nfeature <- 4000 # number HVG's
 latent_dim <- 40	# number of latent dimension for scVI
@@ -22,10 +29,10 @@ Preprocessing the Etv2 scRNA-seq data
 * Get the scaled and normalized gene expression matrix using Seurat 3.1
 * Get the HVG's 
 
-```{r}
+```{r, eval = FALSE}
 se <- readRDS(sprintf('%s/filtered.rds', dataset_dir(dataset)))
 se <- se[rowSums(assays(se)$counts > 0) >= 3, ]
-devtools::load_all('packages/compbio'); se <- scrublet(se, colData(se)$group, expected_doublet_rate = 0.1, min_counts = 2, min_cells = 3, min_gene_variability_pctl = 85, n_prin_comps = 30L)
+se <- scrublet(se, colData(se)$group, expected_doublet_rate = 0.1, min_counts = 2, min_cells = 3, min_gene_variability_pctl = 85, n_prin_comps = 30L)
 is_doublet <- colData(se)$doublet_scores > 0.25
 se <- se[, !is_doublet]
 se2 <- seurat_preprocess(se, nfeatures = nfeature)
@@ -38,10 +45,7 @@ saveRDS(se2, se_file)
 Using scVI for dimension reduction of scRNA-seq followed by UMAP visualization
 This step takes ~1 hour
 
-```{r}
-devtools::load_all('packages/compbio')
-library(umap)
-dataset <- 'dataset=Etv2scRNAseq_version=20190416a'
+```{r, eval = FALSE}
 se_file <- sprintf('%s/filtered_nfeatures=%d.rds', dataset_dir(dataset), nfeature)
 n <- rowData(se)$is_hvg
 se2 <- scvi(se[n, ], n_latent = latent_dim)
@@ -54,9 +58,8 @@ se_file <- sprintf('%s/filtered_nfeatures=%d_latent=%d.rds', dataset_dir(dataset
 saveRDS(se, se_file)
 ```
 
-
 Cell clustering using louvain clustering
-```{r}
+```{r, eval = FALSE}
 se_file <- sprintf('%s/filtered_nfeatures=%d_latent=%d.rds', dataset_dir(dataset), nfeature, latent_dim)
 se <- readRDS(se_file)
 
@@ -76,15 +79,14 @@ clust <- as.numeric(as.factor(membership(lc)))
 G_max <- max(unique(clust))
 colData(se)$cluster <- clust
 
-dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
 plot(colData(se)$umap, col = colorRampPalette(brewer.pal(11,'Spectral'))(G_max)[clust], pch = 16, asp = 1, xaxt = 'n', yaxt = 'n', main = 'cluster', xlab = '', ylab = '')
 y_centers <- do.call('rbind', lapply(1:G_max, function(i) apply(colData(se)$umap[clust == i, ], 2, median)))
 text(y_centers[, 1], y_centers[, 2], 1:G_max, cex = 1.25)
+
 ```
 
-
 Generate a MSP for the Louvain clusters
-```{r}
+```{r, eval = FALSE}
 start.clus <- '4'
 set.seed(1); lin <- getLineages(colData(se)$umap, colData(se)$cluster, start.clus = start.clus)
 dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
@@ -94,18 +96,17 @@ lines(lin, lwd = 3, show.constraints = TRUE)
 ```
 
 Generate smooth curves from the starting cluster to various ending cluster(s)
-```{r}
-set.seed(1); crv <- getCurves(lin, extend = 'n')  # this step ~ 30 mins
+This step takes ~30 - 60 mins
+```{r, eval = FALSE}
+set.seed(1); crv <- getCurves(lin, extend = 'n')
 metadata(se)$curves <- crv
 se_file <- sprintf('%s/filtered_nfeatures=%d_latent=%d_k=%d_slingshot.rds', dataset_dir(dataset), nfeature, latent_dim, k)
 saveRDS(se, se_file)
 ```
 
-```{r}
-dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
-plot(colData(se)$umap, col = bg, asp = 1, pch = 16, xaxt = 'n', yaxt = 'n', main = 'trajectory', xlab = '', ylab = '', cex = 0.5)
-cols <- rep('gray', 6); cols[5] <- 'green'
-lines(metadata(se)$curves, lwd = 3, show.constraints = TRUE, col = cols)
+Save the final data onto s3 for the downstream analysis
+```{r, eval = FALSE}
+s3_saveRDS(se, sprintf('garry_projects/etv2_pioneer/processed_Etv2_scRNAseq.rds'), make_public = TRUE)
 ```
 
 
