@@ -18,6 +18,7 @@ library(FNN)
 library(slingshot)
 library(RColorBrewer)
 library(umap)
+library(parallel)
 dataset <- 'dataset=Etv2scRNAseq_version=20190416a'
 nfeature <- 4000 # number HVG's
 latent_dim <- 40	# number of latent dimension for scVI
@@ -101,6 +102,20 @@ This step takes ~30 - 60 mins
 set.seed(1); crv <- getCurves(lin, extend = 'n')
 metadata(se)$curves <- crv
 se_file <- sprintf('%s/filtered_nfeatures=%d_latent=%d_k=%d_slingshot.rds', dataset_dir(dataset), nfeature, latent_dim, k)
+saveRDS(se, se_file)
+```
+
+[2019-12-06] Find the DE genes in each Louvain clusters by using the t-test on the scaled gene expression levels
+```{r, eval = FALSE}
+se_file <- sprintf('%s/filtered_nfeatures=%d_latent=%d_k=%d_slingshot.rds', dataset_dir(dataset), nfeature, latent_dim, k)
+se <- readRDS(se_file)
+G_max <- max(unique(colData(se)$cluster))
+X <- assays(se)$scaled_counts
+d <- expand.grid(cluster = 1:G_max, gene  = 1:nrow(se))
+clust <- colData(se)$cluster
+pvalues <- unlist(mclapply(1:nrow(d), function(i) t.test(X[d[i, 'gene'], clust == d[i, 'cluster']], X[d[i, 'gene'], clust != d[i, 'cluster']], alternative = 'greater')$p.value, mc.cores = 8))
+P <- t(matrix(pvalues, nrow = G_max, ncol = nrow(se)))
+rowData(se)$clusters <- P
 saveRDS(se, se_file)
 ```
 
