@@ -1,13 +1,97 @@
 ---
-title: 'Analysis of scRNA-seq data'
+title: "Analysis of scRNA-seq data"
+output:
+  html_document: default
+  pdf_document: default
 date: "12/05/2019"
-output: html_document
 ---
 
-```{r}
-dev.new(width = 5, height = 5); par(mar = c(2, 2, 2, 2))
-plot(colData(se)$umap, col = bg, asp = 1, pch = 16, xaxt = 'n', yaxt = 'n', main = 'trajectory', xlab = '', ylab = '', cex = 0.5)
-cols <- rep('gray', 6); cols[5] <- 'green'
-lines(metadata(se)$curves, lwd = 3, show.constraints = TRUE, col = cols)
+```{r, setup, include=FALSE, eval = FALSE}
+knitr::opts_chunk$set(fig.width = 2, fig.height = 2)
 ```
+
+```{r, message = FALSE}
+library(SummarizedExperiment)
+library(RColorBrewer)
+library(slingshot)
+library(knitr)
+library(dplyr)
+library(cluster)
+library(parallel)
+```
+
+Read the processed scRNA-seq data (~2.1G)
+```{r}
+se <- readRDS(gzcon(url('https://s3.msi.umn.edu/garry_projects/etv2_pioneer/processed_Etv2_scRNAseq.rds')))
+```
+
+Determine the number of clusters
+```{r}
+wss <- (nrow(colData(se)$umap)-1) * sum(apply(colData(se)$umap, 2, var))
+for (i in 2:15) wss[i] <- sum(kmeans(colData(se)$umap,centers = i)$withinss)
+plot(1:15, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares")
+n_cluster <- 7
+set.seed(1); colData(se)$cluster <- kmeans(colData(se)$umap, n_cluster)$cluster
+abline(v = n_cluster, col = 'blue', lty = 2)
+```
+Figure of the cell clusters
+```{r}
+group2bg <- c(
+   'MEF_Dox_D1' = 'black',
+   'MEF_NoDox' = 'blue',
+   'MEF_Dox_D2' = 'purple',
+   'MEF_Dox_D7a' = 'red',
+   'MEF_Dox_D7b' = 'pink'
+ )
+plot(colData(se)$umap, col = colorRampPalette(brewer.pal(11,'Spectral'))(n_cluster)[colData(se)$cluster], pch = 16, asp = 1, cex = 0.2, main = 'K-means clusters', xlab = '', ylab = '')
+y_centers <- do.call('rbind', lapply(1:G_max, function(i) apply(colData(se)$umap[colData(se)$cluster == i, ], 2, median)))
+text(y_centers[, 1], y_centers[, 2], 1:G_max, cex = 1)
+```
+Figure of cell sources (e.g. time points)
+```{r}
+bg <- group2bg[colData(se)$group]
+plot(colData(se)$umap, col = bg, asp = 1, pch = 16,  main = 'Cell sources', xlab = '', ylab = '', cex = 0.2, cex.main = 1, cex.axis = 1)
+```
+Identify the up-regulated genes in each cluster
+```{r}
+X <- assays(se)$scaled_counts
+d <- expand.grid(cluster = 1:n_cluster, gene  = 1:nrow(se))
+clust <- colData(se)$cluster
+pvalues <- unlist(mclapply(1:nrow(d), function(i) t.test(X[d[i, 'gene'], clust == d[i, 'cluster']], X[d[i, 'gene'], clust != d[i, 'cluster']], alternative = 'greater')$p.value, mc.cores = 4))
+P <- t(matrix(pvalues, nrow = n_cluster, ncol = nrow(se)))
+rownames(P) <- rowData(se)$name
+rowData(se)$differential_expression <- P
+```
+
+
+Generate a figure with color representing the cell sources
+```{r}
+bg <- group2bg[colData(se)$group]
+#par(xpd = TRUE)
+plot(colData(se)$umap, col = bg, asp = 1, pch = 16,  main = 'Slingshot trajectories', xlab = '', ylab = '', cex = 0.2, cex.main = 1, cex.axis = 1)
+n_lineages <- length(metadata(se)$curves@lineages)
+trajectory_cols <- rep('gray', n_lineages); trajectory_cols[1] <- 'green'
+trajectory_lwd <- rep(0.1, n_lineages)
+crv <- metadata(se)$curves
+lines(crv, lwd = 1, show.constraints = FALSE, col = 'gray')
+is_endothelial <- 1
+crv@curves <- crv@curves[is_endothelial]  # only show the trajectory toward the Flk1+ cells at D7
+lines(crv, lwd = 2, show.constraints = FALSE, col = 'green')
+```
+Examine the expression levels of Emcn (endothelial marker)
+```{r}
+crv <- metadata(se)$curves
+is_endothelial <- 1
+sc <- slingCurves(crv)[[is_endothelial]] # a principal_curve object
+m <- sc$ord # cell order along the endothelial trajectory
+g <- 'Emcn'
+X <- assays(se)$normalized_counts
+rownames(X) <- rowData(se)$name
+df <- data.frame(y = X[g, m], x = 1:length(m))
+plot(y ~ x, df, pch = 21, bg = bg[m], col = bg[m], xlab = 'Cell order', ylab = 'Normalized read counts', main = g, cex = 0.25)
+m <- 1:nrow(df)
+ss <- smooth.spline(df[m, 'x'], df[m, 'y'], df = 10)
+lines(ss, lty = 2, col = 'black', lwd = 3)
+```
+
 
