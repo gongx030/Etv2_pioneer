@@ -1,0 +1,33 @@
+---
+title: 'Defining a unified set of peaks for all MEF and ES/EB ATAC-seq
+output: html_document
+date: '12/11/2019'
+author: 'Wuming Gong'
+---
+
+```{r, message = FALSE}
+devtools::load_all('packages/compbio')
+```
+
+Define a union set of ATAC-seq summits and save as a bed file:
+```{r}
+bed_files <- c(
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed',
+	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
+	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_summits.bed',
+  'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_summits.bed',
+  'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed',
+  'EB_Dox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_summits.bed',
+  'EB_Dox_D25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_summits.bed',
+  'EB_NoDox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25_summits.bed'
+)
+grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
+grs <- lapply(grs, function(gr) resize(gr, width = 100, fix = 'center'))
+	peaks <- grs[[1]]
+	for (i in 2:length(grs)){
+		peaks <- c(peaks, grs[[i]][!grs[[i]] %over% peaks])
+	}
+	peaks <- add.seqinfo(peaks, 'mm10')
+	bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
+	write.table(as.data.frame(peaks), bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
