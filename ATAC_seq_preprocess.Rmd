@@ -1,12 +1,13 @@
 ---
-title: 'Defining a unified set of peaks for all MEF and ES/EB ATAC-seq
+title: 'Preprocessing the ATAC-seq for both ES/EB and MEF
 output: html_document
-date: '12/11/2019'
+date: '12/12/2019'
 author: 'Wuming Gong'
 ---
 
 ```{r, message = FALSE}
 devtools::load_all('packages/compbio')
+library(BSgenome.Mmusculus.UCSC.mm10)
 ```
 
 Define a union set of ATAC-seq summits and save as a bed file:
@@ -31,3 +32,40 @@ grs <- lapply(grs, function(gr) resize(gr, width = 100, fix = 'center'))
 	bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
 	write.table(as.data.frame(peaks), bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
 ```
+
+
+HINT analysis for ATAC-seq footprinting
+```{r}
+dataset <- 'dataset=Etv2ATAC_version=20190228a'; genome <- 'mm10'
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox.bam'; bname <- 'MEF_NoDox'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1.bam'; bname <- 'MEF_Dox_D1'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2.bam'; bname <- 'MEF_Dox_D2'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7.bam'; bname <- 'MEF_Dox_D7'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos.bam'; bname <- 'MEF_Dox_D7_Flk1pos'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25.bam'; bname <- 'EB_Dox_D25'
+#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos.bam'; bname <- 'EB_Dox_D25_Flk1pos'
+bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25.bam'; bname <- 'EB_NoDox_D25'
+output_prefix <- sprintf('%s/%s_HINT', dataset_dir(dataset), bname)
+command <- sprintf('rgt-hint footprinting --organism=%s --paired-end --output-prefix=%s --atac-seq %s %s', genome, output_prefix, bam_file, bed_file)
+flog.info(command)
+system(command)
+command <- sprintf('rgt-hint tracks --bc --bigWig --organism=%s --output-prefix=%s %s %s', genome, output_prefix, bam_file, bed_file)
+flog.info(command)
+system(command)
+```
+
+Merging the nucleoATAC results
+```{r}
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_NoDox'; prefix <- '20170314f'
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D1'; prefix <- '20170314g'
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D2'; prefix <- '20170314h'
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D7'; prefix <- '20170314i'
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D7_Flk1pos'; prefix <- '20170314j'
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'EB_Dox_D25'; prefix <- '20170314k'
+#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'EB_Dox_D25_Flk1pos'; prefix <- '20170314m'
+dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'EB_NoDox_D25'; prefix <- '20170314n'
+base_name <- sprintf('%s/%s_%s', dataset_dir(dataset), bname, prefix)
+nucleoatac_merge(base_name, genome = BSgenome.Mmusculus.UCSC.mm10)
+```
+
