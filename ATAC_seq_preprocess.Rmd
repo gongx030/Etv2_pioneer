@@ -1,71 +1,173 @@
 ---
 title: 'Preprocessing the ATAC-seq for both ES/EB and MEF
 output: html_document
-date: '12/12/2019'
+date: '12/15/2019'
 author: 'Wuming Gong'
 ---
 
 ```{r, message = FALSE}
 devtools::load_all('packages/compbio')
 library(BSgenome.Mmusculus.UCSC.mm10)
+library(parallel)
+library(dplyr)
 ```
 
-Define a union set of ATAC-seq summits and save as a bed file:
+# Calling ATAC-seq peaks for EB Etv2 induction at D2.5 and MEF Etv2 induction data
+
+# Calling ATAC-seq peaks for Naoko's ATAC-seq on D3 EB with and without Etv2 induction
+```{r, eval = FALSE}
+dataset <- 'dataset=Naoko_version=20170628a'; genome <- 'mm10'
+d <- read_dataset(dataset)
+d <- d %>% mutate(bam_file = sra.dedup.bam.file(run))
+
+bname <- 'EB_Dox_D3'; treatment <- c('d3_EB_Dox_1_S3', 'd3_EB_Dox_2_S4')
+#bname <- 'EB_NoDox_D3'; treatment <- c('d3_EB_no_dox_1_S1', 'd3_EB_no_dox_2_S2')
+
+base.name <- sprintf('%s/%s', dataset_dir(dataset), bname); treatment_files <- d[d[, 'run'] %in% treatment, 'bam_file']
+macs2.callpeak(treatment_files, base.name, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+```
+
+# Calling ATAC-seq peaks for Naoko's ATAC-seq on MEF and D2 EB with and without Etv2 induction
+```{r, eval = FALSE}
+dataset <- 'dataset=Naoko_version=20170302a'; genome <- 'mm10'
+d <- read_dataset(dataset)
+d <- d %>% mutate(bam_file = sra.dedup.bam.file(run))
+
+#bname <- 'EB_Dox_D3_Flk1pos'; treatment <- c('D3EB_F_P_6h_Dox-1_S12', 'D3EB_F_P_6h_Dox-2_S13')
+#bname <- 'EB_NoDox_D3_Flk1pos'; treatment <- c('D3EB_F_P_no_Dox-1_S10', 'D3EB_F_P_no_Dox-2_S11')
+#bname <- 'EB_Dox_D0'; treatment <- c('ES_6h_Dox-1_S8', 'ES_6h_Dox-2_S9')
+bname <- 'EB_NoDox_D0'; treatment <- c('ES_no_Dox-1_S6', 'ES_no_Dox-2_S7')
+
+base.name <- sprintf('%s/%s', dataset_dir(dataset), bname); treatment_files <- d[d[, 'run'] %in% treatment, 'bam_file']
+macs2.callpeak(treatment_files, base.name, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+```
+
+# Merging sample-level BAM files (dedup.bam) into group-level BAM files
+```{r}
+dataset <- 'dataset=Naoko_version=20170302a'; bname <- 'EB_Dox_D0'; runs <- c('ES_6h_Dox-1_S8', 'ES_6h_Dox-2_S9')
+dataset <- 'dataset=Naoko_version=20170302a'; bname <- 'EB_NoDox_D0'; runs <- c('ES_no_Dox-1_S6', 'ES_no_Dox-2_S7')
+dataset <- 'dataset=Naoko_version=20170628a'; bname <- 'EB_Dox_D3'; runs <- c('d3_EB_Dox_1_S3', 'd3_EB_Dox_2_S4')
+dataset <- 'dataset=Naoko_version=20170628a'; bname <- 'EB_NoDox_D3'; runs <- c('d3_EB_no_dox_1_S1', 'd3_EB_no_dox_2_S2')
+dataset <- 'dataset=Naoko_version=20170302a'; bname <- 'EB_Dox_D3_Flk1pos'; runs <- c('D3EB_F_P_6h_Dox-1_S12', 'D3EB_F_P_6h_Dox-2_S13')
+dataset <- 'dataset=Naoko_version=20170302a'; bname <- 'EB_NoDox_D3_Flk1pos'; runs <- c('D3EB_F_P_no_Dox-1_S10', 'D3EB_F_P_no_Dox-2_S11')
+
+d <- read_dataset(dataset)
+d <- d %>% mutate(bam_file = sra.dedup.bam.file(run))
+input_bam_files <- d[d$run %in% runs, 'bam_file']
+output_bam_file <- sprintf('%s/%s.bam', dataset_dir(dataset), bname)
+
+merge.bam.files(treatment_files, output_bam_file)
+```
+
+# Define a union set of ATAC-seq summits and save as a bed file:
 ```{r}
 bed_files <- c(
+
+	'EB_Dox_D0' = '/panfs/roc/scratch/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D0_summits.bed',
+	'EB_NoDox_D0' = '/panfs/roc/scratch/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D0_summits.bed',
+	'EB_Dox_D3_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D3_Flk1pos_summits.bed',
+	'EB_NoDox_D3_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D3_Flk1pos_summits.bed',
+
+	'EB_Dox_D3' = '/panfs/roc/scratch/gongx030/datasets/dataset=Naoko_version=20170628a/EB_Dox_D3_summits.bed',
+	'EB_NoDox_D3' = '/panfs/roc/scratch/gongx030/datasets/dataset=Naoko_version=20170628a/EB_NoDox_D3_summits.bed',
+
 	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed',
 	'MEF_Dox_D1' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
 	'MEF_Dox_D2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_summits.bed',
   'MEF_Dox_D7' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_summits.bed',
   'MEF_Dox_D7_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed',
+
   'EB_Dox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_summits.bed',
   'EB_Dox_D25_Flk1pos' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_summits.bed',
   'EB_NoDox_D25' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25_summits.bed'
 )
-grs <- lapply(bed_files, function(bed_file) macs2.read_summits(bed_file))
-grs <- lapply(grs, function(gr) resize(gr, width = 100, fix = 'center'))
-	peaks <- grs[[1]]
-	for (i in 2:length(grs)){
-		peaks <- c(peaks, grs[[i]][!grs[[i]] %over% peaks])
-	}
-	peaks <- add.seqinfo(peaks, 'mm10')
-	bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
-	write.table(as.data.frame(peaks), bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+gr_list <- lapply(1:length(bed_files), function(i){
+  x <- macs2.read_summits(bed_files[i])
+	x$source <- names(bed_files)[i]
+  x
+})
+gr <- Reduce('c', gr_list)
+gr <- resize(gr, width = 200, fix = 'center')
+gr0 <- reduce(gr) # a reduced set of Etv2 peak
+mm <- as.matrix(findOverlaps(gr, gr0))
+sp <- split(mm[, 1], list(mm[, 2]))
+j <- unlist(mclapply(sp, function(i) i[which.max(gr$score[i])], mc.cores = 4))
+gr <- gr[j]
+G <- do.call('cbind', lapply(1:length(bed_files), function(i) gr %over% gr_list[[i]]))
+gr$group <- G # group assignment of the union set to each source
+colnames(gr$group) <- names(bed_files)
+saveRDS(gr, '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC_seq_peaks.rds')
+s3_saveRDS(gr, 'datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC_seq_peaks.rds')
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC_seq_peaks.bed'
+write.table(as.data.frame(gr), bed_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
 ```
 
-
-HINT analysis for ATAC-seq footprinting
+# Generating a read counts matrix for each ATAC-seq sample, over a union peak set across all ATAC-seq samples
+These data will be used to perform a sample level chromVAR analysis
 ```{r}
-dataset <- 'dataset=Etv2ATAC_version=20190228a'; genome <- 'mm10'
-bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/ATAC_peaks_Etv2_reprogramming.bed'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox.bam'; bname <- 'MEF_NoDox'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1.bam'; bname <- 'MEF_Dox_D1'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2.bam'; bname <- 'MEF_Dox_D2'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7.bam'; bname <- 'MEF_Dox_D7'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos.bam'; bname <- 'MEF_Dox_D7_Flk1pos'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25.bam'; bname <- 'EB_Dox_D25'
-#bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos.bam'; bname <- 'EB_Dox_D25_Flk1pos'
-bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25.bam'; bname <- 'EB_NoDox_D25'
-output_prefix <- sprintf('%s/%s_HINT', dataset_dir(dataset), bname)
-command <- sprintf('rgt-hint footprinting --organism=%s --paired-end --output-prefix=%s --atac-seq %s %s', genome, output_prefix, bam_file, bed_file)
-flog.info(command)
-system(command)
-command <- sprintf('rgt-hint tracks --bc --bigWig --organism=%s --output-prefix=%s %s %s', genome, output_prefix, bam_file, bed_file)
-flog.info(command)
-system(command)
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/all_ATAC_seq_peaks.bed'
+peaks <- macs2.read_summits(bed_file)
+peaks <- add.seqinfo(peaks, 'mm10')
+
+dataset <- 'dataset=Etv2ATAC_version=20190228b'
+d <- read_dataset(dataset)
+d <- d %>% mutate(bw_file = sprintf('%s/%s_treat_pileup.bw', dataset_dir(dataset), group))
+d <- d %>% mutate(group = gsub('_rep\\d$', '', group))
+
+dataset2 <- 'dataset=Naoko_version=20170302a'
+d2 <- read_dataset(dataset2)
+g2 <- c(
+	'd0_EB_dox' = 'EB_Dox_D0',
+	'd0_EB_no_dox' = 'EB_NoDox_D0',
+	'd3_EB_dox' = 'EB_Dox_D3_Flk1pos',
+	'd3_EB_no_dox' = 'EB_NoDox_D3_Flk1pos'
+)
+d2 <- d2 %>% mutate(
+	bw_file = sprintf('%s/%s_treat_pileup.bw', dataset_dir(dataset2), run),
+	group = g2[group]
+)
+
+dataset3 <- 'dataset=Naoko_version=20170628a'
+d3 <- read_dataset(dataset3)
+g3 <- c(
+	'd2_EB_dox' = 'EB_Dox_D3',
+	'd2_EB_no_dox' = 'EB_NoDox_D3'
+)
+d3 <- d3 %>% mutate(
+	bw_file = sprintf('%s/%s_treat_pileup.bw', dataset_dir(dataset3), run),
+	group = g3[group]
+)
+
+d <- rbind(d, d2, d3)
+file.exists(d$bw_file)	# make sure the BAM files exist
+
+X <- do.call('cbind', mclapply(d$bw_file, function(bw_file){
+  flog.info(sprintf('reading %s', bw_file))
+#	ga <- rtracklayer::import(bw_file, format = 'BigWig', which = reduce(peaks))
+	ga <- rtracklayer::import(bw_file, format = 'BigWig')#, which = reduce(peaks))
+	ga <- add.seqinfo(ga, 'mm10')
+  cvg <- coverage(ga, weight = as.numeric(mcols(ga)$score))
+  sum(cvg[peaks])
+}, mc.cores = 4))
+
+se <- SummarizedExperiment(assays = SimpleList(counts = X), rowRanges = peaks, colData = d)
+s3_saveRDS(se, sprintf('gongx030/datasets/%s/ATAC_peaks_Etv2_reprogramming.rds', dataset))
+
 ```
 
-Merging the nucleoATAC results
+# HINT analysis for ATAC-seq footprinting
+These are run in batch by jobs 20191215*
+
+
+# Merging the nucleoATAC results
+These are run in batch by jobs 20191216*
 ```{r}
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_NoDox'; prefix <- '20170314f'
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D1'; prefix <- '20170314g'
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D2'; prefix <- '20170314h'
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D7'; prefix <- '20170314i'
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D7_Flk1pos'; prefix <- '20170314j'
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'EB_Dox_D25'; prefix <- '20170314k'
-#dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'EB_Dox_D25_Flk1pos'; prefix <- '20170314m'
-dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'EB_NoDox_D25'; prefix <- '20170314n'
-base_name <- sprintf('%s/%s_%s', dataset_dir(dataset), bname, prefix)
-nucleoatac_merge(base_name, genome = BSgenome.Mmusculus.UCSC.mm10)
+
+dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_NoDox'
+
+base_name <- sprintf('%s/%s', dataset_dir(dataset), bname)
+devtools::load_all('packages/compbio'); nucleoatac_merge(base_name, job = '20191215', genome = BSgenome.Mmusculus.UCSC.mm10)
+
 ```
 
