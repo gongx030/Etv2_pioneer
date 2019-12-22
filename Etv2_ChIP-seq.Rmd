@@ -1,0 +1,32 @@
+---
+title: "Functional analysis of Etv2 ChIP-seq peaks"
+author: "Wuming Gong"
+date: "12/13/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 5, fig.height =5, dpi = 300)
+```
+
+```{r, message = FALSE}
+library(Matrix)
+library(GenomicRanges)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(dplyr)
+library(UpSetR)
+```
+
+
+```{r}
+gr <- readRDS(gzcon(url('https://s3.msi.umn.edu/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds')))
+```
+
+Examine the overlap of Etv2 ChIP-seq peaks from EB and MEF.
+* Majority of the MEF Etv2 peaks do not exist in EB
+* There are peaks existing across all five conditions
+```{r, fig.width = 6, fig.height = 4}
+peak_list <- lapply(1:ncol(gr$group), function(i) which(gr$group[, i]))
+names(peak_list) <- colnames(gr$group)
+upset(fromList(peak_list), order.by = "freq", point.size = 3.5, line.size = 2)
+```

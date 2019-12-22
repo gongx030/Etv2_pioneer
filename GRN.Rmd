@@ -1,0 +1,165 @@
+---
+title: "Gene networks in Flk1+ cells"
+author: "Wuming Gong"
+date: "12/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 5, fig.height =5, dpi = 300)
+```
+
+```{r, message = FALSE}
+library(SummarizedExperiment)
+library(dplyr)
+library(futile.logger)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+library(GenomicFeatures)
+library(chromVARmotifs) # https://github.com/GreenleafLab/chromVARmotifs
+library(chromVAR)
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(motifmatchr)
+library(BiocParallel)
+library(Mus.musculus)
+library(Matrix)
+library(DESeq2)
+library(igraph)
+library(wordcloud)
+```
+
+Read the footprinting predicted by HINT-ATAC for Flk1+ cells ATAC-seq data
+```{r}
+hint_files <- c(
+  'MEF' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_HINT.bed',
+  'EB' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_HINT.bed'
+)
+gr <- Reduce('c', lapply(1:length(hint_files), function(i){
+  flog.info(sprintf('reading %s', hint_files[i]))
+  x <- read.table(url(hint_files[i]), sep = '\t', header = FALSE)
+  x <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]))
+  mcols(x)$group <- names(hint_files)[i]
+  x
+}))
+gr <- resize(gr, width = 200, fix = 'center')
+```
+
+Map the footprinting to individual gene by looking at their overlap with the promoter regions
+```{r}
+pmt <- promoters(TxDb.Mmusculus.UCSC.mm10.knownGene, upstream = 5000, downstream = 2000)
+tx_name2symbol <- select(Mus.musculus, pmt$tx_name, "SYMBOL", 'TXNAME')
+tx_name2symbol <- tx_name2symbol %>% filter(!is.na(SYMBOL))
+gene_symbols <- unique(tx_name2symbol$SYMBOL)
+
+# a binray matrix mapping from promoter (represented as tx_name) to gene (as symbol)
+P2G <- sparseMatrix(
+  i = as.numeric(factor(tx_name2symbol$TXNAME, pmt$tx_name)),
+  j = as.numeric(factor(tx_name2symbol$SYMBOL, gene_symbols)),
+  dims = c(length(pmt$tx_name), length(gene_symbols)),
+  dimnames = list(pmt$tx_name, gene_symbols)
+)
+gr <- gr[gr %over% pmt] # HINT footprint within the promoter regions
+
+gr_EB <- gr[gr$group == 'EB']
+mm <- as.matrix(findOverlaps(gr_EB, pmt))
+H2P_EB <- sparseMatrix(i = mm[, 1], j = mm[, 2], dims = c(length(gr_EB), length(pmt$tx_name)), dimnames = list(NULL, pmt$tx_name))
+G2H_EB <- t(P2G) %*% t(H2P_EB)  # a binary matrix mapping from gene (as symbol) to HINT intervals (within the promoter region)
+
+gr_MEF <- gr[gr$group == 'MEF']
+mm <- as.matrix(findOverlaps(gr_MEF, pmt))
+H2P_MEF <- sparseMatrix(i = mm[, 1], j = mm[, 2], dims = c(length(gr_MEF), length(pmt$tx_name)), dimnames = list(NULL, pmt$tx_name))
+G2H_MEF <- t(P2G) %*% t(H2P_MEF)  # a binary matrix mapping from gene (as symbol) to HINT intervals (within the promoter region)
+```
+
+Find the TFBS within each accessible region
+```{r}
+data("mouse_pwms_v2") #filtered collection of mouse motifs from cisBP database
+motif_ix <- matchMotifs(mouse_pwms_v2, gr, genome = 'mm10', p.cutoff = 1e-3)
+H2M <- assays(motif_ix)$motifMatches # HINT interval ~ motif
+colnames(H2M) <- sapply(mouse_pwms_v2, function(x) x@name)
+H2M <- H2M[, colnames(H2M) %in% gene_symbols] # remove motifs whose names are not gene symbols
+H2M_EB <- H2M[gr$group == 'EB', ]
+H2M_MEF <- H2M[gr$group == 'MEF', ]
+M2G_EB <- t(G2H_EB %*% H2M_EB)
+M2G_MEF <- t(G2H_MEF %*% H2M_MEF)
+```
+
+# Define a set of TFs that are dynamically expressed either in MEF (single cell RNA-seq) or EB (bulk RNA-seq)
+```{r}
+se <- readRDS(gzcon(url('https://s3.msi.umn.edu/garry_projects/etv2_pioneer/processed_Etv2_scRNAseq.rds')))
+n_cluster <- 7
+set.seed(1); cls <- kmeans(colData(se)$umap, n_cluster)$cluster
+cls <- as.numeric(factor(cls, c(1, 5, 4, 2, 3, 6, 7)))
+colData(se)$cluster <- cls
+X <- assays(se)$normalized_counts %>% as.matrix()
+diff_C7_C1 <- Matrix::rowMeans(X[, cls == 7]) - Matrix::rowMeans(X[, cls == 1])
+is_diff <- diff_C7_C1 >= 0.1 | diff_C7_C1 < - 0.1
+pvalue_C7_C1 <- rep(NA, length(diff_C7_C1))
+pvalue_C7_C1[is_diff] <- unlist(mclapply(which(is_diff), function(n) tryCatch(wilcox.test(X[n, cls == 7], X[n, cls == 1])$p.value, error = function(e) NA), mc.cores = 2))
+genes_up_in_MEF <- rowData(se)$name[!is.na(pvalue_C7_C1) & pvalue_C7_C1 < 1e-3 & diff_C7_C1 > 0]
+genes_down_in_MEF <- rowData(se)$name[!is.na(pvalue_C7_C1) & pvalue_C7_C1 < 1e-3 & diff_C7_C1 < 0]
+se_rna <- readRDS(gzcon(url('https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2RNA-seq_version=20190909a/se.rds')))
+se_rna <- DESeqDataSet(se_rna, design = ~ group)
+se_rna <- estimateSizeFactors(se_rna)
+se_rna <- DESeq(se_rna)
+assays(se_rna)$normalized_counts <- log2(counts(se_rna, normalized = TRUE) + 1)
+res <- results(se_rna, contrast = c('group', 'EB_Dox_D25_Flk1pos_Etv2', 'EB_NoDox_D25_Etv2'))
+genes_up_in_EB <- rownames(res)[!is.na(res$pvalue) & res$pvalue < 1e-3 & res$log2FoldChange > log2(2)]
+genes_down_in_EB <- rownames(res)[!is.na(res$pvalue) & res$pvalue < 1e-3 & res$log2FoldChange < log2(1/2)]
+d <- rbind(
+  data.frame(gene = genes_up_in_MEF, direction = 'up', group = 'MEF'),
+  data.frame(gene = genes_down_in_MEF, direction = 'down', group = 'MEF'),
+  data.frame(gene = genes_up_in_EB, direction = 'up', group = 'EB'),
+  data.frame(gene = genes_down_in_EB, direction = 'down', group = 'EB')
+)
+```
+
+Get subnetwork that only include the commonly up- / down-regulated genes
+as well the common links
+```{r}
+up_genes <- intersect(genes_up_in_MEF, genes_up_in_EB)
+down_genes <- intersect(genes_down_in_MEF, genes_down_in_EB)
+from <- rownames(M2G_EB) %in% c(up_genes, down_genes)
+to <- colnames(M2G_EB) %in% c(up_genes, down_genes)
+M2G <- M2G_EB[from, to] > 0 & M2G_MEF[from, to] > 0 # common edges 
+M2G <- M2G[, colSums(M2G) > 0] # remove vertices without incoming edges
+```
+
+```{r, fig.width = 15, fig.height = 15}
+genes_union <- union(rownames(M2G), colnames(M2G))
+A <- Matrix(0, nrow = length(genes_union), ncol = length(genes_union), dimnames = list(genes_union, genes_union))
+A[rownames(M2G), colnames(M2G)] <- M2G
+exclude <- c('Gng11')
+A <- A[!rownames(A) %in% exclude, !colnames(A) %in% exclude]
+g <- graph_from_adjacency_matrix(A, mode = 'directed', weighted = TRUE)
+highlight_genes <- c(rownames(M2G), 'Etv2', 'Igfbp4', 'Kdr', 'Lmo2',  
+  'Ets1', 'Sox18', 'Cdh5', 'Rhoj', 'Vim',
+  'Elk3', 'Cd44', 'Tek', 'Gata2', 
+  'Eng', 'Itga2b',
+  'Egr1', 'Kras',
+  'Emcn', 'Nrp1',
+  'Prdm1', 'Srf', 'Yy1', 'Yes1', 'Amotl1', 'Myc', 'Ccnd1')
+coords <- layout_with_mds(g)
+E(g)$color <- 'gray'
+V(g)$size <- 1.5
+V(g)$size[V(g)$name %in% colnames(H2M)] <- 2
+V(g)$color <- 'gray'
+V(g)$color[V(g)$name %in% up_genes] <- 'red'
+V(g)$color[V(g)$name %in% down_genes] <- 'blue'
+exclude <- c('Gng11')
+gg <- summary(g[])
+par(xpd = TRUE)
+plot(coords, xpd = TRUE, bty = 'n', axes = FALSE, xlab = '', ylab = '', pch = 3, cex = 0.25)
+segment_col <- rep('gray', nrow(gg))
+segment_col[gg[, 1] == which(V(g)$name == 'Etv2')] <- 'gray'
+segment_lwd <- rep(1, nrow(gg))
+segment_lwd[gg[, 1] == which(V(g)$name == 'Etv2')] <- 1
+segments(coords[gg[, 1], 1], coords[gg[, 1], 2], coords[gg[, 2], 1], coords[gg[, 2], 2], col = segment_col, lwd = segment_lwd)
+textplot(coords[, 1], coords[, 2], V(g)$name, new = FALSE, col = V(g)$color, show.lines = FALSE, cex = V(g)$size)
+```
+
+
+```{r}
+plot(g, edge.arrow.size = 0.1, layout = coords, vertex.label.dist = 0.1)
+
+```
+
