@@ -1,0 +1,112 @@
+---
+title: 'Preprocessing the ChIP-seq for both ES/EB and MEF
+output: html_document
+date: '12/13/2019'
+author: 'Wuming Gong'
+---
+
+```{r}
+devtools::load_all('packages/compbio')
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(dplyr)
+library(parallel)
+```
+
+Calling Peaks for Etv2, Brg1 and H3K27ac ChIP-seq
+```{r}
+dataset <- 'dataset=Etv2PioneerChIPseq_version=20191203a'
+genome <- 'mm10'
+d <- read.table('https://docs.google.com/spreadsheets/d/e/2PACX-1vQvPeb6eRcvT7kY0ymiVim8ScprZhBW7DIoHlVqzIAc_cDuVmMqR777jUZU0XuTVxSzDYw0BTbrVMTZ/pub?output=tsv', sep = '\t', header = TRUE)
+d <- d[d$status == 'good', ]
+
+treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd2'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd7'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Etv2'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Etv2'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'MEF'; stage <- 'd0'; dox_status <- 'NoDox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'MEF'; stage <- 'd2'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'MEF'; stage <- 'd7'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'NoDox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'NoDox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd0'; dox_status <- 'NoDox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd2'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd7'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'NoDox'; broad <- TRUE; call_summits <- FALSE
+#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'NoDox'; broad <- TRUE; call_summits <- FALSE
+
+bname <- sprintf('%s_%s_%s_%s', celltype, dox_status, stage, treatment)
+treatment_files <- d %>% filter(cell == celltype & time == stage & dox == dox_status & seqtype == treatment) %>% select(bam_file) %>% unlist()
+control_files <- d %>% filter(cell == celltype & time == stage & dox == dox_status & seqtype == 'input') %>% select(bam_file) %>% unlist()
+base.name <- sprintf('%s/%s', dataset_dir(dataset), bname)
+
+macs2.callpeak(treatment_files, base.name, control_files, format = 'BAM', genome = genome, broad = broad, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = call_summits)
+```
+
+Get a union set of Etv2 ChIP-seq peaks in ES/EB and MEF 
+```{r}
+bed_files <- c(
+	'MEF_Dox_d1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed',
+	'MEF_Dox_d2_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d2_Etv2_summits.bed',
+	'MEF_Dox_d7_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d7_Etv2_summits.bed',
+	'EB_Dox_3h_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed',
+	'EB_Dox_12h_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_12h_Etv2_summits.bed'
+)
+gr_list <- lapply(1:length(bed_files), function(i){
+	x <- macs2.read_summits(bed_files[i])
+	x$source <- names(bed_files)[i]
+	x
+})
+gr <- Reduce('c', gr_list)
+gr <- resize(gr, width = 200, fix = 'center')
+gr0 <- reduce(gr)	# a reduced set of Etv2 peak
+mm <- as.matrix(findOverlaps(gr, gr0))
+sp <- split(mm[, 1], list(mm[, 2]))
+j <- unlist(mclapply(sp, function(i) i[which.max(gr$score[i])], mc.cores = 4))
+gr <- gr[j]
+G <- do.call('cbind', lapply(1:length(bed_files), function(i) gr %over% gr_list[[i]]))
+gr$group <- G	# group assignment of the union set to each source
+colnames(gr$group) <- names(bed_files)
+s3_saveRDS(gr, 'datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds')
+```
+
+Retrieve the NucleoaATAC signal for MEF surrounding all D1 Etv2 ChIP-seq peaks post Etv2 induction
+and clustering all Etv2 peaks based on the NucleoATAC signal
+```{r}
+#gs <- 'MEF_Dox_d1_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 3
+gs <- 'MEF_Dox_d1_Etv2'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 2
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed'
+peaks <- macs2.read_summits(bed_file)
+bw_files <- c(
+	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_20170314f.nucleoatac_signal.smooth.bw',
+	'MEF_MNase' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase.smooth.bw',
+	'MEF_MNase2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Teif_version=20170321a/MEF_Coverage_pileup.bw',
+	'MEF_ATAC' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw',
+	'MEF_Dox_d1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_FE.bw'
+)
+n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+
+mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
+
+```
+
+
+Retrieve the NucleoaATAC signal for EB surrounding all 12h Etv2 ChIP-seq peaks post Etv2 induction
+and clustering all Etv2 peaks based on the NucleoATAC signal
+```{r}
+gs <- 'EB_Dox_3h_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 3
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed'
+peaks <- macs2.read_summits(bed_file)
+bw_files <- c(
+	'EB_Dox_3h_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_FE.bw',
+	'mESC_MNase' = '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw'
+)
+devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+```
+

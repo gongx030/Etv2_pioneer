@@ -1,7 +1,7 @@
 ---
 title: 'Preparing the MEF ATAC-seq data for Etv2 peaks at D1 post induction
 output: html_document
-date: '12/14/2019'
+date: '12/25/2019'
 author: 'Wuming Gong'
 ---
 
