@@ -39,28 +39,8 @@ saveRDS(windows, file = sprintf('%s/MEF_Dox_d1_Etv2_on_MEF_ATAC.rds', project_di
 ```{r}
 windows <- readRDS(sprintf('%s/MEF_Dox_d1_Etv2_on_MEF_ATAC.rds', project_dir('seatac')))
 set.seed(1); gr <- sample(windows[windows$num_reads >= 20], 5000)
-#latent_dim <- 2; epochs <- 20; type <- 'vae_imputation'
-#latent_dim <- 2; epochs <- 20; type <- 'vae_imputation_gmm'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_knn'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_output_fragment_size_position'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_output_fragment_size_position_with_imputation'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_baseline'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_gmm'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_cnn_encoder'
-#latent_dim <- 5; epochs <- 10; type <- 'vae_fragment_size_position_cnn_encoder_gmm'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_cnn_encoder_with_imputation'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_mixture_cnn_gmm'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_mixture_cnn'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_cnn_with_imputation'
-#latent_dim <- 10; epochs <- 10; type <- 'vae_fragment_size_gmm'
-#latent_dim <- 5; epochs <- 10; type <- 'vae_fragment_size'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_position_cnn_kmeans'
-#latent_dim <- 5; epochs <- 10; type <- 'vae_fragment_size_position_cnn'
-#latent_dim <- 2; epochs <- 10; type <- 'vae_fragment_size_parametric'
-latent_dim <- 10; epochs <- 20; type <- 'vae_baseline'
-set.seed(1); devtools::load_all('analysis/seatac/packages/seatac'); model <- seatac(gr, type = type, latent_dim = latent_dim, epochs = epochs)
-
-#set.seed(1); devtools::load_all('analysis/seatac/packages/seatac'); model <- model %>% finetuning(centers = 4, epochs = 10)
+latent_dim <- 10; epochs <- 10
+set.seed(1); devtools::load_all('packages/seatac'); model <- seatac(gr, latent_dim = latent_dim, epochs = epochs)
 
 devtools::load_all('analysis/seatac/packages/seatac'); gr <- model %>% predict(gr)
 

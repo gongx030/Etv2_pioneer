@@ -118,7 +118,7 @@ d <- d %>% mutate(group = gsub('_rep\\d$', '', group))
 dataset2 <- 'dataset=Naoko_version=20170302a'
 d2 <- read_dataset(dataset2)
 g2 <- c(
-	'd0_EB_dox' = 'EB_Dox_D0',
+	'd0_EB_dox' = 'jB_Dox_D0',
 	'd0_EB_no_dox' = 'EB_NoDox_D0',
 	'd3_EB_dox' = 'EB_Dox_D3_Flk1pos',
 	'd3_EB_no_dox' = 'EB_NoDox_D3_Flk1pos'
@@ -165,6 +165,7 @@ These are run in batch by jobs 20191216*
 ```{r}
 
 dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_NoDox'
+dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D1'
 
 base_name <- sprintf('%s/%s', dataset_dir(dataset), bname)
 devtools::load_all('packages/compbio'); nucleoatac_merge(base_name, job = '20191215', genome = BSgenome.Mmusculus.UCSC.mm10)
