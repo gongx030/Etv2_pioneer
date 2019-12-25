@@ -1,0 +1,223 @@
+---
+title: 'Combined analysis of MEF scRNA-seq and ES/EB bulk RNA-seq '
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+date: "12/11/2019"
+---
+
+```{r setup, include=FALSE, eval = TRUE}
+knitr::opts_chunk$set(fig.width = 5, fig.height =5, dpi = 300)
+```
+
+```{r, message = FALSE}
+library(SummarizedExperiment)
+library(RColorBrewer)
+library(knitr)
+library(dplyr)
+library(parallel)
+library(ggplot2)
+library(DESeq2)
+library(wordcloud)
+library(ComplexHeatmap)
+library(circlize)
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+library(goseq)
+library(stringr)
+library(UpSetR)
+```
+Read the processed scRNA-seq data and find the DE genes between C1 (MEF) and C7 (Flk1+ cells at D7 of reprogramming)
+```{r}
+se <- readRDS(gzcon(url('https://s3.msi.umn.edu/garry_projects/etv2_pioneer/processed_Etv2_scRNAseq.rds')))
+n_cluster <- 7
+set.seed(1); cls <- kmeans(colData(se)$umap, n_cluster)$cluster
+cls <- as.numeric(factor(cls, c(1, 5, 4, 2, 3, 6, 7)))
+colData(se)$cluster <- cls
+X <- assays(se)$normalized_counts %>% as.matrix()
+diff_C7_C1 <- Matrix::rowMeans(X[, cls == 7]) - Matrix::rowMeans(X[, cls == 1])
+pvalue_C7_C1 <- unlist(mclapply(1:nrow(X), function(n) tryCatch(wilcox.test(X[n, cls == 7], X[n, cls == 1])$p.value, error = function(e) NA), mc.cores = 4))
+```
+Load the bulk RNA-seq of Etv2 induction in ES/EB.
+```{r}
+se_rna <- readRDS(gzcon(url('https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2RNA-seq_version=20190909a/se.rds')))
+se_rna <- DESeqDataSet(se_rna, design = ~ group)
+se_rna <- estimateSizeFactors(se_rna)
+se_rna <- DESeq(se_rna)
+assays(se_rna)$normalized_counts <- log2(counts(se_rna, normalized = TRUE) + 1)
+res <- results(se_rna, contrast = c('group', 'EB_Dox_D25_Flk1pos_Etv2', 'EB_NoDox_D25_Etv2'))
+```
+Merge the scRNA-seq and bulk RNA-seq by gene symbols.
+```{r}
+y <- merge(
+  data.frame(symbol = rownames(res), EB_log2FoldChange = res$log2FoldChange, EB_pvalue = res$pvalue), 
+  data.frame(symbol = rowData(se)$name, MEF_log2FoldChange = diff_C7_C1, MEF_pvalue = pvalue_C7_C1), 
+  by.x = 'symbol', 
+  by.y = 'symbol'
+)
+y <- y[!is.na(y$EB_pvalue) & !is.na(y$MEF_pvalue), ]
+y <- y[!duplicated(y$symbol), ]
+rownames(y) <- y$symbol
+```
+Look at the genes that are consistently changed in ES/EB and MEF
+```{r, fig.width = 5, fig.height =5}
+n <- y$EB_pvalue < 1e-3
+up_MEF <- y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange > 0 &  y$EB_log2FoldChange > 0
+down_MEF <- y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange < 0 & y$EB_log2FoldChange < 0
+bg <- rep('black', nrow(y))
+names(bg) <- rownames(y)
+bg[up_MEF] <- 'red'
+bg[down_MEF] <- 'blue'
+lm_model <- lm(MEF_log2FoldChange ~ EB_log2FoldChange - 1, y[n, ])
+plot(MEF_log2FoldChange ~ EB_log2FoldChange, y[n, ], cex = 0.1, xlab = 'ES/EB', ylab = 'MEF', pch = 21, bg = bg[n], col = bg[n], main = sprintf('p=%.3e', coef(summary(lm_model))[1, 4]), xpd = TRUE)
+abline(v = 0, h = 0, lty = 2)
+lm_model <- lm(MEF_log2FoldChange ~ EB_log2FoldChange - 1, y[n, ])
+abline(lm_model, lwd = 2, lty = 2, col = 'black')
+gs <- c(
+  'Etv2', 'Igfbp4', 'Kdr', 'Lmo2',  
+  'Ets1', 'Sox18', 'Cdh5', 'Rhoj', 'Vim',
+  'Elk3', 'Cd44', 'Tek', 'Gata2', 
+  'Eng', 'Itga2b', 'Mest',
+  'Egr1', 'Bcat1', 'Myc'
+)
+wordcloud::textplot(y[gs, 'EB_log2FoldChange'], y[gs, 'MEF_log2FoldChange'], gs, cex = 1.5, new = FALSE,col = bg[gs])
+```
+A heatmap of combined RNA-seq data
+```{r}
+# genes up-regulated in both MEF and EB
+up_up <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange > log2(2) & y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange > 0.1] 
+down_down <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange < log2(1/2) & y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange < -0.1] 
+gs <- c(up_up, down_down)
+row_vector <- rep(1:2, c(length(up_up), length(down_down)))
+# genes to highlight in the heatmap
+genes <- c(
+  'Etv2', 'Igfbp4', 'Kdr', 'Lmo2',  
+  'Ets1', 'Sox18', 'Cdh5', 'Rhoj', 'Vim',
+  'Elk3', 'Cd44', 'Tek', 'Gata2', 
+  'Eng', 'Itga2b', 'Mest',
+  'Egr1', 'Kras',
+  'Emcn', 'Nrp1',
+  'Prdm1', 'Srf', 'Yy1', 'Yes1', 'Amotl1', 'Tgfbr2', 'Myc', 'Ccnd1', 'Vav3'
+)
+genes <- genes[genes %in% gs]
+col_fun <- colorRamp2(c(-3, 0, 3), c("blue", "white", "red"))
+```
+
+```{r, fig.width = 5, fig.height = 4}
+X_sc <- assays(se)$scaled_counts[, cls %in% c(1, 7)] %>% as.matrix()
+col_group_sc <- colData(se)$group[cls %in% c(1, 7)]
+rownames(X_sc) <- rowData(se)$name
+group2bg <- c(
+   'MEF_Dox_D1' = 'black',
+   'MEF_NoDox' = 'blue',
+   'MEF_Dox_D2' = 'purple',
+   'MEF_Dox_D7a' = 'red',
+   'MEF_Dox_D7b' = 'pink'
+ )
+cluster2bg <- colorRampPalette(brewer.pal(11,'Spectral'))(n_cluster)
+names(cluster2bg) <- sprintf('C%d', 1:n_cluster)
+column_annotation <- HeatmapAnnotation(
+  group = colData(se)$group[cls %in% c(1, 7)], 
+  cluster = sprintf('C%d', colData(se)$cluster[cls %in% c(1, 7)]),
+  col = list(group = group2bg, cluster = cluster2bg)
+)
+Heatmap(X_sc[gs, ], row_split = row_vector, cluster_rows = FALSE, cluster_columns = FALSE, 
+        show_row_names = FALSE, 
+        col = col_fun, 
+        show_row_dend = FALSE,
+        top_annotation = column_annotation,
+        )
+```
+
+```{r, fig.width = 5, fig.height = 4}
+X_b <- t(scale(t(log2(assays(se_rna)$normalized_counts + 1))))
+rownames(X_b) <- rowData(se_rna)$refseq_mrna
+group2stage <- c(
+  'EB_Dox_D2_Etv2' = 'D2',
+  'EB_Dox_D25_Etv2' = 'D2_5',
+  'EB_Dox_D25_Flk1pos_Etv2' = 'D2_5_Flk1',
+  'EB_NoDox_D2_Etv2' = 'D2',
+  'EB_NoDox_D25_Etv2' = 'D2_5'
+)
+stage <- group2stage[colData(se_rna)$group]
+group2dox <- c(
+  'EB_Dox_D2_Etv2' = 'Dox',
+  'EB_Dox_D25_Etv2' = 'Dox',
+  'EB_Dox_D25_Flk1pos_Etv2' = 'Dox',
+  'EB_NoDox_D2_Etv2' = 'NoDox',
+  'EB_NoDox_D25_Etv2' = 'NoDox'
+)
+dox <- group2dox[colData(se_rna)$group]
+column_annotation <- HeatmapAnnotation(
+  stage = stage, 
+  dox = dox,
+  col = list(stage = c('D2' = 'green', 'D2_5' = 'gold', 'D2_5_Flk1' = 'pink'), dox = c('Dox' = 'black', 'NoDox' = 'white'))
+)
+mark_col <- rep('red', length(gs))
+names(mark_col) <- gs
+mark_col[gs %in% down_down] <- 'blue'
+mark_at <- which(gs %in% genes)
+row_annotation <- rowAnnotation(
+  up_genes = anno_mark(
+    at = mark_at, 
+    labels = gs[mark_at], 
+    labels_gp = gpar(fontsize = 15, col = mark_col[mark_at]),
+    padding = unit(1, "mm")
+  )
+)
+Heatmap(X_b[gs, ], row_split = row_vector, cluster_rows = FALSE, cluster_columns = TRUE, 
+        show_row_names = FALSE, 
+        col = col_fun, 
+        show_row_dend = FALSE,
+        show_column_dend = FALSE,
+        top_annotation = column_annotation,
+        right_annotation = row_annotation
+)
+```
+Pathway analysis of commonly up-regulated genes, commonly down-regulated genes and up-regulated in ES/EB but not in MEF
+
+Create a list of signifiant genes up-regulated in each cluster, fit the Probability Weighting Function (PWF) and find the 
+significantly enriched GO terms. 
+
+```{r, warning = FALSE, message = FALSE}
+up_up <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange > log2(2) & y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange > 0.1] 
+down_down <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange < log2(1/2) & y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange < -0.1] 
+up_nc <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange > log2(2) & !(y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange > 0.1)]
+down_nc <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange < log2(1/2) & !(y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange < -0.1)]
+
+go_res <- lapply(list(up_up, down_down, up_nc, down_nc), function(g){
+   x <- rep(0, nrow(y))
+   names(x) <- rownames(y)
+   x[g] <- 1
+   pwf <- nullp(x, "mm10", "geneSymbol", plot.fit = FALSE)
+   goseq(pwf, "mm10","geneSymbol", test.cats = c("GO:BP"))
+})
+```
+
+```{r fig.width = 6, fig.height = 5}
+h <- 3
+  go_res[[h]] %>% 
+  filter(numInCat < 1000) %>%
+  top_n(10, wt = -over_represented_pvalue) %>% 
+  mutate(hitsPerc = numDEInCat * 100 / numInCat, term = str_wrap(term, 30)) %>% 
+  ggplot(aes(x = hitsPerc, y = term, colour = over_represented_pvalue, size = numDEInCat)) +
+  geom_point() +
+  labs(title = sprintf('cluster %d', h), x="Hits (%)", y="", colour="p value", size="Count") +
+  theme(axis.text = element_text(size = 15, face = 'bold')) + 
+  theme(legend.text = element_text(size = 15, face = 'bold')) + 
+  theme(legend.title = element_text(size = 15, face = 'bold'))
+```
+Make venn diagram showing the overlap between up- and down- regulated genes between MEF and ES/EB
+```{r, fig.width = 5, fig.height = 5}
+up_in_EB <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange > log2(2)]
+up_in_MEF <- rownames(y)[y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange > 0.1] 
+down_in_EB <- rownames(y)[y$EB_pvalue < 1e-3 & y$EB_log2FoldChange < -log2(2)] 
+down_in_MEF <- rownames(y)[y$MEF_pvalue < 1e-3 & y$MEF_log2FoldChange < -0.1] 
+listInput <- list('up in EB' = up_in_EB, 'up in MEF' = up_in_MEF, 'down in EB' = down_in_EB, 'down in MEF' = down_in_MEF)
+upset(fromList(listInput), order.by = "freq", point.size = 3.5, line.size = 2, text.scale = c(1, 2, 1, 1, 1, 2))
+
+
+```
+```{r}
+sessionInfo()
+```
