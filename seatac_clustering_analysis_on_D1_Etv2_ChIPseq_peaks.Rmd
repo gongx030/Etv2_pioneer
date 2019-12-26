@@ -1,0 +1,59 @@
+---
+title: "Exploring the procedures to cluster V-plot by using SeATAC results"
+author: "Wuming Gong"
+date: "12/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE}
+library(Matrix)
+library(dplyr)
+```
+
+# Read the SeATAC results
+```{r}
+gr <- readRDS(gzcon(url('https://s3.msi.umn.edu/gongx030/projects/seatac/models/peak=MEF_Dox_d1_Etv2_bam=MEF_NoDox_latent_dim=10_window_size=640_bin_size=5_fragment_size_range=50+370_fragment_size_interval=5/predict.rds')))
+```
+
+# Cluster the V-plot using fragment size profile
+```{r, warning = FALSE}
+fragment_size <- gr$fragment_size_profile
+fragment_size <- Diagonal(x = 1 / rowSums(fragment_size)) %*% fragment_size %>% as.matrix() # scale to sum of one for each sample
+wss <- (nrow(fragment_size)-1) * sum(apply(fragment_size,2,var))
+for (i in 2:15) wss[i] <- sum(kmeans(fragment_size, centers=i)$withinss)
+plot(1:15, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares")
+```
+
+```{r, warning = FALSE}
+k <- 10
+set.seed(1); cls <- kmeans(fragment_size, k)$cluster
+```
+
+
+```{r, fig.width = 5, fig.height = 10}
+par(mfrow = c(k, 6), mar = c(2, 2, 2, 1))
+bg <- colMeans(mcols(gr)$counts)
+for (i in 1:k){
+  x <- colMeans(mcols(gr)$counts[cls == i, ])
+  x_norm <- matrix(x - bg, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
+  image(x_norm, col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'), main = sprintf('cluster %d(%d)', i, sum(cls == i)))
+  
+  x_non_norm <- matrix(x, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
+  image(x_non_norm, col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'), main = 'Raw signal')
+  
+  plot(colMeans(fragment_size[cls == i, ]), main = 'Fragment size')
+  
+  plot(colMeans(gr$nfr_reads[cls == i, ]), main = 'NFR reads')
+  
+  plot(colMeans(gr$mono_nucleosome_reads[cls == i, ]), main = 'Mono nucleosome reads')
+  
+  plot(colMeans(gr$MEF_MNase[cls == i, ]), main = 'MEF MNase')
+}
+```
+
+```{r}
+```
