@@ -1,7 +1,7 @@
 ---
 title: 'Preparing the MEF ATAC-seq data for Etv2 peaks at D1 post induction
 output: html_document
-date: '12/25/2019'
+date: '12/26/2019'
 author: 'Wuming Gong'
 ---
 
@@ -13,7 +13,6 @@ devtools::load_all('packages/compbio')
 devtools::load_all('packages/seatac')
 library(futile.logger); flog.threshold(TRACE)
 library(BSgenome.Mmusculus.UCSC.mm10)
-library(Rtsne)
 ```
 
 
@@ -26,12 +25,10 @@ bin_size <- 5
 fragment_size_range <- c(50, 370)
 fragment_size_interval <- 5
 latent_dim <- 10
-min_num_reads <- 10
+#min_num_reads <- 10
+min_num_reads <- 20
+max_num_reads <- 500
 genome <- 'mm10'
-```
-
-# Prepare the windows (window_size = 320 or 640)
-```{r}
 bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed'
 mnase_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw'
 bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_NoDox.bam'
@@ -46,7 +43,23 @@ window_file <- sprintf('%s/windows/peak=%s_bam=%s_window_size=%d_bin_size=%d_fra
 	fragment_size_range[2],
 	fragment_size_interval
 )
+model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d_min_num_reads=%d_max_num_reads=%d',
+	project_dir('seatac'),
+	peak_name,
+	bam_name,
+	latent_dim,
+	window_size,
+	bin_size,
+	fragment_size_range[1],
+	fragment_size_range[2],
+	fragment_size_interval,
+	min_num_reads,
+	max_num_reads
+)
+```
 
+# Prepare windows
+```{r}
 x <- read.table(bed_file, sep = '\t',  header = FALSE)
 peaks <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]))
 devtools::load_all('packages/seatac'); windows <- prepare_windows(
@@ -60,151 +73,23 @@ devtools::load_all('packages/seatac'); windows <- prepare_windows(
 	fragment_size_interval = fragment_size_interval, 
 	genome = BSgenome.Mmusculus.UCSC.mm10
 )
-
 saveRDS(windows, file = window_file)
 ```
 
 # Running SeATAC
 ```{r}
 windows <- readRDS(window_file)
-windows <- windows[windows$num_reads >= min_num_reads]
+windows <- windows[windows$num_reads >= min_num_reads & windows$num_reads <= max_num_reads]
 set.seed(1); devtools::load_all('packages/seatac'); model <- seatac(windows, latent_dim = latent_dim, epochs = 100, batch_size = 128, steps_per_epoch = 50)
-
-model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d',
-	project_dir('seatac'),
-	peak_name,
-	bam_name,
-	latent_dim,
-	window_size,
-	bin_size,
-	fragment_size_range[1],
-	fragment_size_range[2],
-	fragment_size_interval
-)
-
 devtools::load_all('packages/seatac'); model %>% save_model(model_dir_name)
 ```
 
-# Load the trained SeATAC model
-```{r}
-model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d',
-	project_dir('seatac'),
-	peak_name,
-	bam_name,
-	latent_dim,
-	window_size,
-	bin_size,
-	fragment_size_range[1],
-	fragment_size_range[2],
-	fragment_size_interval
-)
-devtools::load_all('packages/seatac'); model <- load_model(model_dir_name)
-```
-
-
+# Load the trained SeATAC model and make predictions
 ```{r}
 devtools::load_all('packages/seatac'); gr <- model %>% predict(model$data, batch_size = 256)
 predict_file <- sprintf('%s/predict.rds', model_dir_name)
 saveRDS(gr, predict_file)
-devtools::load_all('packages/compbio'); s3_sync('projects/seatac')
+devtools::load_all('packages/compbio'); s3_sync('projects/seatac/', make_public = TRUE)
 ```
 
-
-k <- 4
-cls <- kmeans(gr$latent, k)$cluster
-#cls <- kmeans(model$data$fragment_size, k)$cluster
-#cls2 <- kmeans(model$data$position, k)$cluster
-
-par(mfrow = c(7 + 1, k), mar = c(2, 2, 2, 2))
-lapply(1:k, function(i) image(matrix(colMeans(mcols(gr)$counts[cls == i, ]) - colMeans(mcols(gr)$counts), metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals), col = colorpanel(100, low = 'blue', mid = 'white', high = 'red')))
-lapply(1:k, function(i) image(matrix(colMeans(mcols(gr)$counts[cls == i, ]), metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals), col = colorpanel(100, low = 'blue', mid = 'white', high = 'red')))
-lapply(1:k, function(i) plot(colMeans(gr$fragment_size[cls == i, ])))
-lapply(1:k, function(i) plot(colMeans(gr$predicted_fragment_size[cls == i, ])))
-lapply(1:k, function(i) plot(colMeans(gr$position[cls == i, ])))
-lapply(1:k, function(i) plot(colMeans(gr$predicted_position[cls == i, ])))
-lapply(1:k, function(i) plot(colMeans(gr$MEF_MNase[cls == i, ])))
-smoothScatter(gr$latent, main = 'v-plot')
-model$prior(NULL)$components_distribution$mean() %>% as.matrix() %>% points(pch =21, bg = 'red')
-image(matrix(colMeans(mcols(gr)$counts), metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals), col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'))
-
- gr$latent %>% model$decoder$dense_1() %>% as.matrix()
-
-y <- Rtsne(gr$latent, check_duplicates = FALSE)$Y
-smoothScatter(y, main = 'v-plot')
-
-
-plot(y2, main = 'v-plot + fragment_size')
-y2 <- Rtsne(gr$h_fragment_size)$Y
-plot(y2, main = 'fragment_size')
-
-cls <- kmeans(gr$h_fragment_size, 3)$cluster
-lapply(1:3, function(i) plot(colMeans(model$data$fragment_size[cls == i, ])))
-
-cls <- kmeans(cbind(gr$latent, gr$h_fragment_size), 3)$cluster
-lapply(1:3, function(i) plot(colMeans(model$data$fragment_size[cls == i, ])))
-
-
-```
-
-source('analysis/seatac/windows.r'); save_windows(windows, gs, window_size, bin_size, fs[1:2], fs[3])
-
-# --- load training windows
-source('analysis/seatac/windows.r'); windows <- load_windows(gs, window_size, bin_size, fs[1:2], fs[3])
-
-# --- train model
-latent_dim <- 2; epochs <- 10; bs <- 256; spe <- 20
-source('analysis/seatac/model_dir_name.r'); model_dir <- model_dir_name(gs, latent_dim, window_size, bin_size, fs[1:2], fs[3], epochs, bs, spe)
-windows <- windows[windows$num_reads >= 20]
-devtools::load_all('analysis/seatac/packages/seatac'); model <- seatac(windows, latent_dim = latent_dim, epochs = epochs, batch_size = bs, steps_per_epoch = spe)
-devtools::load_all('analysis/seatac/packages/seatac'); gr <- model %>% predict(windows)
-
-
-
-par(mfcol = c(3, 5))
-k <- 5
-set.seed(1); cls <- kmeans(gr$latent, k)$cluster
-res <- lapply(1:k, function(c){
-	i <- cls == c
-	xx <- as.matrix(colMeans(mcols(gr)$counts[i, , drop = FALSE]))
-	X <- matrix(xx, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
-	image(X)
-	abline(v = 0.5)
-})
-
-smoothScatter(gr$latent, xlim = c(-10, 10), ylim = c(-10, 10))
-
-z <- c(-5, -5)
-xx <- model$decoder(matrix(z, nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t()
-plot(rowMeans(xx))
-plot(colMeans(xx))
-col <- colorpanel(100, low = 'blue', mid = 'white', high = 'yellow')
-breaks <- seq(0, 1, length.out = 101)
-image(model$decoder(matrix(z, nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t(), col = col, breaks = breaks)
-
-par(mfrow = c(3, 4))
-hs <- 1:12 + 1000
-res <- lapply(hs, function(i){ 
-	X <- as(matrix(mcols(gr)$counts[i, ], metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals), 'dgCMatrix')
-	xx <- as.matrix(summary(X))[, 1:2]
-	x <- cbind(dist_to_center = abs(xx[, 1] -  metadata(gr)$n_bins_per_window / 2), fragment_size = xx[, 2], group = i)
-#	plot(x[, 'dist_to_center'] + 1, (x[, 'dist_to_center'] + 1) / x[, 'fragment_size'], log = 'xy', xlim = c(1, metadata(gr)$n_bins_per_window / 2), ylim = c(1 / metadata(gr)$n_intervals, metadata(gr)$n_bins_per_window / 2))
-	plot(x[, 'dist_to_center'] + 1, x[, 'fragment_size'] / (x[, 'dist_to_center'] + 1), log = 'xy', xlim = c(1, metadata(gr)$n_bins_per_window / 2), ylim = c(1 / (metadata(gr)$n_bins_per_window / 2 + 1), metadata(gr)$n_intervals))
-})
-
-smoothScatter(x[, 1:2])
-
-par(mfrow = c(3, 4))
-image(model$decoder(matrix(c(-5, 0), nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t())
-image(model$decoder(matrix(c(5, 0), nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t())
-
-image(model$decoder(matrix(c(0, -5), nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t(), col = col, breaks = breaks)
-image(model$decoder(matrix(c(5, 0), nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t(), col = col, breaks = breaks)
-image(model$decoder(matrix(c(-5, 0), nrow = 1, ncol = 2))$mean() %>% tf$squeeze() %>% as.matrix() %>% t(), col = col, breaks = breaks)
-
-xx <- as.matrix(colMeans(mcols(gr)$counts))
-X <- matrix(xx, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
-bg_feature <- colMeans(X)
-bg_input <- rowMeans(X)
-X <- t(t(X) - bg_feature) - bg_input
-image(X)
 

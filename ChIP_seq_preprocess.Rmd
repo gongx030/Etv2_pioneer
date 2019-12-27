@@ -19,7 +19,7 @@ genome <- 'mm10'
 d <- read.table('https://docs.google.com/spreadsheets/d/e/2PACX-1vQvPeb6eRcvT7kY0ymiVim8ScprZhBW7DIoHlVqzIAc_cDuVmMqR777jUZU0XuTVxSzDYw0BTbrVMTZ/pub?output=tsv', sep = '\t', header = TRUE)
 d <- d[d$status == 'good', ]
 
-treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
+#treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
 #treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd2'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
 #treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd7'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
 #treatment <- 'Etv2'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
@@ -32,7 +32,7 @@ treatment <- 'Etv2'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_s
 #treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '3h'; dox_status <- 'NoDox'; broad <- FALSE; call_summits <- TRUE
 #treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'Dox'; broad <- FALSE; call_summits <- TRUE
 #treatment <- 'Brg1'; control <- 'input'; celltype <- 'EB'; stage <- '12h'; dox_status <- 'NoDox'; broad <- FALSE; call_summits <- TRUE
-#treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd0'; dox_status <- 'NoDox'; broad <- TRUE; call_summits <- FALSE
+treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd0'; dox_status <- 'NoDox'; broad <- TRUE; call_summits <- FALSE
 #treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd1'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
 #treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd2'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
 #treatment <- 'H3K27ac'; control <- 'input'; celltype <- 'MEF'; stage <- 'd7'; dox_status <- 'Dox'; broad <- TRUE; call_summits <- FALSE
