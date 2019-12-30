@@ -130,22 +130,6 @@ for (i in 1:k){
 ```
 
 
-# Write the estimated mono nucleosome / NFR ratio as a BigWig file
-This file will be used by ``get_normalizeToMatrix`` to generate the heatmap
-```{r}
-bw_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_vs_nfr_seatac.bw'
-gr_bin <- unlist(tile(gr, width = bin_size))
-gr_bin$score <- log(gr$mono_nucleosome_reads + 1) - log(gr$nfr_reads + 1)
-seqlevels(gr_bin) <- seqlevels(BSgenome.Mmusculus.UCSC.mm10)
-seqlengths(gr_bin) <- seqlengths(BSgenome.Mmusculus.UCSC.mm10)
-seqinfo(gr_bin) <- seqinfo(BSgenome.Mmusculus.UCSC.mm10)
-cvg <- GenomicRanges::coverage(gr_bin, weight = 'score')
-win <- unlist(tile(reduce(gr_bin), width = bin_size))
-win$score <- mean(cvg[win])
-seqlengths(win) <- seqlengths(BSgenome.Mmusculus.UCSC.mm10)
-export(win, con = bw_file, format = 'BigWig')
-```
-
 # Split the BAM file of EB_NoDox_D25 ATAC-seq  into mono nucleosome BAM and NFR BAM
 ```{bash}
 INPUT_FILE=/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25.bam
@@ -192,14 +176,6 @@ bw_files <- c(
 )
 n2m_files <- get_normalizeToMatrix(gr, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
 
-extend <- window_size / 2; w <- 5; smooth <- FALSE; target_ratio <- 1; mc.cores <- 4
-bw_files2 <- c(
-	'EB_NoDox_D25_mono_vs_nfr_seatac' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_vs_nfr_seatac.bw'
-)
-n2m_files2 <- get_normalizeToMatrix(gr, gs, bw_files2, extend = window_size, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
-
-
-n2m_files <- c(n2m_files, n2m_files2)
 group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
 group_cols['MNase'] <- 'green'
 group_cols['EB_Dox_3h_Etv2'] <- 'red'
@@ -208,18 +184,16 @@ mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
 col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.005, 0.995)), c('white', group_cols[i])))
 names(col_fun) <- names(n2m_files)
 col_fun[['EB_NoDox_D25_mono_vs_nfr']] <- colorRamp2(quantile(mat[['EB_NoDox_D25_mono_vs_nfr']], c(0.005, 0.5, 0.995)), c('blue', 'black', 'yellow'))
-col_fun[['EB_NoDox_D25_mono_vs_nfr_seatac']] <- colorRamp2(quantile(mat[['EB_NoDox_D25_mono_vs_nfr_seatac']], c(0.005, 0.5, 0.995)), c('blue', 'black', 'yellow'))
 
 i <- 1:length(gr)
 sp <- factor(gr$cluster)
 ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
-h <- EnrichedHeatmap(mat[['EB_NoDox_D25_mono_vs_nfr_seatac']][i, ], col = col_fun[['EB_NoDox_D25_mono_vs_nfr_seatac']], split = sp[i], name = 'EB_NoDox_D25_mono_vs_nfr_seatac', top_annotation = ta, pos_line = FALSE)
-ss <- c('EB_NoDox_D25_mono_vs_nfr', 'EB_Dox_3h_Etv2', 'EB_Dox_12h_Etv2')
+h <- EnrichedHeatmap(mat[['EB_NoDox_D25_mono_vs_nfr']][i, ], col = col_fun[['EB_NoDox_D25_mono_vs_nfr']], split = sp[i], name = 'EB_NoDox_D25_mono_vs_nfr', top_annotation = ta, pos_line = FALSE)
+ss <- c('EB_Dox_3h_Etv2', 'EB_Dox_12h_Etv2')
 for (s in ss[ss %in% names(bw_files)]){
   h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
 }
 draw(h, heatmap_legend_side = 'bottom')
-
 ```
 
 
