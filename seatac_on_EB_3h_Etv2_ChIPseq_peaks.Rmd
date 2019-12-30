@@ -145,21 +145,11 @@ samtools index $OUTPUT_MONO_FILE
 # Running MACS2 on the NFR and mono nucleosome BAM to generate NFR and mono specific BW files for the heatmap
 ```{r}
 dataset <- 'dataset=Etv2ATAC_version=20190228b'; genome <- 'mm10'
-
-bname <- 'EB_NoDox_D25_nfr'
-base.name <- sprintf('%s/%s', dataset_dir(dataset), bname); treatment_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr.bam'
-macs2.callpeak(treatment_files, base.name, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
-
-bname <- 'EB_NoDox_D25_mono_nucleosome'
-base.name <- sprintf('%s/%s', dataset_dir(dataset), bname); treatment_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome.bam'
-macs2.callpeak(treatment_files, base.name, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
-
 bname <- 'EB_NoDox_D25_mono_nucleosome_vs_nfr'
 base.name <- sprintf('%s/%s', dataset_dir(dataset), bname)
 treatment_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome.bam'
 control_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr.bam'
 macs2.callpeak(treatment_files, base.name, control_files, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
-
 ```
 
 # Generate the heatmap
