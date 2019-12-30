@@ -1,0 +1,225 @@
+---
+title: 'Seatac on EB D2.5 ATAC-seq data surrounding EB 3h Etv2 ChIP-seq peak'
+output: rmarkdown::github_document
+date: '12/30/2019'
+author: 'Wuming Gong'
+---
+
+```{r, message = FALSE}
+library(roxygen2)
+library(devtools)
+devtools::document('packages/seatac')
+devtools::load_all('packages/compbio')
+devtools::load_all('packages/seatac')
+library(futile.logger); flog.threshold(TRACE)
+library(BSgenome.Mmusculus.UCSC.mm10)
+```
+
+
+# Parameters
+```{r}
+peak_name <- 'EB_Dox_3h_Etv2'; bam_name <- 'EB_NoDox_D25'
+window_size <- 640 
+bin_size <- 5
+fragment_size_range <- c(50, 370)
+fragment_size_interval <- 5
+latent_dim <- 10
+min_num_reads <- 20
+max_num_reads <- 500
+genome <- 'mm10'
+bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed'
+mnase_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw'
+bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25.bam'
+blacklist_file <- '/panfs/roc/scratch/gongx030/datasets/datasets=blacklists_version=20190827a/mm10.blacklist.bed.gz'
+window_file <- sprintf('%s/windows/peak=%s_bam=%s_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d',
+  project_dir('seatac'),
+	peak_name,
+  bam_name,
+	window_size,
+  bin_size,
+	fragment_size_range[1],
+	fragment_size_range[2],
+	fragment_size_interval
+)
+model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d_min_num_reads=%d_max_num_reads=%d',
+	project_dir('seatac'),
+	peak_name,
+	bam_name,
+	latent_dim,
+	window_size,
+	bin_size,
+	fragment_size_range[1],
+	fragment_size_range[2],
+	fragment_size_interval,
+	min_num_reads,
+	max_num_reads
+)
+```
+
+# Prepare windows
+```{r}
+x <- read.table(bed_file, sep = '\t',  header = FALSE)
+peaks <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]))
+devtools::load_all('packages/seatac'); windows <- prepare_windows(
+	peaks, 
+	window_size = window_size, 
+	bin_size = bin_size, 
+	bigwig_files = c(MEF_MNase = mnase_file), 
+	bam_files = bam_file, 
+	blacklist_file = blacklist_file, 
+	fragment_size_range = fragment_size_range, 
+	fragment_size_interval = fragment_size_interval, 
+	genome = BSgenome.Mmusculus.UCSC.mm10
+)
+saveRDS(windows, file = window_file)
+```
+
+# Running SeATAC
+```{r}
+windows <- readRDS(window_file)
+windows <- windows[windows$num_reads >= min_num_reads & windows$num_reads <= max_num_reads]
+set.seed(1); devtools::load_all('packages/seatac'); model <- seatac(windows, latent_dim = latent_dim, epochs = 100, batch_size = 128, steps_per_epoch = 50)
+devtools::load_all('packages/seatac'); model %>% save_model(model_dir_name)
+```
+
+# Load the trained SeATAC model and make predictions
+```{r}
+devtools::load_all('packages/seatac'); gr <- model %>% predict(model$data, batch_size = 256)
+predict_file <- sprintf('%s/predict.rds', model_dir_name)
+saveRDS(gr, predict_file)
+s3_sync('projects/seatac/', make_public = TRUE)
+```
+
+# Use two features for v-plot clustering
+1. ratio between total NFR reads and mono nucleosome reads
+2. ratio between NFR reads and mono nucleosome reads at the center
+```{r}
+h <- log(rowSums(gr$nfr_reads[, (64 - 3):(64 + 3)]) + 1) - log(rowSums(gr$mono_nucleosome_reads[, (64 - 3):(64 + 3)]) + 1)
+v <- log(rowSums(gr$nfr_reads) + 1) - log(rowSums(gr$mono_nucleosome_reads) + 1)
+par(mfrow = c(1, 2))
+k <- 2
+gr$cluster <- kmeans(cbind(h, v), k)$cluster
+boxplot(split(gr$num_reads, list(gr$cluster)), col = 1:k, log = 'y', main = 'number of reads', ylab = 'Number of reads')
+plot(h, v, pch = 21, bg = gr$cluster, xlab = 'ratio between center NFR and mono reads', ylab = 'ratio between total NFR and mono reads')
+abline(h = 0, v = 0, lty = 2)
+```
+
+# Visualize the V-plot, fragment size profile, mono nucleosome reads and NFR reads pattern in each cluster
+```{r, fig.width = 12, fig.height = 8}
+par(mfcol = c(6, k), mar = c(2, 5, 2, 1))
+bg <- colMeans(mcols(gr)$counts)
+breaks_non_norm <- c(seq(0, max(bg) * 0.9, length.out = 100), 1)
+breaks_norm <- c(-1, seq(-0.01, 0.01, length.out = 99), 1)
+yy <- c(50, 100, 180, 247, 315, 473)
+for (i in 1:k){
+  x <- colMeans(mcols(gr)$counts[gr$cluster == i, ])
+	x_norm <- matrix(x - bg, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
+  image(x_norm, col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'), breaks = breaks_norm, main = sprintf('cluster %d(%d)', i, sum(gr$cluster == i)), axes = FALSE)
+	axis(2, at = (yy - fragment_size_range[1]) / (fragment_size_range[2] - fragment_size_range[1]), label = yy, las = 2)
+	abline(v = c(0.5 - (1:4) * 180 /metadata(gr)$window_size , 0.5, (1:4) * 180/ metadata(gr)$window_size + 0.5), col = 'yellow', lty = 2)
+  x_non_norm <- matrix(x, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
+  image(x_non_norm, col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'), breaks = breaks_non_norm, main = 'Raw signal', axes = FALSE)
+	axis(2, at = (yy - fragment_size_range[1]) / (fragment_size_range[2] - fragment_size_range[1]), label = yy, las = 2)
+	abline(v = c(0.5 - (1:4) * 180 /metadata(gr)$window_size , 0.5, (1:4) * 180/ metadata(gr)$window_size + 0.5), col = 'yellow', lty = 2)
+  plot(colMeans(gr$fragment_size_profile[gr$cluster == i, ]), main = 'Fragment size')
+	plot(colMeans(gr$nfr_reads[gr$cluster == i, ]), main = 'NFR reads')
+	plot(colMeans(gr$mono_nucleosome_reads[gr$cluster == i, ]), main = 'Mono nucleosome reads')
+	r <- log(gr$mono_nucleosome_reads[gr$cluster == i, ] + 1) - log(gr$nfr_reads[gr$cluster == i, ] + 1)
+	plot(colMeans(r), main = 'Mono / NFR')
+}
+```
+
+
+# Write the estimated mono nucleosome / NFR ratio as a BigWig file
+This file will be used by ``get_normalizeToMatrix`` to generate the heatmap
+```{r}
+bw_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_vs_nfr_seatac.bw'
+gr_bin <- unlist(tile(gr, width = bin_size))
+gr_bin$score <- log(gr$mono_nucleosome_reads + 1) - log(gr$nfr_reads + 1)
+seqlevels(gr_bin) <- seqlevels(BSgenome.Mmusculus.UCSC.mm10)
+seqlengths(gr_bin) <- seqlengths(BSgenome.Mmusculus.UCSC.mm10)
+seqinfo(gr_bin) <- seqinfo(BSgenome.Mmusculus.UCSC.mm10)
+cvg <- GenomicRanges::coverage(gr_bin, weight = 'score')
+win <- unlist(tile(reduce(gr_bin), width = bin_size))
+win$score <- mean(cvg[win])
+seqlengths(win) <- seqlengths(BSgenome.Mmusculus.UCSC.mm10)
+export(win, con = bw_file, format = 'BigWig')
+```
+
+# Split the BAM file of EB_NoDox_D25 ATAC-seq  into mono nucleosome BAM and NFR BAM
+```{bash}
+INPUT_FILE=/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25.bam
+OUTPUT_NFR_FILE=/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr.bam
+samtools view -h $INPUT_FILE | awk '{if ($9 <= 100 && $9 >= -100 && $9 != 0 || $1 ~ /^@/) print $0}' | samtools view -bS - > $OUTPUT_NFR_FILE
+samtools index $OUTPUT_FILE
+
+OUTPUT_MONO_FILE=/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome.bam
+samtools view -h INPUT_FILE | awk '{if ((($9 <= 247 && $9 >= 180) || ($9 <= -180 && $9 >= -247)) && $9 != 0 || $1 ~ /^@/) print $0}' | samtools view -bS - > $OUTPUT_MONO_FILE
+samtools index $OUTPUT_MONO_FILE
+```
+
+# Running MACS2 on the NFR and mono nucleosome BAM to generate NFR and mono specific BW files for the heatmap
+```{r}
+dataset <- 'dataset=Etv2ATAC_version=20190228b'; genome <- 'mm10'
+
+bname <- 'EB_NoDox_D25_nfr'
+base.name <- sprintf('%s/%s', dataset_dir(dataset), bname); treatment_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr.bam'
+macs2.callpeak(treatment_files, base.name, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+
+bname <- 'EB_NoDox_D25_mono_nucleosome'
+base.name <- sprintf('%s/%s', dataset_dir(dataset), bname); treatment_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome.bam'
+macs2.callpeak(treatment_files, base.name, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = FALSE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+
+bname <- 'EB_NoDox_D25_mono_nucleosome_vs_nfr'
+base.name <- sprintf('%s/%s', dataset_dir(dataset), bname)
+treatment_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome.bam'
+control_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr.bam'
+macs2.callpeak(treatment_files, base.name, control_files, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+
+```
+
+# Generate the heatmap
+```{r}
+gs <- 'EB_Dox_3h_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 4
+bw_files <- c(
+  'MNase' =           '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw',
+  'EB_NoDox_D25' =    '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_treat_pileup.bw',
+	'EB_Dox_3h_Etv2' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_FE.bw',
+	'EB_Dox_12h_Etv2' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_12h_Etv2_FE.bw',
+	'EB_NoDox_D25_nfr' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr_treat_pileup.bw',
+	'EB_NoDox_D25_mono' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_treat_pileup.bw',
+	'EB_NoDox_D25_mono_vs_nfr' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_vs_nfr_FE.bw'
+)
+n2m_files <- get_normalizeToMatrix(gr, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+
+extend <- window_size / 2; w <- 5; smooth <- FALSE; target_ratio <- 1; mc.cores <- 4
+bw_files2 <- c(
+	'EB_NoDox_D25_mono_vs_nfr_seatac' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_vs_nfr_seatac.bw'
+)
+n2m_files2 <- get_normalizeToMatrix(gr, gs, bw_files2, extend = window_size, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+
+
+n2m_files <- c(n2m_files, n2m_files2)
+group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
+group_cols['MNase'] <- 'green'
+group_cols['EB_Dox_3h_Etv2'] <- 'red'
+group_cols['EB_Dox_12h_Etv2'] <- 'red'
+mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
+col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.005, 0.995)), c('white', group_cols[i])))
+names(col_fun) <- names(n2m_files)
+col_fun[['EB_NoDox_D25_mono_vs_nfr']] <- colorRamp2(quantile(mat[['EB_NoDox_D25_mono_vs_nfr']], c(0.005, 0.5, 0.995)), c('blue', 'black', 'yellow'))
+col_fun[['EB_NoDox_D25_mono_vs_nfr_seatac']] <- colorRamp2(quantile(mat[['EB_NoDox_D25_mono_vs_nfr_seatac']], c(0.005, 0.5, 0.995)), c('blue', 'black', 'yellow'))
+
+i <- 1:length(gr)
+sp <- factor(gr$cluster)
+ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
+h <- EnrichedHeatmap(mat[['EB_NoDox_D25_mono_vs_nfr_seatac']][i, ], col = col_fun[['EB_NoDox_D25_mono_vs_nfr_seatac']], split = sp[i], name = 'EB_NoDox_D25_mono_vs_nfr_seatac', top_annotation = ta, pos_line = FALSE)
+ss <- c('EB_NoDox_D25_mono_vs_nfr', 'EB_Dox_3h_Etv2', 'EB_Dox_12h_Etv2')
+for (s in ss[ss %in% names(bw_files)]){
+  h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
+}
+draw(h, heatmap_legend_side = 'bottom')
+
+```
+
+
