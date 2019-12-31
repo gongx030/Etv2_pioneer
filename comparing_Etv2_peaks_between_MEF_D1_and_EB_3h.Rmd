@@ -53,7 +53,7 @@ plot(vd)
 
 ```{r}
 anno_list <- lapply(ol$peaklist, function(p)
-  annotatePeak(p, tssRegion = c(-2000, 500), TxDb = TxDb.Mmusculus.UCSC.mm10.knownGene, annoDb = "org.Mm.eg.db")
+  annotatePeak(p, tssRegion = c(-5000, 1000), TxDb = TxDb.Mmusculus.UCSC.mm10.knownGene, annoDb = "org.Mm.eg.db")
 )
 ```
 
@@ -61,7 +61,11 @@ anno_list <- lapply(ol$peaklist, function(p)
 plotAnnoBar(anno_list)
 ```
 
-```{r}
+
+# Pathway analysis of three groups of Etv2 ChIP-seq peaks (EB only, MEF only and EB&MEF)
+There is no very interesting results, probably because most of the initial binding events are randomly across the genome
+and not target specific gene groups
+```{r, eval = FALSE}
 genes <- lapply(anno_list, function(i) as.data.frame(i)$geneId)
 genes <- lapply(genes, unique)
 compKEGG <- compareCluster(geneCluster   = genes,
@@ -70,8 +74,7 @@ compKEGG <- compareCluster(geneCluster   = genes,
                          ont = 'BP',
                          level = 3
                          )
-```
-
-```{r, fig.width = 10}
 dotplot(compKEGG, showCategory = 30, title = "KEGG Pathway Enrichment Analysis")
 ```
+
+# Compare the 

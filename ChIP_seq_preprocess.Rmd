@@ -75,38 +75,3 @@ gr$group <- G	# group assignment of the union set to each source
 colnames(gr$group) <- names(bed_files)
 s3_saveRDS(gr, 'datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds')
 ```
-
-Retrieve the NucleoaATAC signal for MEF surrounding all D1 Etv2 ChIP-seq peaks post Etv2 induction
-and clustering all Etv2 peaks based on the NucleoATAC signal
-```{r}
-#gs <- 'MEF_Dox_d1_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 3
-gs <- 'MEF_Dox_d1_Etv2'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 2
-bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed'
-peaks <- macs2.read_summits(bed_file)
-bw_files <- c(
-	'MEF_NoDox' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_20170314f.nucleoatac_signal.smooth.bw',
-	'MEF_MNase' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase.smooth.bw',
-	'MEF_MNase2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Teif_version=20170321a/MEF_Coverage_pileup.bw',
-	'MEF_ATAC' = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw',
-	'MEF_Dox_d1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_FE.bw'
-)
-n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
-
-mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
-
-```
-
-
-Retrieve the NucleoaATAC signal for EB surrounding all 12h Etv2 ChIP-seq peaks post Etv2 induction
-and clustering all Etv2 peaks based on the NucleoATAC signal
-```{r}
-gs <- 'EB_Dox_3h_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 3
-bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed'
-peaks <- macs2.read_summits(bed_file)
-bw_files <- c(
-	'EB_Dox_3h_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_FE.bw',
-	'mESC_MNase' = '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw'
-)
-devtools::load_all('packages/compbio'); n2m_files <- get_normalizeToMatrix(peaks, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
-```
-
