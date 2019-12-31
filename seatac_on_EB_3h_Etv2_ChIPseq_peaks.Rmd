@@ -54,6 +54,8 @@ model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d
 	min_num_reads,
 	max_num_reads
 )
+predict_file <- sprintf('%s/predict.rds', model_dir_name)
+peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.rds'
 ```
 
 # Prepare windows
@@ -85,7 +87,6 @@ devtools::load_all('packages/seatac'); model %>% save_model(model_dir_name)
 # Load the trained SeATAC model and make predictions
 ```{r}
 devtools::load_all('packages/seatac'); gr <- model %>% predict(model$data, batch_size = 256)
-predict_file <- sprintf('%s/predict.rds', model_dir_name)
 saveRDS(gr, predict_file)
 s3_sync('projects/seatac/', make_public = TRUE)
 ```
@@ -94,14 +95,21 @@ s3_sync('projects/seatac/', make_public = TRUE)
 1. ratio between total NFR reads and mono nucleosome reads
 2. ratio between NFR reads and mono nucleosome reads at the center
 ```{r}
+gr <- readRDS(predict_file)
 h <- log(rowSums(gr$nfr_reads[, (64 - 3):(64 + 3)]) + 1) - log(rowSums(gr$mono_nucleosome_reads[, (64 - 3):(64 + 3)]) + 1)
 v <- log(rowSums(gr$nfr_reads) + 1) - log(rowSums(gr$mono_nucleosome_reads) + 1)
 par(mfrow = c(1, 2))
 k <- 2
-gr$cluster <- kmeans(cbind(h, v), k)$cluster
+set.seed(1); gr$cluster <- kmeans(cbind(h, v), k)$cluster
 boxplot(split(gr$num_reads, list(gr$cluster)), col = 1:k, log = 'y', main = 'number of reads', ylab = 'Number of reads')
 plot(h, v, pch = 21, bg = gr$cluster, xlab = 'ratio between center NFR and mono reads', ylab = 'ratio between total NFR and mono reads')
 abline(h = 0, v = 0, lty = 2)
+```
+
+# Save the clustering results
+```{r}
+saveRDS(gr, peak_file)
+s3_sync('datasets/dataset=Etv2PioneerChIPseq_version=20191203a/', make_public = TRUE)
 ```
 
 # Visualize the V-plot, fragment size profile, mono nucleosome reads and NFR reads pattern in each cluster
