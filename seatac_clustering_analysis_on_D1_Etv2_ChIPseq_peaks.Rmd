@@ -67,8 +67,8 @@ for (i in 1:k){
 h <- log(rowSums(gr$nfr_reads[, (64 - 3):(64 + 3)]) + 1) - log(rowSums(gr$mono_nucleosome_reads[, (64 - 3):(64 + 3)]) + 1)
 v <- log(rowSums(gr$nfr_reads) + 1) - log(rowSums(gr$mono_nucleosome_reads) + 1)
 par(mfrow = c(1, 2))
-k <- 4
-set.seed(1); cls <- kmeans(cbind(h, v), k)$cluster
+k <- 3
+cls <- kmeans(cbind(h, v), k)$cluster
 boxplot(split(gr$num_reads, list(cls)), col = 1:k, log = 'y', main = 'number of reads', ylab = 'Number of reads')
 plot(h, v, pch = 21, bg = cls, xlab = 'ratio between center NFR and mono reads', ylab = 'ratio between total NFR and mono reads')
 abline(h = 0, v = 0, lty = 2)
@@ -112,11 +112,7 @@ gr <- readRDS(gzcon(url('https://s3.msi.umn.edu/gongx030/projects/seatac/models/
 ```{r, fig.width = 8}
 h <- log(rowSums(gr$nfr_reads[, (64 - 3):(64 + 3)]) + 1) - log(rowSums(gr$mono_nucleosome_reads[, (64 - 3):(64 + 3)]) + 1)
 v <- log(rowSums(gr$nfr_reads) + 1) - log(rowSums(gr$mono_nucleosome_reads) + 1)
-par(mfrow = c(1, 2))
 k <- 2
-```
-
-```{r, fig.width = 8}
 set.seed(1); cls <- kmeans(cbind(h, v), k)$cluster
 par(mfrow = c(1, 2))
 boxplot(split(gr$num_reads, list(cls)), col = 1:k, log = 'y', main = 'number of reads', ylab = 'Number of reads')
