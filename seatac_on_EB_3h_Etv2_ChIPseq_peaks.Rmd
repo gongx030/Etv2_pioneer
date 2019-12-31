@@ -154,14 +154,12 @@ macs2.callpeak(treatment_files, base.name, control_files, format = 'BAMPE', geno
 
 # Generate the heatmap
 ```{r}
-gs <- 'EB_Dox_3h_Etv2'; extend <- 1000; w <- 50; smooth <- TRUE; target_ratio <- 0.2; mc.cores <- 4
+gs <- 'EB_Dox_3h_Etv2'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 4
 bw_files <- c(
   'MNase' =           '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw',
   'EB_NoDox_D25' =    '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_treat_pileup.bw',
 	'EB_Dox_3h_Etv2' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_FE.bw',
 	'EB_Dox_12h_Etv2' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_12h_Etv2_FE.bw',
-	'EB_NoDox_D25_nfr' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_nfr_treat_pileup.bw',
-	'EB_NoDox_D25_mono' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_treat_pileup.bw',
 	'EB_NoDox_D25_mono_vs_nfr' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_mono_nucleosome_vs_nfr_FE.bw'
 )
 n2m_files <- get_normalizeToMatrix(gr, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
