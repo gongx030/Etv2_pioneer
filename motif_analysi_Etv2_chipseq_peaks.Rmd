@@ -1,0 +1,112 @@
+---
+title: "Motif analysis of Etv2 ChIP-seq peaks"
+author: "Wuming Gong"
+date: "1/4/2020"
+output: rmarkdown::github_document
+---
+
+```{r, include = FALSE}
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(DECIPHER)
+library(chromVARmotifs) # https://github.com/GreenleafLab/chromVARmotifs
+library(motifmatchr)
+library(BiocParallel)
+library(TFBSTools)
+library(rGADEM)
+library(dplyr)
+register(MulticoreParam(4)) # Use 8 cores
+MEF_peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.rds'
+EB_peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.rds'
+core_window_size <- 20
+matchMotifs_p_cutoff <- 0.05
+```
+
+# Generate a merged dataset
+For EB: cluster 1: nucleosome; cluster 2: NFR
+For MEF: cluster 1: NFR; cluster 3: nucleosome 
+```{r}
+mef <- readRDS(gzcon(url(MEF_peak_file)))
+eb <- readRDS(gzcon(url(EB_peak_file)))
+gr_eb <- granges(eb)
+gr_eb$type <- NA
+gr_eb$type[eb$cluster == 1] <- 'nucleosome'
+gr_eb$type[eb$cluster == 2] <- 'NFR'
+gr_eb$cell <- 'EB'
+gr_mef <- granges(mef)
+gr_mef$type <- NA
+gr_mef$type[mef$cluster == 1] <- 'NFR'
+gr_mef$type[mef$cluster == 3] <- 'nucleosome'
+gr_mef$cell <- 'MEF'
+gr <- c(gr_eb, gr_mef)
+```
+
+# Retrieve the DNA sequences at the core window
+
+```{r}
+gr <- resize(gr, fix = 'center', width = core_window_size)
+data('homer_pwms')
+etv2 <- homer_pwms[['Etv2(ETS)/ES-ER71-ChIP-Seq(GSE59402)/Homer(0.967)']] # a PWMatrix object
+mm <- matchMotifs(etv2, gr, genome = 'mm10', p.cutoff = matchMotifs_p_cutoff, out = 'positions')[[1]]
+gr$has_Etv2_motif <- gr %over% mm
+```
+
+# Show the % of Etv2 peaks that have the canonical Etv2 motifs in each category
+```{r}
+x <- table(gr$cell, gr$has_Etv2_motif)
+barplot(t(x / rowSums(x)))
+x <- table(gr$type, gr$has_Etv2_motif)
+barplot(t(x / rowSums(x)))
+```
+
+# Retrieve the sequence in each category
+```{r}
+mm <- resize(mm, fix = 'center', width = 20)
+mm$cell <- cbind(
+  MEF = mm %over% gr[gr$cell == 'MEF'],
+  EB = mm %over% gr[gr$cell == 'EB']
+)
+mm$type <- cbind(
+  NFR = mm %over% gr[!is.na(gr$type) & gr$type == 'NFR'],
+  nucleosome = mm %over% gr[!is.na(gr$type) & gr$type == 'nucleosome']
+)
+mm$sequence <- getSeq(BSgenome.Mmusculus.UCSC.mm10, mm)
+mm$sequence <- reverseComplement(mm$sequence)
+```
+
+# Use DREME to find enriched motifs 
+```{r, include = FALSE}
+base.name <- sprintf('%s/Etv2_peaks_Choi', project_dir('etv2_pionner'))
+fasta_file <- sprintf('%s.fa', base.name)
+output_dir <- sprintf('%s.meme', base.name)
+s <- getSeq(BSgenome.Mmusculus.UCSC.mm10, gr)
+names(s) <- 1:length(s)
+writeXStringSet(s, fasta_file)
+command <- sprintf('dreme -p %s -oc %s -png -mink 8 -maxk 8 -m 10', fasta_file, output_dir)
+system(command)
+```
+
+```{r}
+cm_list <- consensusMatrix(motif_set)
+for (i in seq_len(length(cm_list))){
+  cm <- cm_list[[i]]
+  m <- cm + 1 # add a pseudo number
+  pfm <- cm %*% diag(1 / colSums(cm))
+  seqLogo(pfm)
+}
+motif_set@motifEvalues
+```
+
+
+```{r}
+for (i in 1:length(s)){
+  cm <- consensusMatrix(s[[i]])
+  cm <- cm[c('A', 'C', 'G', 'T'), ]
+  cm <- cm + 1 # add a pseudo number
+  pfm <- cm %*% diag(1 / colSums(cm))
+  seqLogo::seqLogo(pfm)
+}
+print(names(s))
+```
+
+```{r}
+```
