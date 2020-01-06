@@ -49,29 +49,3 @@ base.name <- sprintf('%s/%s', dataset_dir(dataset), bname)
 macs2.callpeak(treatment_files, base.name, control_files, format = 'BAM', genome = genome, broad = broad, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = call_summits)
 ```
 
-Get a union set of Etv2 ChIP-seq peaks in ES/EB and MEF 
-```{r}
-bed_files <- c(
-	'MEF_Dox_d1_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed',
-	'MEF_Dox_d2_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d2_Etv2_summits.bed',
-	'MEF_Dox_d7_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d7_Etv2_summits.bed',
-	'EB_Dox_3h_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed',
-	'EB_Dox_12h_Etv2' = '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_12h_Etv2_summits.bed'
-)
-gr_list <- lapply(1:length(bed_files), function(i){
-	x <- macs2.read_summits(bed_files[i])
-	x$source <- names(bed_files)[i]
-	x
-})
-gr <- Reduce('c', gr_list)
-gr <- resize(gr, width = 200, fix = 'center')
-gr0 <- reduce(gr)	# a reduced set of Etv2 peak
-mm <- as.matrix(findOverlaps(gr, gr0))
-sp <- split(mm[, 1], list(mm[, 2]))
-j <- unlist(mclapply(sp, function(i) i[which.max(gr$score[i])], mc.cores = 4))
-gr <- gr[j]
-G <- do.call('cbind', lapply(1:length(bed_files), function(i) gr %over% gr_list[[i]]))
-gr$group <- G	# group assignment of the union set to each source
-colnames(gr$group) <- names(bed_files)
-s3_saveRDS(gr, 'datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds')
-```

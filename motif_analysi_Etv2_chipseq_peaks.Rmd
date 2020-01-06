@@ -1,5 +1,5 @@
 ---
-title: "Motif analysis of Etv2 ChIP-seq peaks"
+title: "Find de novo Motifs in Etv2 ChIP-seq peaks"
 author: "Wuming Gong"
 date: "1/4/2020"
 output: rmarkdown::github_document
@@ -14,6 +14,7 @@ library(BiocParallel)
 library(TFBSTools)
 library(rGADEM)
 library(dplyr)
+devtools::load_all('packages/compbio')
 register(MulticoreParam(4)) # Use 8 cores
 MEF_peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.rds'
 EB_peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.rds'
@@ -60,7 +61,7 @@ barplot(t(x / rowSums(x)))
 
 # Retrieve the sequence in each category
 ```{r}
-mm <- resize(mm, fix = 'center', width = 20)
+mm <- resize(mm, fix = 'center', width = 200)
 mm$cell <- cbind(
   MEF = mm %over% gr[gr$cell == 'MEF'],
   EB = mm %over% gr[gr$cell == 'EB']
@@ -73,16 +74,67 @@ mm$sequence <- getSeq(BSgenome.Mmusculus.UCSC.mm10, mm)
 mm$sequence <- reverseComplement(mm$sequence)
 ```
 
-# Use DREME to find enriched motifs 
+# Option 1: Use DREME to find enriched motifs 
+And save the results for following analysis (This step takes a few hours)
 ```{r, include = FALSE}
-base.name <- sprintf('%s/Etv2_peaks_Choi', project_dir('etv2_pionner'))
-fasta_file <- sprintf('%s.fa', base.name)
-output_dir <- sprintf('%s.meme', base.name)
-s <- getSeq(BSgenome.Mmusculus.UCSC.mm10, gr)
-names(s) <- 1:length(s)
-writeXStringSet(s, fasta_file)
-command <- sprintf('dreme -p %s -oc %s -png -mink 8 -maxk 8 -m 10', fasta_file, output_dir)
-system(command)
+devtools::load_all('packages/compbio'); pwm_list <- run_dreme(
+	mm$sequence, 
+	binary = 'dreme', 
+	argument = list('-mink' = 8,  '-maxk' = 12, '-m' = 20, '-e' = 1e-50, '-s' = 1)
+)
+metadata(mm)$dreme <- pwm_list
+pwm_list_file <- sprintf('%s/Etv2_chipseq_peaks_width=200_E=1e-50_with_dreme.rds', project_dir('etv2_pioneer'))
+saveRDS(mm, pwm_list_file)
+s3_upload('projects/etv2_pioneer/', make_public = TRUE)
+```
+
+
+# Option 2: Use Homer to find enriched de novo motifs
+This steps takes ~ 30 mins
+```{r, include = FALSE}
+homer_output_dir <- sprintf('%s/Etv2_chipseq_peaks_width=200_homer', project_dir('etv2_pioneer'))
+homer_motif_files <- sprintf('%s/%s', homer_output_dir, c('homerMotifs.motifs8', 'homerMotifs.motifs10', 'homerMotifs.motifs12'))
+devtools::load_all('packages/compbio'); pwm_list <- homer_findMotifsGenome(
+	mm, 
+	genome = 'mm10',
+	binary = 'findMotifsGenome.pl', 
+	known = FALSE,
+	nocheck = TRUE,
+	output_dir = homer_output_dir,
+	argument = list('-len' = '8,10,12', '-size' = 200, '-S' = 25)
+)
+s3_upload('projects/etv2_pioneer/', make_public = TRUE)
+```
+
+
+Read the de novo motifs found by HOMER and find the enriched motifs at each group of peaks
+```{r}
+devtools::load_all('packages/compbio'); pwm_list <- Reduce('c', lapply(homer_motif_files, function(homer_motif_file) read_homer_motifs(homer_motif_file)))
+names(pwm_list) <- sapply(pwm_list, function(z) z@name)
+
+
+cell <- 'EB'
+#pos_type <- 'NFR'; neg_type <- 'nucleosome'
+pos_type <- 'nucleosome'; neg_type <- 'NFR'
+pos <- mm$cell[, cell] & mm$type[, pos_type]
+neg <- mm$cell[, cell] & mm$type[, neg_type]
+centrimo_output_dir <- sprintf('%s/Etv2_chipseq_peaks_width=200_E=1e-50_cell=%s_%s_vs_%s_with_homer_centrimo', project_dir('etv2_pioneer'), cell, pos_type, neg_type)
+devtools::load_all('packages/compbio'); run_centrimo(
+	mm$sequence[pos],
+	neg = mm$sequence[neg],
+	pwms = pwm_list,
+	binary = 'centromo', 
+	output_dir = centrimo_output_dir
+)
+
+devtools::load_all('packages/compbio'); s3_upload('projects/etv2_pioneer/', make_public = TRUE)
+```
+
+
+
+```{r}
+reverseComplement(pwm_list[['SCATTTCC']]) %>% as.matrix() %>% seqLogo::seqLogo()
+
 ```
 
 ```{r}
