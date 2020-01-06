@@ -72,6 +72,9 @@ mm$type <- cbind(
 )
 mm$sequence <- getSeq(BSgenome.Mmusculus.UCSC.mm10, mm)
 mm$sequence <- reverseComplement(mm$sequence)
+mm_file <- sprintf('%s/Etv2_chipseq_peaks_width=200.rds', project_dir('etv2_pioneer'))
+saveRDS(mm, mm_file)
+s3_upload('projects/etv2_pioneer/', make_public = TRUE)
 ```
 
 # Option 1: Use DREME to find enriched motifs 
@@ -106,29 +109,6 @@ devtools::load_all('packages/compbio'); pwm_list <- homer_findMotifsGenome(
 s3_upload('projects/etv2_pioneer/', make_public = TRUE)
 ```
 
-
-Read the de novo motifs found by HOMER and find the enriched motifs at each group of peaks
-```{r}
-devtools::load_all('packages/compbio'); pwm_list <- Reduce('c', lapply(homer_motif_files, function(homer_motif_file) read_homer_motifs(homer_motif_file)))
-names(pwm_list) <- sapply(pwm_list, function(z) z@name)
-
-
-cell <- 'EB'
-#pos_type <- 'NFR'; neg_type <- 'nucleosome'
-pos_type <- 'nucleosome'; neg_type <- 'NFR'
-pos <- mm$cell[, cell] & mm$type[, pos_type]
-neg <- mm$cell[, cell] & mm$type[, neg_type]
-centrimo_output_dir <- sprintf('%s/Etv2_chipseq_peaks_width=200_E=1e-50_cell=%s_%s_vs_%s_with_homer_centrimo', project_dir('etv2_pioneer'), cell, pos_type, neg_type)
-devtools::load_all('packages/compbio'); run_centrimo(
-	mm$sequence[pos],
-	neg = mm$sequence[neg],
-	pwms = pwm_list,
-	binary = 'centromo', 
-	output_dir = centrimo_output_dir
-)
-
-devtools::load_all('packages/compbio'); s3_upload('projects/etv2_pioneer/', make_public = TRUE)
-```
 
 
 

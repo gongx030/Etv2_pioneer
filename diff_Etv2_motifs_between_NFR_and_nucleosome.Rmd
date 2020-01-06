@@ -1,0 +1,87 @@
+---
+title: Find motifs differentially enriched between Etv2 peaks at nucleosome and NFR
+  regions
+author: "Wuming Gong"
+date: "1/5/2020"
+output: rmarkdown::github_document
+---
+
+```{r global_options}
+knitr::opts_chunk$set(fig.path='figures/')
+```
+
+```{r, include = FALSE}
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(TFBSTools)
+library(dplyr)
+library(parallel)
+devtools::load_all('../../packages/compbio')
+```
+
+# Read de novo motifs identified by Homer (see `find_de_novo_motifs_Etv2_chipseq_peaks.Rmd`)
+```{r}
+homer_output_dir <- 'https://s3.msi.umn.edu/gongx030/projects/etv2_pioneer/Etv2_chipseq_peaks_width=200_homer'
+homer_motif_files <- sprintf('%s/%s', homer_output_dir, c('homerMotifs.motifs8', 'homerMotifs.motifs10', 'homerMotifs.motifs12'))
+pwm_list <- Reduce('c', lapply(homer_motif_files, function(homer_motif_file) read_homer_motifs(homer_motif_file)))
+names(pwm_list) <- sapply(pwm_list, function(z) z@name)
+```
+
+# Read the Etv2 motifs in Etv2 ChIP-seq peaks (see `find_de_novo_motifs_Etv2_chipseq_peaks.Rmd`)
+```{r}
+gr <- readRDS(gzcon(url('https://s3.msi.umn.edu/gongx030/projects/etv2_pioneer/Etv2_chipseq_peaks_width=200.rds')))
+```
+
+# Use centrimo to find the differentially enriched motifs between NFR and nucleosome centred Etv2 peaks in EB and MEF
+```{r, include = FALSE}
+df <- expand.grid(cell = c('EB', 'MEF'), pos_type = c('NFR', 'nucleosome'), neg_type = c('NFR', 'nucleosome'))
+df <- df[df$pos_type != df$neg_type, ]
+
+x <- do.call('rbind', mclapply(1:nrow(df), function(i){
+  pos <- gr$cell[, df[i, 'cell']] & gr$type[, df[i, 'pos_type']]
+  neg <- gr$cell[, df[i, 'cell']] & gr$type[, df[i, 'neg_type']]
+  tfile <- tempfile(fileext = '.tsv')
+  run_centrimo(
+  	gr$sequence[pos],
+	  neg = gr$sequence[neg],
+	  pwms = pwm_list,
+	  binary = '/Users/gongx030/meme/bin/centrimo', 
+	  output_dir = tfile
+  )
+  y <- read.table(sprintf('%s/centrimo.tsv', tfile), header = TRUE, sep = '\t', row.names = NULL)
+  cn <- colnames(y)[-1]
+  y <- y[, -ncol(y)]
+  colnames(y) <- cn
+  y$cell <- df[i, 'cell']
+  y$pos_type <- df[i, 'pos_type']
+  y$neg_type <- df[i, 'neg_type']
+  y
+}, mc.cores = 4))
+```
+
+
+
+SCATTTCC is th only motif that are  significantly enriched in NFR in both MEF and EB
+```{r}
+x %>% filter(pos_type == 'NFR' & neg_type == 'nucleosome' & fisher_adj_pvalue < 0.05) %>% arrange(fisher_adj_pvalue)
+```
+
+```{r}
+x %>% filter(motif_id == 'SCATTTCC') %>% select(E.value, log_adj_p.value, total_sites, neg_sites, fisher_adj_pvalue, cell, pos_type, neg_type)
+```
+
+```{r}
+pwm_list[['SCATTTCC']] %>% reverseComplement() %>% as.matrix() %>% seqLogo::seqLogo()
+```
+Plot the canonitcal Etv2 motifs that are most enriched in EB
+```{r}
+x %>% filter(motif_id == 'RCCGGAAGTN') %>% select(motif_id, log_adj_p.value, E.value, cell, pos_type)
+```
+
+```{r}
+pwm_list[['RCCGGAAGTN']] %>% as.matrix() %>% seqLogo::seqLogo()
+```
+
+
+```{r}
+sessionInfo()
+```
