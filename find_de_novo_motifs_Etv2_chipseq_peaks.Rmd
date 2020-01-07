@@ -5,6 +5,8 @@ date: "1/4/2020"
 output: rmarkdown::github_document
 ---
 
+We used two ways `Homer` and `Dreme` to identify de novo motifs in a list of sequences.  Both of them need a long time to execute.  This script should run on MSI. 
+
 ```{r, include = FALSE}
 library(BSgenome.Mmusculus.UCSC.mm10)
 library(DECIPHER)
@@ -18,6 +20,7 @@ devtools::load_all('packages/compbio')
 register(MulticoreParam(4)) # Use 8 cores
 MEF_peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.rds'
 EB_peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.rds'
+mm_file <- sprintf('%s/Etv2_chipseq_peaks_width=200.rds', project_dir('etv2_pioneer'))
 core_window_size <- 20
 matchMotifs_p_cutoff <- 0.05
 ```
@@ -72,7 +75,6 @@ mm$type <- cbind(
 )
 mm$sequence <- getSeq(BSgenome.Mmusculus.UCSC.mm10, mm)
 mm$sequence <- reverseComplement(mm$sequence)
-mm_file <- sprintf('%s/Etv2_chipseq_peaks_width=200.rds', project_dir('etv2_pioneer'))
 saveRDS(mm, mm_file)
 s3_upload('projects/etv2_pioneer/', make_public = TRUE)
 ```
@@ -109,36 +111,3 @@ devtools::load_all('packages/compbio'); pwm_list <- homer_findMotifsGenome(
 s3_upload('projects/etv2_pioneer/', make_public = TRUE)
 ```
 
-
-
-
-```{r}
-reverseComplement(pwm_list[['SCATTTCC']]) %>% as.matrix() %>% seqLogo::seqLogo()
-
-```
-
-```{r}
-cm_list <- consensusMatrix(motif_set)
-for (i in seq_len(length(cm_list))){
-  cm <- cm_list[[i]]
-  m <- cm + 1 # add a pseudo number
-  pfm <- cm %*% diag(1 / colSums(cm))
-  seqLogo(pfm)
-}
-motif_set@motifEvalues
-```
-
-
-```{r}
-for (i in 1:length(s)){
-  cm <- consensusMatrix(s[[i]])
-  cm <- cm[c('A', 'C', 'G', 'T'), ]
-  cm <- cm + 1 # add a pseudo number
-  pfm <- cm %*% diag(1 / colSums(cm))
-  seqLogo::seqLogo(pfm)
-}
-print(names(s))
-```
-
-```{r}
-```

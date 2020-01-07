@@ -58,11 +58,39 @@ x <- do.call('rbind', mclapply(1:nrow(df), function(i){
 }, mc.cores = 4))
 ```
 
+## Visualize the motifs that are enriched in each comparison
+1. NFR > nucleosome in EB
+2. NFR > nucleosome in MEF
+3. nucleosome > NFR in EB
+4. nucleosome > NFR in MEF
+```{r}
+x %>% 
+  filter(pos_type == 'NFR' & neg_type == 'nucleosome' & cell == 'EB' & fisher_adj_pvalue < 0.05) %>% 
+  select(motif_id, fisher_adj_pvalue, total_sites, neg_sites, cell, pos_type)
+pwm_list[['SCATTTCC']] %>% reverseComplement() %>% as.matrix() %>% seqLogo::seqLogo()
+```
+
+```{r}
+x %>% 
+  filter(pos_type == 'NFR' & neg_type == 'nucleosome' & cell == 'MEF' & fisher_adj_pvalue < 0.05) %>% 
+  select(motif_id, fisher_adj_pvalue, total_sites, neg_sites, cell, pos_type) %>% 
+  arrange(fisher_adj_pvalue)
+pwm_list[['NNRCMGGAAGYN']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['RCCGGAWR']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['CMGGAARYNV']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['GCAGCTTGCG']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['RCCGGAAGTN']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['SCATTTCC']] %>% reverseComplement() %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['CTTCCGGAAGCA']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['CMGGAARY']] %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['WYTTCCGG']] %>% reverseComplement() %>% as.matrix() %>% seqLogo::seqLogo()
+pwm_list[['TCCGTAAGGA']] %>% as.matrix() %>% seqLogo::seqLogo()
+```
 
 
 SCATTTCC is th only motif that are  significantly enriched in NFR in both MEF and EB
 ```{r}
-x %>% filter(pos_type == 'NFR' & neg_type == 'nucleosome' & fisher_adj_pvalue < 0.05) %>% arrange(fisher_adj_pvalue)
+x %>% filter(pos_type == 'NFR' & neg_type == 'nucleosome' & cell == 'EB' & fisher_adj_pvalue < 0.05) %>% arrange(fisher_adj_pvalue)
 ```
 
 ```{r}
