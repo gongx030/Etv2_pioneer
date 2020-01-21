@@ -1,7 +1,7 @@
 ---
 title: 'Compare Etv2 ChIP-seq between D1 and D7 during MEF reprogramming
 output: rmarkdown::github_document
-date: '01/05/2019'
+date: '01/21/2019'
 author: 'Wuming Gong'
 ---
 
@@ -17,48 +17,20 @@ library(ChIPseeker)
 library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 library(org.Mm.eg.db)
 library(GO.db)
+gr_url <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds' 
 ```
 
-Get a union set of Etv2 ChIP-seq peaks in ES/EB and MEF 
-```{r}
-bed_files <- c(
-	'MEF_Dox_d1_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed',
-	'MEF_Dox_d2_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d2_Etv2_summits.bed',
-	'MEF_Dox_d7_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d7_Etv2_summits.bed',
-	'EB_Dox_3h_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed',
-	'EB_Dox_12h_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_12h_Etv2_summits.bed'
-)
-gr_list <- lapply(1:length(bed_files), function(i){
-	x <- read.table(bed_files[i], header = FALSE, sep = '\t')
-	gr <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]), peak_id = x[, 4], score = x[, 5])
-	gr$source <- names(bed_files)[i]
-	gr	
-})
-gr <- Reduce('c', gr_list)
-gr <- resize(gr, width = 200, fix = 'center')
-gr0 <- reduce(gr)	# a reduced set of Etv2 peak
-mm <- as.matrix(findOverlaps(gr, gr0))
-sp <- split(mm[, 1], list(mm[, 2]))
-j <- unlist(mclapply(sp, function(i) i[which.max(gr$score[i])], mc.cores = 4))
-gr <- gr[j]
-G <- do.call('cbind', lapply(1:length(bed_files), function(i) gr %over% gr_list[[i]]))
-gr$group <- G	# group assignment of the union set to each source
-colnames(gr$group) <- names(bed_files)
-gr_file <- sprintf('%s/all_Etv2_peaks.rds', dataset_dir('dataset=Etv2PioneerChIPseq_version=20191203a'))
-saveRDS(gr, gr_file)
-s3_sync('datasets/dataset=Etv2PioneerChIPseq_version=20191203a/', make_public = TRUE)
-```
-
-## split the Etv2 MEF D1 peaks into three groups: 
+### split the Etv2 MEF D1 peaks into three groups: 
 1: on at D1 and off at D7 (early)
 2: off at D1 and on at D7 (late)
 3: on at both D1 and D7 (persist)
 ```{r}
-gr_file <- sprintf('%s/all_Etv2_peaks.rds', dataset_dir('dataset=Etv2PioneerChIPseq_version=20191203a'))
-gr <- readRDS(gr_file)
+gr <- readRDS(gzcon(url(gr_url)))
 peaks <- gr[gr$group[, 'MEF_Dox_d1_Etv2'] | gr$group[, 'MEF_Dox_d7_Etv2']]
+```
 
-# Produce the normalized matrix for ComplexHeatmap plot
+### Produce the normalized matrix for ComplexHeatmap plot and generate the heatmap
+```{r}
 gs <- 'Etv2_peaks_MEF_D1_Dox_merged'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 2
 bw_files <- c(
 	'MEF_Dox_D1_Etv2' 									= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_FE.bw',
@@ -111,30 +83,10 @@ for (s in ss[ss %in% names(bw_files)]){
 draw(h, heatmap_legend_side = 'bottom')
 ```
 
-
-## The supplementary figure for early/late/persist Etv2 peaks and epigenetic marks in MEF
-```{r}
-#set.seed(1); i <- sample(1:length(peaks), 2000)
-i <- 1:length(peaks)
-sp <- factor(sprintf('%s_%s', peaks$group[, 'MEF_Dox_d1_Etv2'], peaks$group[, 'MEF_Dox_d7_Etv2']))
-ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
-h <- EnrichedHeatmap(mat[['MEF_Dox_D1_Etv2']][i, ], col = col_fun[['MEF_Dox_D1_Etv2']], split = sp[i], name = 'MEF_Dox_D1_Etv2', top_annotation = ta, pos_line = FALSE)
-ss <- c('MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2', 'MNase', 'H3', 'H3K9me3', 'H3K27me3', 'H3K9ac', 'H3K4me2', 'H3K4me1', 'Hdac1')
-for (s in ss[ss %in% names(bw_files)]){
-  h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
-}
-draw(h, heatmap_legend_side = 'bottom')
-
-```
-
-
-
-
-
-## split the Etv2 EB peaks into three groups: 
-1: on at D1 and off at D7 (early)
-2: off at D1 and on at D7 (late)
-3: on at both D1 and D7 (persist)
+### split the Etv2 EB peaks into three groups: 
+1: on at 3h and off at 12h (early)
+2: off at 3h and on at 12h (late)
+3: on at both 3h and 12h (persist)
 ```{r}
 peaks <- gr[gr$group[, 'EB_Dox_3h_Etv2'] | gr$group[, 'EB_Dox_12h_Etv2']]
 
@@ -219,6 +171,5 @@ length(unique(anno$geneId[anno$group.EB_Dox_12h_Etv2 & !anno$group.MEF_Dox_d7_Et
 sum(gr$group[, 'EB_Dox_12h_Etv2'] & gr$group[, 'MEF_Dox_d7_Etv2'])
 sum(!gr$group[, 'EB_Dox_12h_Etv2'] & gr$group[, 'MEF_Dox_d7_Etv2'])
 sum(gr$group[, 'EB_Dox_12h_Etv2'] & !gr$group[, 'MEF_Dox_d7_Etv2'])
-
 ```
 
