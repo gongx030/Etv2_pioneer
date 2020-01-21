@@ -54,10 +54,12 @@ s3_sync('datasets/dataset=Etv2PioneerChIPseq_version=20191203a/', make_public = 
 2: off at D1 and on at D7 (late)
 3: on at both D1 and D7 (persist)
 ```{r}
+gr_file <- sprintf('%s/all_Etv2_peaks.rds', dataset_dir('dataset=Etv2PioneerChIPseq_version=20191203a'))
+gr <- readRDS(gr_file)
 peaks <- gr[gr$group[, 'MEF_Dox_d1_Etv2'] | gr$group[, 'MEF_Dox_d7_Etv2']]
 
 # Produce the normalized matrix for ComplexHeatmap plot
-gs <- 'Etv2_peaks_MEF_D1_Dox_merged'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 4
+gs <- 'Etv2_peaks_MEF_D1_Dox_merged'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 2
 bw_files <- c(
 	'MEF_Dox_D1_Etv2' 									= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_FE.bw',
 	'MEF_Dox_D2_Etv2' 									= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d2_Etv2_FE.bw',
@@ -69,14 +71,26 @@ bw_files <- c(
   'MEF_NoDox_H3K27ac' 								= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_NoDox_d0_H3K27ac_FE.bw',
   'MEF_Dox_D1_H3K27ac' 								= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_H3K27ac_FE.bw',
   'MEF_Dox_D2_H3K27ac' 								= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d2_H3K27ac_FE.bw',
-  'MEF_Dox_D7_H3K27ac' 								= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d7_H3K27ac_FE.bw'
+  'MEF_Dox_D7_H3K27ac' 								= '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d7_H3K27ac_FE.bw',
+	'MNase'                             = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/MNase_treat_pileup.bw',
+	'H3'                                = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3_treat_pileup.bw',
+	'H3K9me3'                           = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K9me3_treat_pileup.bw',
+	'H3K27me3'                          = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K27me3_treat_pileup.bw',
+	'H3K36me3'                          = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K36me3_treat_pileup.bw',
+	'H3K9ac'                            = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K9ac_treat_pileup.bw',
+	'H3K79me2'                          = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K79me2_treat_pileup.bw',
+	'H3K4me2'                           = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K4me2_treat_pileup.bw',
+	'H3K4me1'                           = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3K4me1_treat_pileup.bw',
+	'Hdac1'                             = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/Hdac1_treat_pileup.bw',
+	'H3.3'                              = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/H3.3_treat_pileup.bw',
+	'P300'                              = '/panfs/roc/scratch/gongx030/datasets/dataset=Chronis_version=20170519a/P300_treat_pileup.bw'
 )
 n2m_files <- peaks %>% 
 	resize(fix = 'center', width = 1) %>% 
 	get_normalizeToMatrix(gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
 
-
 group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
+group_cols[c('H3', 'MNase')] <- 'green'
 group_cols[c('MEF_Dox_D1_Etv2', 'MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2')] <- 'red'
 group_cols[c('MEF_NoDox_Brg1', 'MEF_Dox_D1_Brg1', 'MEF_Dox_D2_Brg1', 'MEF_Dox_D7_Brg1')] <- 'purple'
 group_cols[c('MEF_NoDox_H3K27ac', 'MEF_Dox_D1_H3K27ac', 'MEF_Dox_D2_H3K27ac', 'MEF_Dox_D7_H3K27ac')] <- 'darkgreen'
@@ -84,13 +98,28 @@ mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
 col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.005, 0.995)), c('white', group_cols[i])))
 names(col_fun) <- names(n2m_files)
 
-i <- 1:length(peaks)
-#set.seed(1); i <- sample(1:length(peaks), 2000)
+#i <- 1:length(peaks)
+set.seed(1); i <- sample(1:length(peaks), 2000)
 sp <- factor(sprintf('%s_%s', peaks$group[, 'MEF_Dox_d1_Etv2'], peaks$group[, 'MEF_Dox_d7_Etv2']))
-
 ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
 h <- EnrichedHeatmap(mat[['MEF_Dox_D1_Etv2']][i, ], col = col_fun[['MEF_Dox_D1_Etv2']], split = sp[i], name = 'MEF_Dox_D1_Etv2', top_annotation = ta, pos_line = FALSE)
+
 ss <- c('MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2', 'MEF_NoDox_Brg1', 'MEF_Dox_D1_Brg1', 'MEF_Dox_D2_Brg1', 'MEF_Dox_D7_Brg1', 'MEF_NoDox_H3K27ac', 'MEF_Dox_D1_H3K27ac', 'MEF_Dox_D2_H3K27ac', 'MEF_Dox_D7_H3K27ac')
+for (s in ss[ss %in% names(bw_files)]){
+  h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
+}
+draw(h, heatmap_legend_side = 'bottom')
+```
+
+
+## The supplementary figure for early/late/persist Etv2 peaks and epigenetic marks in MEF
+```{r}
+#set.seed(1); i <- sample(1:length(peaks), 2000)
+i <- 1:length(peaks)
+sp <- factor(sprintf('%s_%s', peaks$group[, 'MEF_Dox_d1_Etv2'], peaks$group[, 'MEF_Dox_d7_Etv2']))
+ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
+h <- EnrichedHeatmap(mat[['MEF_Dox_D1_Etv2']][i, ], col = col_fun[['MEF_Dox_D1_Etv2']], split = sp[i], name = 'MEF_Dox_D1_Etv2', top_annotation = ta, pos_line = FALSE)
+ss <- c('MEF_Dox_D2_Etv2', 'MEF_Dox_D7_Etv2', 'MNase', 'H3', 'H3K9me3', 'H3K27me3', 'H3K9ac', 'H3K4me2', 'H3K4me1', 'Hdac1')
 for (s in ss[ss %in% names(bw_files)]){
   h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
 }
@@ -99,7 +128,10 @@ draw(h, heatmap_legend_side = 'bottom')
 ```
 
 
-## split the Etv2 MEF D1 peaks into three groups: 
+
+
+
+## split the Etv2 EB peaks into three groups: 
 1: on at D1 and off at D7 (early)
 2: off at D1 and on at D7 (late)
 3: on at both D1 and D7 (persist)
