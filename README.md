@@ -14,3 +14,4 @@
 ### TODO
 1. Investigate the ATAC-seq fragment size profile over early, late and persis Etv2 peaks in EB/MEF.
 2. Check if H3K9me3 is a barrier for Etv2 binding. 
+3. Need to write a function to fastly extract the fragment size profile. Directly clustering (e.g. kmeans) of fragment size profile is a way to segment the genome. 
