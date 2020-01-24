@@ -88,28 +88,6 @@ pwm_list[['TCCGTAAGGA']] %>% as.matrix() %>% seqLogo::seqLogo()
 ```
 
 
-SCATTTCC is th only motif that are  significantly enriched in NFR in both MEF and EB
-```{r}
-x %>% filter(pos_type == 'NFR' & neg_type == 'nucleosome' & cell == 'EB' & fisher_adj_pvalue < 0.05) %>% arrange(fisher_adj_pvalue)
-```
-
-```{r}
-x %>% filter(motif_id == 'SCATTTCC') %>% select(E.value, log_adj_p.value, total_sites, neg_sites, fisher_adj_pvalue, cell, pos_type, neg_type)
-```
-
-```{r}
-pwm_list[['SCATTTCC']] %>% reverseComplement() %>% as.matrix() %>% seqLogo::seqLogo()
-```
-Plot the canonitcal Etv2 motifs that are most enriched in EB
-```{r}
-x %>% filter(motif_id == 'RCCGGAAGTN') %>% select(motif_id, log_adj_p.value, E.value, cell, pos_type)
-```
-
-```{r}
-pwm_list[['RCCGGAAGTN']] %>% as.matrix() %>% seqLogo::seqLogo()
-```
-
-
 ```{r}
 sessionInfo()
 ```
