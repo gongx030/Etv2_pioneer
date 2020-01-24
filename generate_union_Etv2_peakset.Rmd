@@ -1,0 +1,40 @@
+---
+title: 'Generate a union set of all Etv2 ChIP-seq peaks'
+output: rmarkdown::github_document
+date: '01/21/2019'
+author: 'Wuming Gong'
+---
+
+```{r, include = FALSE}
+devtools::load_all('packages/compbio')
+gr_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds'
+```
+
+
+### Get a union set of Etv2 ChIP-seq peaks in ES/EB and MEF 
+```{r}
+bed_files <- c(
+	'MEF_Dox_d1_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed',
+	'MEF_Dox_d2_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d2_Etv2_summits.bed',
+	'MEF_Dox_d7_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d7_Etv2_summits.bed',
+	'EB_Dox_3h_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.bed',
+	'EB_Dox_12h_Etv2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_12h_Etv2_summits.bed'
+)
+gr_list <- lapply(1:length(bed_files), function(i){
+	x <- read.table(bed_files[i], header = FALSE, sep = '\t')
+	gr <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]), peak_id = x[, 4], score = x[, 5])
+	gr$source <- names(bed_files)[i]
+	gr	
+})
+gr <- Reduce('c', gr_list)
+gr <- resize(gr, width = 200, fix = 'center')
+gr0 <- reduce(gr)	# a reduced set of Etv2 peak
+mm <- as.matrix(findOverlaps(gr, gr0))
+sp <- split(mm[, 1], list(mm[, 2]))
+j <- unlist(mclapply(sp, function(i) i[which.max(gr$score[i])], mc.cores = 4))
+gr <- gr[j]
+G <- do.call('cbind', lapply(1:length(bed_files), function(i) gr %over% gr_list[[i]]))
+gr$group <- G	# group assignment of the union set to each source
+colnames(gr$group) <- names(bed_files)
+saveRDS(gr, gr_file)
+```
