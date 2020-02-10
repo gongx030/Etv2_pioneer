@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width = 5, fig.height =5, dpi = 300)
+knitr::opts_chunk$set(fig.path='figures/')
 ```
 
 ```{r, message = FALSE}

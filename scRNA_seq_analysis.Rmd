@@ -1,13 +1,11 @@
 ---
 title: "Clustering of scRNA-seq of Etv2 reprogramming"
-output:
-  html_document: default
+output: rmarkdown::github_document
 date: "12/10/2019"
 ---
 
 ```{r setup, include=FALSE, eval = TRUE}
-knitr::opts_chunk$set(fig.width = 5, fig.height =5)
-knitr::opts_chunk$set(dev = 'pdf')
+knitr::opts_chunk$set(fig.path='figures/')
 ```
 
 
@@ -21,25 +19,27 @@ library(parallel)
 library(ggplot2)
 library(goseq)
 library(stringr)
-library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 ```
-Read the processed scRNA-seq data (~2.1G)
+
+### Read the processed scRNA-seq data (~2.1G)
+The scRNA-seq dataset was prepared in scRNA_seq_preprocess.Rmd
 ```{r}
 se <- readRDS(gzcon(url('https://s3.msi.umn.edu/garry_projects/etv2_pioneer/processed_Etv2_scRNAseq.rds')))
 ```
-Determine the number of clusters by running k-means on the scVI latent space
+
+### Determine the number of clusters by running k-means on the scVI latent space
 ```{r elbow, echo=TRUE, fig.height=5, fig.width=5}
 wss <- (nrow(colData(se)$umap)-1) * sum(apply(colData(se)$umap, 2, var))
 for (i in 2:15) wss[i] <- sum(kmeans(colData(se)$umap,centers = i)$withinss)
 plot(1:15, wss, type="b", xlab="Number of Clusters", ylab="Within groups sum of squares")
 n_cluster <- 7
-set.seed(1); cls <- kmeans(colData(se)$umap, n_cluster)$cluster
-cls <- as.numeric(factor(cls, c(1, 5, 4, 2, 3, 6, 7)))
-set.seed(1); colData(se)$cluster <- cls
 abline(v = n_cluster, col = 'blue', lty = 2)
 ```
-Figure of the cell clusters
+### Visulize cell clusters
 ```{r, fig.width = 4, fig.height =4}
+set.seed(4); cls <- kmeans(colData(se)$umap, n_cluster, nstart = 100)$cluster
+cls <- as.numeric(factor(cls, c(1, 5, 4, 2, 3, 6, 7)))
+colData(se)$cluster <- cls
 group2bg <- c(
    'MEF_Dox_D1' = 'black',
    'MEF_NoDox' = 'blue',
@@ -47,7 +47,13 @@ group2bg <- c(
    'MEF_Dox_D7a' = 'red',
    'MEF_Dox_D7b' = 'pink'
  )
-plot(colData(se)$umap, col = colorRampPalette(brewer.pal(11,'Spectral'))(n_cluster)[colData(se)$cluster], pch = 16, asp = 1, cex = 0.2, main = 'K-means clusters', xlab = '', ylab = '', xlim = c(-10, 10), ylim = c(-10, 10))
+plot(
+   colData(se)$umap, 
+   col = colorRampPalette(brewer.pal(11,'Spectral'))(n_cluster)[colData(se)$cluster], 
+   pch = 16, asp = 1, cex = 0.2, 
+   main = 'K-means clusters', xlab = '', ylab = '', 
+   xlim = c(-10, 10), ylim = c(-10, 10)
+)
 y_centers <- do.call('rbind', lapply(1:n_cluster, function(i) apply(colData(se)$umap[colData(se)$cluster == i, ], 2, median)))
 text(y_centers[, 1], y_centers[, 2], 1:n_cluster, cex = 1)
 ```
