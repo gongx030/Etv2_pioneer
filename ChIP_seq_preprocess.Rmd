@@ -13,7 +13,7 @@ library(parallel)
 ```
 
 Calling Peaks for Etv2, Brg1 and H3K27ac ChIP-seq
-```{r}
+```{r, eval = FALSE}
 dataset <- 'dataset=Etv2PioneerChIPseq_version=20191203a'
 genome <- 'mm10'
 d <- read.table('https://docs.google.com/spreadsheets/d/e/2PACX-1vQvPeb6eRcvT7kY0ymiVim8ScprZhBW7DIoHlVqzIAc_cDuVmMqR777jUZU0XuTVxSzDYw0BTbrVMTZ/pub?output=tsv', sep = '\t', header = TRUE)
