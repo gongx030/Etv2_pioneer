@@ -9,12 +9,11 @@ author: 'Wuming Gong'
 library(roxygen2)
 library(devtools)
 devtools::document('packages/seatac')
-devtools::load_all('packages/compbio')
 devtools::load_all('packages/seatac')
+devtools::load_all('packages/s3msi'); set_s3_environment()
 library(futile.logger); flog.threshold(TRACE)
 library(BSgenome.Mmusculus.UCSC.mm10)
 ```
-
 
 # Parameters
 ```{r}
@@ -31,8 +30,8 @@ bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_ver
 mnase_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw'
 bam_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25.bam'
 blacklist_file <- '/panfs/roc/scratch/gongx030/datasets/datasets=blacklists_version=20190827a/mm10.blacklist.bed.gz'
-window_file <- sprintf('%s/windows/peak=%s_bam=%s_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d',
-  project_dir('seatac'),
+window_file <- sprintf('%s/projects/seatac/windows/peak=%s_bam=%s_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d',
+	Sys.getenv('TMPDIR'),
 	peak_name,
   bam_name,
 	window_size,
@@ -41,8 +40,8 @@ window_file <- sprintf('%s/windows/peak=%s_bam=%s_window_size=%d_bin_size=%d_fra
 	fragment_size_range[2],
 	fragment_size_interval
 )
-model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d_min_num_reads=%d_max_num_reads=%d',
-	project_dir('seatac'),
+model_dir_name <- sprintf('%s/projects/seatac/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d_bin_size=%d_fragment_size_range=%d+%d_fragment_size_interval=%d_min_num_reads=%d_max_num_reads=%d',
+	Sys.getenv('TMPDIR'),
 	peak_name,
 	bam_name,
 	latent_dim,
@@ -55,7 +54,6 @@ model_dir_name <- sprintf('%s/models/peak=%s_bam=%s_latent_dim=%d_window_size=%d
 	max_num_reads
 )
 predict_file <- sprintf('%s/predict.rds', model_dir_name)
-peak_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_Dox_3h_Etv2_summits.rds'
 ```
 
 # Prepare windows
@@ -91,50 +89,9 @@ saveRDS(gr, predict_file)
 s3_sync('projects/seatac/', make_public = TRUE)
 ```
 
-# Use two features for v-plot clustering
-1. ratio between total NFR reads and mono nucleosome reads
-2. ratio between NFR reads and mono nucleosome reads at the center
 ```{r}
-gr <- readRDS(predict_file)
-h <- log(rowSums(gr$nfr_reads[, (64 - 3):(64 + 3)]) + 1) - log(rowSums(gr$mono_nucleosome_reads[, (64 - 3):(64 + 3)]) + 1)
-v <- log(rowSums(gr$nfr_reads) + 1) - log(rowSums(gr$mono_nucleosome_reads) + 1)
-par(mfrow = c(1, 2))
-k <- 2
-set.seed(1); gr$cluster <- kmeans(cbind(h, v), k)$cluster
-boxplot(split(gr$num_reads, list(gr$cluster)), col = 1:k, log = 'y', main = 'number of reads', ylab = 'Number of reads')
-plot(h, v, pch = 21, bg = gr$cluster, xlab = 'ratio between center NFR and mono reads', ylab = 'ratio between total NFR and mono reads')
-abline(h = 0, v = 0, lty = 2)
-```
-
-# Save the clustering results
-```{r}
-saveRDS(gr, peak_file)
-s3_sync('datasets/dataset=Etv2PioneerChIPseq_version=20191203a/', make_public = TRUE)
-```
-
-# Visualize the V-plot, fragment size profile, mono nucleosome reads and NFR reads pattern in each cluster
-```{r, fig.width = 12, fig.height = 8}
-par(mfcol = c(6, k), mar = c(2, 5, 2, 1))
-bg <- colMeans(mcols(gr)$counts)
-breaks_non_norm <- c(seq(0, max(bg) * 0.9, length.out = 100), 1)
-breaks_norm <- c(-1, seq(-0.01, 0.01, length.out = 99), 1)
-yy <- c(50, 100, 180, 247, 315, 473)
-for (i in 1:k){
-  x <- colMeans(mcols(gr)$counts[gr$cluster == i, ])
-	x_norm <- matrix(x - bg, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
-  image(x_norm, col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'), breaks = breaks_norm, main = sprintf('cluster %d(%d)', i, sum(gr$cluster == i)), axes = FALSE)
-	axis(2, at = (yy - fragment_size_range[1]) / (fragment_size_range[2] - fragment_size_range[1]), label = yy, las = 2)
-	abline(v = c(0.5 - (1:4) * 180 /metadata(gr)$window_size , 0.5, (1:4) * 180/ metadata(gr)$window_size + 0.5), col = 'yellow', lty = 2)
-  x_non_norm <- matrix(x, metadata(gr)$n_bins_per_window, metadata(gr)$n_intervals)
-  image(x_non_norm, col = colorpanel(100, low = 'blue', mid = 'white', high = 'red'), breaks = breaks_non_norm, main = 'Raw signal', axes = FALSE)
-	axis(2, at = (yy - fragment_size_range[1]) / (fragment_size_range[2] - fragment_size_range[1]), label = yy, las = 2)
-	abline(v = c(0.5 - (1:4) * 180 /metadata(gr)$window_size , 0.5, (1:4) * 180/ metadata(gr)$window_size + 0.5), col = 'yellow', lty = 2)
-  plot(colMeans(gr$fragment_size_profile[gr$cluster == i, ]), main = 'Fragment size')
-	plot(colMeans(gr$nfr_reads[gr$cluster == i, ]), main = 'NFR reads')
-	plot(colMeans(gr$mono_nucleosome_reads[gr$cluster == i, ]), main = 'Mono nucleosome reads')
-	r <- log(gr$mono_nucleosome_reads[gr$cluster == i, ] + 1) - log(gr$nfr_reads[gr$cluster == i, ] + 1)
-	plot(colMeans(r), main = 'Mono / NFR')
-}
+devtools::load_all('packages/s3msi'); local_to_public(predict_file)
+devtools::load_all('packages/s3msi'); predict_file %>% s3_upload() %>% make_public()
 ```
 
 
@@ -150,6 +107,7 @@ samtools view -h INPUT_FILE | awk '{if ((($9 <= 247 && $9 >= 180) || ($9 <= -180
 samtools index $OUTPUT_MONO_FILE
 ```
 
+
 # Running MACS2 on the NFR and mono nucleosome BAM to generate NFR and mono specific BW files for the heatmap
 ```{r}
 dataset <- 'dataset=Etv2ATAC_version=20190228b'; genome <- 'mm10'
@@ -160,8 +118,10 @@ control_files <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2ATAC_version=
 macs2.callpeak(treatment_files, base.name, control_files, format = 'BAMPE', genome = genome, broad = FALSE, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
 ```
 
-# Generate the heatmap
+# Generate the normalize2Matrix files for the following heatmap
 ```{r}
+gr <- readRDS(predict_file)
+
 gs <- 'EB_Dox_3h_Etv2'; extend <- 1000; w <- 50; smooth <- FALSE; target_ratio <- 0.2; mc.cores <- 4
 bw_files <- c(
   'MNase' =           '/panfs/roc/scratch/gongx030/datasets/dataset=mESC_MNase_version=20190925a/MNase_mESC.bw',
@@ -172,28 +132,11 @@ bw_files <- c(
 	'EB_NoDox_3h_Brg1' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_NoDox_3h_Brg1_FE.bw',
 	'EB_NoDox_3h_H3K27ac' = 	'/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/EB_NoDox_3h_H3K27ac_FE.bw'
 )
-n2m_files <- get_normalizeToMatrix(gr, gs, bw_files, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
+#devtools::load_all('packages/s3msi'); bw_files %>% local_to_s3() %>% s3_download()
 
-group_cols <- rep('blue', length(bw_files)); names(group_cols) <- names(bw_files)
-group_cols['MNase'] <- 'green'
-group_cols['EB_Dox_3h_Etv2'] <- 'red'
-group_cols['EB_Dox_12h_Etv2'] <- 'red'
-group_cols['EB_NoDox_3h_Brg1'] <- 'purple'
-group_cols['EB_NoDox_3h_H3K27ac'] <- 'darkgreen'
-mat <- lapply(n2m_files, readRDS); names(mat) <- names(n2m_files)
-col_fun <- lapply(1:length(mat), function(i) colorRamp2(quantile(mat[[i]], c(0.005, 0.995)), c('white', group_cols[i])))
-names(col_fun) <- names(n2m_files)
-col_fun[['EB_NoDox_D25_mono_vs_nfr']] <- colorRamp2(quantile(mat[['EB_NoDox_D25_mono_vs_nfr']], c(0.005, 0.5, 0.995)), c('blue', 'black', 'yellow'))
-
-i <- 1:length(gr)
-sp <- factor(gr$cluster, c(2, 1))
-ta <- HeatmapAnnotation(enriched = anno_enriched(gp = gpar(lty = 1, lwd = 2, col = 1:nlevels(sp)), axis_param = list(facing = 'inside', at = -1000)))
-h <- EnrichedHeatmap(mat[['EB_NoDox_D25_mono_vs_nfr']][i, ], col = col_fun[['EB_NoDox_D25_mono_vs_nfr']], split = sp[i], name = 'EB_NoDox_D25_mono_vs_nfr', top_annotation = ta, pos_line = FALSE)
-ss <- c('EB_NoDox_3h_Brg1', 'EB_NoDox_3h_H3K27ac', 'EB_Dox_3h_Etv2', 'EB_Dox_12h_Etv2')
-for (s in ss[ss %in% names(bw_files)]){
-  h <- h + EnrichedHeatmap(mat[[s]][i, ], col = col_fun[[s]], name = s, top_annotation = ta, pos_line = FALSE)
-}
-draw(h, heatmap_legend_side = 'bottom')
+devtools::load_all('packages/compbio'); n2m_files <- normalizeToMatrix_files(gs, base_names = names(bw_files), extend = extend, w = w, smooth = smooth, target_ratio = target_ratio)
+#devtools::load_all('packages/s3msi'); n2m_files %>% local_to_s3() %>% s3_download()
+devtools::load_all('packages/compbio'); get_normalizeToMatrix(bw_files, n2m_files, gr, extend = extend, w = w, smooth = smooth, target_ratio = target_ratio, mc.cores = mc.cores, force = FALSE)
 ```
 
 
