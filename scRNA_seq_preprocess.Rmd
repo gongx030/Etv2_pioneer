@@ -4,7 +4,7 @@ author:
 - name: 'Wuming Gong'
 created: '12/05/2019'
 updated: '12/05/2019'
-output: html_document
+output: rmarkdown::github_document
 ---
 
 This document covers the preprocessing steps of the scRNA-seq of Etv2 reprogramming in MEF
