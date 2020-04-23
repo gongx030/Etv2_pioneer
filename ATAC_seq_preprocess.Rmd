@@ -1,15 +1,81 @@
 ---
 title: 'Preprocessing the ATAC-seq for both ES/EB and MEF
 output: html_document
-date: '12/15/2019'
+date: '04/23/2019'
 author: 'Wuming Gong'
 ---
 
 ```{r, message = FALSE}
-devtools::load_all('packages/compbio')
 library(BSgenome.Mmusculus.UCSC.mm10)
-library(parallel)
 library(dplyr)
+library(futile.logger)
+library(BiocParallel)
+register(MulticoreParam(8))
+devtools::load_all('../ngsmsi')
+options(width = as.integer(system('tput cols', intern = TRUE)))
+```
+
+### Process the ATAC-seq for ES/EB differentiation and MEF reprogramming induced by Etv2
+* Note that all reads have been concatenated across lanes within each flow cell.  
+However, to achieve full read depth, your informatics team will need to concatenate reads across flow cells.
+```{r}
+root_dir <- sprintf('%s/etv2_atac', Sys.getenv('TMPDIR'))
+if (!file.exists(root_dir)) dir.create(root_dir)
+run1 <- '/home/garrydj/data_release/umgc/nextseq/190227_NB551164_0120_AHJYKYBGX9/Garry_Project_066_068_Run1'
+run2 <- '/home/garrydj/data_release/umgc/nextseq/190227_NB551498_0015_AHK23NBGX9/Garry_Project_066_068_Run2'
+files1 <- list.files(run1, 'fastq.gz', full.names = FALSE)
+files2 <- list.files(run2, 'fastq.gz', full.names = FALSE)
+all(files1 == files2) # this should be TRUE
+res <- bplapply(1:length(files1), function(i){
+	command <- sprintf('cat %s/%s %s/%s > %s/%s', run1, files1[i], run2, files1[i], root_dir, files1[i])
+	flog.info(sprintf('%d/%d | %s', i, length(files1), command))
+	system(command)
+})
+```
+
+### Move the fastq files to the temdir for alignment
+```{r}
+study_accession <- 'etv2_atac'
+dataset <- 'dataset=Etv2ATAC_version=20190228b'
+root <- Sys.getenv('TMPDIR')
+seqtype <- 'ATAC'
+genome <- 'mm10'
+data.dir <- sprintf('%s/%s', root, study_accession)
+fastq.files <- list.files(data.dir, 'fastq.gz', full.names = TRUE)
+run_accession <- gsub(sprintf('%s/(.+?)_R[1|2].+$', data.dir), '\\1', fastq.files)
+pairend <- as.numeric(gsub(sprintf('%s/.+?_R([1|2]).+$', data.dir), '\\1', fastq.files))
+res <- sapply(1:length(fastq.files), function(i) dir.create(sra_run_dir(run_accession[i]), recursive = TRUE))  # create run dir
+target.files <- sprintf('%s/%s_%d.fastq.gz', sra_run_dir(run_accession), run_accession, pairend)
+res <- bplapply(1:length(fastq.files), function(i){ 
+	command <- sprintf('cp %s %s', fastq.files[i], target.files[i])
+	cat(sprintf('[%s] %s\n', Sys.time(), command))
+	system(command)
+})  # move fastq files into tmpdir
+```
+
+### Prepare a data frame for each replicate
+```{r}
+run2group <- c(
+	'Dox_D1-1_S3' = 'MEF_Dox_D1_rep1',
+	'Dox_D1-2_S4' =	'MEF_Dox_D1_rep2',
+	'Dox_D2-1_S5' =	'MEF_Dox_D2_rep1',
+	'Dox_D2-2_S6' =	'MEF_Dox_D2_rep2',
+	'Dox_D7-1_Bulk_S7' = 'MEF_Dox_D7_rep1',
+	'Dox_D7-1_Sorted_S9' = 'MEF_Dox_D7_Flk1pos_rep1',
+	'Dox_D7-2_Bulk_S8' = 'MEF_Dox_D7_rep2',
+	'Dox_D7-2_Sorted_S10' =	'MEF_Dox_D7_Flk1pos_rep2',
+	'EB_D25_Dox12hBulk1_S13' = 'EB_Dox_D25_rep1',
+	'EB_D25_Dox12hBulk2_S14' = 'EB_Dox_D25_rep2',
+	'EB_D25_Dox12hSorted1_S15' = 'EB_Dox_D25_Flk1pos_rep1',
+	'EB_D25_Dox12hSorted2_S16' = 'EB_Dox_D25_Flk1pos_rep2',
+	'EB_D25_NoDox1_S11'	= 'EB_NoDox_D25_rep1',
+	'EB_D25_NoDox2_S12'	= 'EB_NoDox_D25_rep2',
+	'No_Dox_1_S1'	= 'MEF_NoDox_rep1',
+	'No_Dox_2_S2' =	'MEF_NoDox_rep2'
+)
+group <- run2group[unique(run_accession)]
+d <- data.frame(study_accession = study_accession, run = unique(run_accession), seqtype = seqtype, genome = genome, group = group)
+write.table(d, sprintf('../datasets/%s.tsv', dataset), sep = '\t', quote = FALSE, row.names = FALSE)
 ```
 
 # Calling ATAC-seq peaks for EB Etv2 induction at D2.5 and MEF Etv2 induction data
