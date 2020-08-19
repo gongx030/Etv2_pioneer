@@ -1,7 +1,7 @@
 ---
 title: 'Preprocessing the ATAC-seq for both ES/EB and MEF
 output: html_document
-date: '04/23/2019'
+date: '08/17/2020'
 author: 'Wuming Gong'
 ---
 
@@ -125,7 +125,7 @@ output_bam_file <- sprintf('%s/%s.bam', dataset_dir(dataset), bname)
 merge.bam.files(treatment_files, output_bam_file)
 ```
 
-# Define a union set of ATAC-seq summits and save as a bed file:
+### Define a union set of ATAC-seq summits and save as a bed file:
 ```{r}
 bed_files <- c(
 
@@ -235,6 +235,298 @@ dataset <- 'dataset=Etv2ATAC_version=20190228a'; bname <- 'MEF_Dox_D1'
 
 base_name <- sprintf('%s/%s', dataset_dir(dataset), bname)
 devtools::load_all('packages/compbio'); nucleoatac_merge(base_name, job = '20191215', genome = BSgenome.Mmusculus.UCSC.mm10)
+```
+
+### Process the ATAC-seq of Brg1 KD in MEF after Etv2 induction
+raw data: /home/garrydj/data_release/umgc/novaseq/200811_A00223_0389_BHHV3FDRXX/Garry_Project_078
+```{r}
+library(parallel)
+devtools::load_all('../ngsmsi')
+root <- '/home/garrydj/data_release/umgc/novaseq'
+study_accessions <- c('200811_A00223_0389_BHHV3FDRXX/Garry_Project_078')
+dataset <- 'dataset=Brg1KO_MEF_reprogramming_version=20200817a'
+lapply(study_accessions, function(study_accession){
+	data_dir <- sprintf('%s/%s', root, study_accession)
+	fastq_files <- list.files(data_dir, 'fastq.gz', full.names = TRUE)
+	run_accession <- gsub(sprintf('%s/(.+?)_R[1|2].+$', data_dir), '\\1', fastq_files)
+	pairend <- as.numeric(gsub(sprintf('%s/.+?_R([1|2]).+$', data_dir), '\\1', fastq_files))
+	res <- sapply(1:length(fastq_files), function(i) dir.create(sra_run_dir(run_accession[i]), recursive = TRUE))  # create run dir
+	target_files <- sprintf('%s/%s_%d.fastq.gz', sra_run_dir(run_accession), run_accession, pairend)
+	res <- unlist(mclapply(1:length(fastq_files), function(i){ command <- sprintf('cp %s %s', fastq_files[i], target_files[i]); cat(sprintf('[%s] %s\n', Sys.time(), command)); system(command)}, mc.cores = 8))  # move fastq files into tmpdir
+})
+
+run2group <- c(
+	"Brg1_KD_D0_1_S1" = 'MEF_Brg1_KD_D0_rep1',
+	"Brg1_KD_D0_2_S2" = 'MEF_Brg1_KD_D0_rep2',
+	"Brg1_KD_Dox_D1_1_S5" = 'MEF_Brg1_KD_Dox_D1_rep1',
+	"Brg1_KD_Dox_D1_2_S6" = 'MEF_Brg1_KD_Dox_D1_rep2',
+	"Brg1_KD_Dox_D2_1_S9" = 'MEF_Brg1_KD_Dox_D2_rep1',
+	"Brg1_KD_Dox_D2_2_S10" = 'MEF_Brg1_KD_Dox_D2_rep2',
+	"Brg1_KD_Dox_D7_1_S13" = 'MEF_Brg1_KD_Dox_D7_rep1',
+	"Brg1_KD_Dox_D7_2_S14" = 'MEF_Brg1_KD_Dox_D7_rep2',
+	"Brg1_KD_NoDox_D1_1_S8" = 'MEF_Brg1_KD_NoDox_D1_rep1',
+	"Brg1_KD_NoDox_D1_2_S4" = 'MEF_Brg1_KD_NoDox_D1_rep2',
+	"Brg1_KD_NoDox_D2_1_S7" = 'MEF_Brg1_KD_NoDox_D2_rep1',
+	"Brg1_KD_NoDox_D2_2_S3" = 'MEF_Brg1_KD_NoDox_D2_rep2',
+	"Brg1_KD_NoDox_D7_1_S11" = 'MEF_Brg1_KD_NoDox_D7_rep1',
+	"Brg1_KD_NoDox_D7_2_S12" = 'MEF_Brg1_KD_NoDox_D7_rep2'
+)
+
+d <- do.call('rbind', lapply(study_accessions, function(study_accession){
+	data.dir <- sprintf('%s/%s', root, study_accession)
+	fastq.files <- list.files(data.dir, 'fastq.gz', full.names = TRUE)
+	run_accession <- gsub(sprintf('%s/(.+?)_R[1|2].+$', data.dir), '\\1', fastq.files)
+	group <- run2group[unique(run_accession)]
+	data.frame(study_accession = study_accession, run = unique(run_accession), seqtype = 'ATAC', genome = 'mm10', group = group)
+}))
+write.table(d, sprintf('data/%s.tsv', dataset), sep = '\t', quote = FALSE, row.names = FALSE)
+```
+
+### Prepare the jobs for alignning dataset=Brg1KO_MEF_reprogramming_version=20200817a
+```{r}
+devtools::load_all('../ngsmsi')
+devtools::load_all('../msipbs')
+
+dataset <- 'dataset=Brg1KO_MEF_reprogramming_version=20200817a'
+batch <- 1; np <- 8; ppn <- 8; walltime <- '24:00:00'
+dataset_file <- sprintf('data/%s.tsv', dataset)
+prefix <- '20200817a'
+
+x <- read.table(dataset_file, sep = '\t', header = TRUE)
+command_list <- lapply(1:nrow(x), function(i) align(x[i, 'run'], x[i, 'genome'], x[i, 'seqtype'], np = np))
+command_list <- sapply(command_list, function(c) paste(c, collapse = '\n'))
+
+bs <- split(1:length(command_list), ceiling(1:length(command_list) / batch))
+for (j in 1:length(bs)){
+	command <- paste(lapply(bs[[j]], function(i) command_list[[i]]), collapse = '\n\n')
+	id <- sprintf('%s_%s', prefix, j)
+	pbs_write_pbs(id, dir = 'jobs', queue = 'mesabi_bash', conda = 'ngs', wd = getwd(), walltime = walltime, nodes = np / ppn, ppn = ppn, command = command)
+}
+
+# running background jobs for sequence alignment
+
+dataset_dir <- sprintf('/panfs/roc/scratch/gongx030/datasets/%s', dataset)
+dir.create(dataset_dir, recursive = TRUE)
+x <- x %>%
+	mutate(source_bam_file = sprintf('%s/%s/%s.dedup.bam', sra_run_dir(run), run, run)) %>%
+	mutate(source_bai_file = sprintf('%s/%s/%s.dedup.bai', sra_run_dir(run), run, run)) %>%
+	mutate(source_bw_file = sprintf('%s/%s/pileup.bw', sra_run_dir(run), run, run)) %>%
+	mutate(target_bam_file = sprintf('%s/%s.bam', dataset_dir, group)) %>%
+	mutate(target_bai_file = sprintf('%s/%s.bai', dataset_dir, group)) %>%
+	mutate(target_bw_file = sprintf('%s/%s.bw', dataset_dir, group))
+
+file.copy(x$source_bam_file, x$target_bam_file)
+file.copy(x$source_bai_file, x$target_bai_file)
+file.copy(x$source_bw_file, x$target_bw_file)
+```
+
+### Define the samples and the replicates
+```{r}
+dataset <- 'dataset=Brg1KO_MEF_reprogramming_version=20200817a'
+dataset_file <- sprintf('data/%s.tsv', dataset)
+dataset_dir <- sprintf('/panfs/roc/scratch/gongx030/datasets/%s', dataset)
+
+replicate2sample <- c(
+	'MEF_Brg1_KD_D0_rep1' = 'MEF_Brg1_KD_D0',
+	'MEF_Brg1_KD_D0_rep2' = 'MEF_Brg1_KD_D0',
+	'MEF_Brg1_KD_Dox_D1_rep1' = 'MEF_Brg1_KD_Dox_D1',
+	'MEF_Brg1_KD_Dox_D1_rep2' = 'MEF_Brg1_KD_Dox_D1',
+	'MEF_Brg1_KD_Dox_D2_rep1' = 'MEF_Brg1_KD_Dox_D2',
+	'MEF_Brg1_KD_Dox_D2_rep2' = 'MEF_Brg1_KD_Dox_D2',
+	'MEF_Brg1_KD_Dox_D7_rep1' = 'MEF_Brg1_KD_Dox_D7',
+	'MEF_Brg1_KD_Dox_D7_rep2' = 'MEF_Brg1_KD_Dox_D7',
+	'MEF_Brg1_KD_NoDox_D1_rep1' = 'MEF_Brg1_KD_NoDox_D1',
+	'MEF_Brg1_KD_NoDox_D1_rep2' = 'MEF_Brg1_KD_NoDox_D1',
+	'MEF_Brg1_KD_NoDox_D2_rep1' = 'MEF_Brg1_KD_NoDox_D2',
+	'MEF_Brg1_KD_NoDox_D2_rep2' = 'MEF_Brg1_KD_NoDox_D2',
+	'MEF_Brg1_KD_NoDox_D7_rep1' = 'MEF_Brg1_KD_NoDox_D7',
+	'MEF_Brg1_KD_NoDox_D7_rep2' = 'MEF_Brg1_KD_NoDox_D7'
+)
+sp <- split(names(replicate2sample), list(replicate2sample))
+```
+
+### Merge replicate-level BAM files into sample-level BAM files for `dataset=Brg1KO_MEF_reprogramming_version=20200817a`
+```{r} 
+devtools::load_all('../compbio')
+mclapply(2:length(sp), function(i){
+	source_bam_files <- sprintf('%s/%s.bam', dataset_dir, sp[[i]])
+	target_bam_file <- sprintf('%s/%s.bam', dataset_dir, names(sp)[i])
+	merge_bam_files(source_bam_files, target_bam_file, method = 'samtools')
+}, mc.cores = 4)
+```
+
+### Calling peaks by Macs2 (generating jobs)
+```{r}
+
+devtools::load_all('../compbio')
+devtools::load_all('../msipbs')
+prefix <- '20200818a'
+
+for (i in 1:length(sp)){
+
+	treatment_files <- sprintf('%s/%s.bam', dataset_dir, sp[[i]])
+	base_name <- sprintf('%s/%s', dataset_dir, names(sp)[i])
+
+	r_command <- sprintf("
+devtools::load_all('../compbio')
+treatment_files <- c(%s)
+base_name <- '%s'
+macs2.callpeak(treatment_files, base_name, format = 'BAMPE', genome = 'mm10', broad = FALSE, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+",  paste(sprintf('"%s"', treatment_files), collapse = ','), base_name)
+
+	id <- sprintf('%s_%d', prefix, i)
+  pbs_write_r(id, dir = 'jobs', r_command)
+  pbs_write_pbs(id, dir = 'jobs', queue = 'mesabi', conda = 'r', pmem = 2580, nodes = 1, ppn = 1, wd = getwd(), walltime = '24:00:00')
+
+}
+
+
+bs <- split(1:length(command_list), ceiling(1:length(command_list) / batch))
+for (j in 1:length(bs)){
+	command <- paste(lapply(bs[[j]], function(i) command_list[[i]]), collapse = '\n\n')
+	id <- sprintf('%s_%s', prefix, j)
+	pbs_write_pbs(id, dir = 'jobs', queue = 'mesabi_bash', conda = 'ngs', wd = getwd(), walltime = walltime, nodes = np / ppn, ppn = ppn, command = command)
+}
+```
+
+### [2020-08-19] Upload the /panfs/roc/scratch/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a to MSI
+```{bash}
+
+#s3cmd sync -v --dry-run --no-check-md5 --exclude '*.bdg' /panfs/roc/scratch/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a s3://gongx030/datasets/
+s3cmd sync -v --no-check-md5 --exclude '*.bdg' /panfs/roc/scratch/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a s3://gongx030/datasets/
+s3cmd setacl -P -r s3://gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/
 
 ```
 
+
+### [2020-08-19] Define a union set of ATAC-seq summits (including Brg1 KD ATAC-seq) and save as a bed file:
+```{r}
+library(BSgenome.Mmusculus.UCSC.mm10)
+library(parallel)
+bed_files <- c(
+
+	'EB_Dox_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D0_summits.bed',
+
+	'EB_NoDox_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D0_summits.bed',
+	'EB_Dox_D3_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D3_Flk1pos_summits.bed',
+	'EB_NoDox_D3_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D3_Flk1pos_summits.bed',
+
+	'EB_Dox_D3' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170628a/EB_Dox_D3_summits.bed',
+	'EB_NoDox_D3' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170628a/EB_NoDox_D3_summits.bed',
+
+	'MEF_NoDox' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed',
+	'MEF_Dox_D1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
+	'MEF_Dox_D2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D2_summits.bed',
+  'MEF_Dox_D7' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_summits.bed',
+  'MEF_Dox_D7_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D7_Flk1pos_summits.bed',
+
+  'EB_Dox_D25' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_summits.bed',
+  'EB_Dox_D25_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_Dox_D25_Flk1pos_summits.bed',
+  'EB_NoDox_D25' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/EB_NoDox_D25_summits.bed',
+
+	'MEF_Brg1_KD_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_D0_summits.bed',
+	'MEF_Brg1_KD_Dox_D1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D1_summits.bed',
+	'MEF_Brg1_KD_Dox_D2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D2_summits.bed',
+	'MEF_Brg1_KD_Dox_D7' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D7_summits.bed',
+	'MEF_Brg1_KD_NoDox_D1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D1_summits.bed',
+	'MEF_Brg1_KD_NoDox_D2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D2_summits.bed',
+	'MEF_Brg1_KD_NoDox_D7' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D7_summits.bed'
+
+)
+
+s3_bed_files <- gsub('https://s3.msi.umn.edu', 's3://', bed_files)
+local_bed_files <- gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', bed_files)
+
+# make sure all the files exist
+commands <- sprintf('s3cmd info %s', s3_bed_files)
+res <- sapply(commands, function(command) system(command))
+all(res == 0)
+
+# download the bed files to local
+commands <- sprintf('s3cmd get --recursive %s %s', s3_bed_files, local_bed_files)
+lapply(commands, function(command) system(command))
+
+# retrieve the blacklist file
+remote_blacklist_file <- 'https://s3.msi.umn.edu/gongx030/datasets/datasets=blacklists_version=20190827a/mm10.blacklist.bed.gz'
+s3_blacklist_file <- gsub('https://s3.msi.umn.edu', 's3://', remote_blacklist_file)
+local_blacklist_file <- gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', remote_blacklist_file)
+system(sprintf('s3cmd get --recursive %s %s', s3_blacklist_file, local_blacklist_file))
+blacklist <- read.table(gzfile(local_blacklist_file), header = FALSE, sep = '\t')
+blacklist <- GRanges(seqnames = blacklist[, 1], range = IRanges(blacklist[, 2], blacklist[, 3]))
+
+gr_list <- lapply(1:length(local_bed_files), function(i){
+	x <- read.table(local_bed_files[i], header = FALSE, sep = '\t')
+	x <- GRanges(seqnames = x[, 1], range = IRanges(x[, 2], x[, 3]), score = x[, 5])
+	x$source <- names(local_bed_files)[i]
+  x
+})
+
+gr <- Reduce('c', gr_list)
+
+gr <- gr[!gr %over% blacklist]	# remove the ATAC-seq peaks overlapping with blacklist
+
+gr <- resize(gr, width = 200, fix = 'center')
+gr0 <- reduce(gr) # a reduced set of ATAC-seq peaks
+mm <- as.matrix(findOverlaps(gr, gr0))
+sp <- split(mm[, 1], list(mm[, 2]))
+j <- unlist(mclapply(sp, function(i) i[which.max(gr$score[i])], mc.cores = 4))
+gr <- gr[j]
+G <- do.call('cbind', lapply(1:length(bed_files), function(i) gr %over% gr_list[[i]]))
+gr$group <- G # group assignment of the union set to each source
+colnames(gr$group) <- names(bed_files)
+
+peak_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC_seq_peaks_v2.bed'
+s3_peak_file <- gsub('https://s3.msi.umn.edu', 's3://', peak_file)
+local_peak_file <- gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', peak_file)
+write.table(as.data.frame(gr), local_peak_file, sep = '\t', quote = FALSE, row.names = FALSE, col.names = FALSE)
+system(sprintf('s3cmd put %s %s', local_peak_file, s3_peak_file))
+system(sprintf('s3cmd setacl -P %s', s3_peak_file))
+
+gr_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC_seq_peaks_v2.rds'
+s3_gr_file <- gsub('https://s3.msi.umn.edu', 's3://', gr_file)
+local_gr_file <- gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', gr_file)
+saveRDS(gr, file = local_gr_file)
+system(sprintf('s3cmd put %s %s', local_gr_file, s3_gr_file))
+system(sprintf('s3cmd setacl -P %s', s3_gr_file))
+```
+
+### [2020-08-19] Generating a read counts matrix for each ATAC-seq sample, over a union peak set across all ATAC-seq samples
+* These data will be used to perform a sample level chromVAR analysis
+* This update inclues the Brg1 KD data
+```{r}
+devtools::load_all('../compbio')
+gr_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC_seq_peaks_v2.rds'
+peaks <- readRDS(url(gr_file))
+peaks <- compbio::add.seqinfo(peaks, 'mm10')
+
+# check if the pileup bigwig file exist
+bw_files <- gsub('_summits.bed', '_treat_pileup.bw', bed_files)
+s3_bw_files <- gsub('https://s3.msi.umn.edu', 's3://', bw_files)
+commands <- sprintf('s3cmd info %s', s3_bw_files)
+res <- sapply(commands, function(command) system(command))
+all(res == 0)
+
+# download the pileup bigwig files to local
+local_bw_files <-  gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', bw_files)
+commands <- sprintf('s3cmd get --recursive %s %s', s3_bw_files, local_bw_files)
+lapply(commands, function(command) system(command))
+
+X <- do.call('cbind', mclapply(local_bw_files, function(bw_file){
+  flog.info(sprintf('reading %s', bw_file))
+#	ga <- rtracklayer::import(bw_file, format = 'BigWig', which = reduce(peaks))
+	ga <- rtracklayer::import(bw_file, format = 'BigWig')#, which = reduce(peaks))	
+	ga <- add.seqinfo(ga, 'mm10')
+  cvg <- coverage(ga, weight = as.numeric(mcols(ga)$score))
+  sum(cvg[peaks])
+}, mc.cores = 4))
+
+se <- SummarizedExperiment(assays = SimpleList(counts = X), rowRanges = peaks, colData = data.frame(bed_file = bed_files, bw_file = bw_files, group = names(bw_files)))
+
+se_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds'
+s3_se_file <- gsub('https://s3.msi.umn.edu', 's3://', se_file)
+local_se_file <- gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', se_file)
+saveRDS(se, file = local_se_file)
+system(sprintf('s3cmd put %s %s', local_se_file, s3_se_file))
+system(sprintf('s3cmd setacl -P %s', s3_se_file))
+
+```

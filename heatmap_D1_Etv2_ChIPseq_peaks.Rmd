@@ -1,7 +1,7 @@
 ---
-title: 'Heatmap for epigenetic data surrounding Etv2 ChIP-seq peaks at D1 post induction
+title: 'Prepare data for epigenetic data surrounding Etv2 ChIP-seq peaks at D1 post induction
 output: rmarkdown::github_document
-date: '12/26/2019'
+date: '02/12/2019'
 author: 'Wuming Gong'
 ---
 
@@ -17,8 +17,9 @@ library(BSgenome.Mmusculus.UCSC.mm10)
 
 # Read the Etv2 ChIP-seq peaks at D1 MEF reprogramming
 ```{r}
-bed_file <- '/panfs/roc/scratch/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed'
-peaks <- macs2.read_summits(bed_file)
+bed_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_Dox_d1_Etv2_summits.bed'
+peaks <- read.table(bed_file, sep = '\t', header = FALSE)
+peaks <- GRanges(seqnames = peaks[, 1], range = IRanges(peaks[, 2], peaks[, 3]))
 seqlevels(peaks) <- seqlevels(BSgenome.Mmusculus.UCSC.mm10)
 seqlengths(peaks) <- seqlengths(BSgenome.Mmusculus.UCSC.mm10)
 seqinfo(peaks) <- seqinfo(BSgenome.Mmusculus.UCSC.mm10)
