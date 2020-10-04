@@ -35,3 +35,7 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 [diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd](diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd) R script for performing motif analysis of finding relatively enriched motifs in NFR compared with nucleosome within Etv2 ChIP-seq peaks regions. 
 
 [find_de_novo_motifs_Etv2_chipseq_peaks.Rmd](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) R script for finding de novo motifs within Etv2 ChIP-seq peaks in EB and MEF.  The de novo motifs were identified by Homer. 
+
+## Figures
+
+[Brg1KD_scRNA_seq_D7.ipynb](Brg1KD_scRNA_seq_D7.ipynb): Figure of analysis of D7 single cell RNA-seq including Brg1 KD samples.
