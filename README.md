@@ -18,9 +18,9 @@ peaks
 
 ## Datasets
 
-| | link |
-| --- | --- |
-| ATAC-seq counts | https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds |
+| | link | Format |
+| --- | --- | --- |
+| ATAC-seq counts | [link](https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds) | SummarizedExperiment |
 
 ## Notebooks
 
