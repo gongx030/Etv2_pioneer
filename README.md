@@ -24,7 +24,7 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 
 [Brg1KD_scRNA_seq_D7.ipynb](Brg1KD_scRNA_seq_D7.ipynb): D7 single cell RNA-seq including Brg1 KD samples.
 
-[Brg1KD_scRNA-seq.ipynb](https://colab.research.google.com/drive/18I1xy3uPzhEfTzZZbM-bPJTITMnPoHHB?usp=sharing) Analysis of Brg1KD single cell RNA-seq. 
+[Brg1KD_scRNA_seq_D0.ipynb](Brg1KD_scRNA_seq_D0.ipynb): Single cell RNA-seq of control MEF and Brg1 KD cells at D0. 
 
 [Brg1KD_analysis.ipynb](Brg1KD_analysis.ipynb) Notebook for Brg1 KD ATAC-seq analysis. 
 
