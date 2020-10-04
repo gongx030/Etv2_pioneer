@@ -24,9 +24,8 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 
 |  | Figure | Preview | Colab link | Time (mins) |
 | --- | --- | --- | --- | --- |
-| D7 single cell RNA-seq including Brg1 KD samples | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 46 |
-
-| D0 single cell RNA-seq including Brg1 KD samples | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
+| D7 single cell RNA-seq including Brg1 KD samples |  | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 46 |
+| D0 single cell RNA-seq including Brg1 KD samples |  | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 
 
 
