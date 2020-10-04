@@ -28,9 +28,6 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 | D0 single cell RNA-seq including Brg1 KD samples |  | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 
 
-
-[Brg1KD_scRNA_seq_D0.ipynb](Brg1KD_scRNA_seq_D0.ipynb): Single cell RNA-seq of control MEF and Brg1 KD cells at D0. 
-
 [Brg1KD_analysis.ipynb](Brg1KD_analysis.ipynb) Notebook for Brg1 KD ATAC-seq analysis. 
 
 [ATAC_seq_preprocess.Rmd](ATAC_seq_preprocess.Rmd) R script for processing ATAC-seq data of ES/EB differentiation and MEF reprogramming induced by Etv2.  
