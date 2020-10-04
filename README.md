@@ -18,7 +18,9 @@ peaks
 
 ## Datasets
 
-The processed sequencing data can be found [here](https://docs.google.com/spreadsheets/d/18E90G_y3H5jT5wbNObcNY0Jdhqo0YWRMrPHzvoaiwD8/edit?usp=sharing). 
+| | link |
+| --- | --- |
+| ATAC-seq counts | https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds |
 
 ## Notebooks
 
