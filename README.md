@@ -22,6 +22,8 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 
 ## Notebooks
 
+[Brg1KD_scRNA_seq_D7.ipynb](Brg1KD_scRNA_seq_D7.ipynb): D7 single cell RNA-seq including Brg1 KD samples.
+
 [Brg1KD_scRNA-seq.ipynb](https://colab.research.google.com/drive/18I1xy3uPzhEfTzZZbM-bPJTITMnPoHHB?usp=sharing) Analysis of Brg1KD single cell RNA-seq. 
 
 [Brg1KD_analysis.ipynb](Brg1KD_analysis.ipynb) Notebook for Brg1 KD ATAC-seq analysis. 
@@ -36,6 +38,3 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 
 [find_de_novo_motifs_Etv2_chipseq_peaks.Rmd](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) R script for finding de novo motifs within Etv2 ChIP-seq peaks in EB and MEF.  The de novo motifs were identified by Homer. 
 
-## Figures
-
-[Brg1KD_scRNA_seq_D7.ipynb](Brg1KD_scRNA_seq_D7.ipynb): D7 single cell RNA-seq including Brg1 KD samples.
