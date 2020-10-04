@@ -16,11 +16,11 @@ peaks <- gr[gr$group[, 'MEF_Dox_d1_Etv2'] | gr$group[, 'MEF_Dox_d7_Etv2']]
 peaks
 ```
 
-## Datasets
+## Processed datasets
 
-| | link | Format |
-| --- | --- | --- |
-| ATAC-seq counts | [link](https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds) | SummarizedExperiment |
+| | link | Format | Script | 
+| --- | --- | --- | --- | 
+| ATAC-seq counts | [link](https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds) | SummarizedExperiment | [ATAC_seq_preprocess.Rmd](ATAC_seq_preprocess.Rmd) |
 
 ## Notebooks
 
