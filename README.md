@@ -25,7 +25,7 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 |  | Figure | Preview | Colab link | Time (mins) |
 | --- | --- | --- | --- | --- |
 | D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 46 |
-| D0 scRNA-seq including Brg1 KD samples |  | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
+| D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 12 | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 
 
 [Brg1KD_analysis.ipynb](Brg1KD_analysis.ipynb) Notebook for Brg1 KD ATAC-seq analysis. 
