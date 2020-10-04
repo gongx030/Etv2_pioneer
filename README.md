@@ -22,9 +22,9 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 
 ## Notebooks
 
-|  | Preview | Colab link |
-| --- | --- | --- |
-| D7 single cell RNA-seq including Brg1 KD samples | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 
+|  | Preview | Colab link | Time (mins) |
+| --- | --- | --- | --- |
+| D7 single cell RNA-seq including Brg1 KD samples | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 46 |
 
 
 [Brg1KD_scRNA_seq_D0.ipynb](Brg1KD_scRNA_seq_D0.ipynb): Single cell RNA-seq of control MEF and Brg1 KD cells at D0. 
