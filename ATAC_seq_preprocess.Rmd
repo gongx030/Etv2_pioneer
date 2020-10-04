@@ -355,7 +355,7 @@ mclapply(2:length(sp), function(i){
 }, mc.cores = 4)
 ```
 
-### Calling peaks by Macs2 (generating jobs)
+### [2020-08-18] Calling sample-level peaks by Macs2 (generating jobs)
 ```{r}
 
 devtools::load_all('../compbio')
@@ -389,6 +389,55 @@ for (j in 1:length(bs)){
 }
 ```
 
+
+### [2020-08-20] Calling replicate-level peaks by Macs2 
+* The treat_pileup.bw files will used for chromVAR analysis
+```{r}
+devtools::load_all('../compbio')
+devtools::load_all('../msipbs')
+
+dataset <- 'dataset=Brg1KO_MEF_reprogramming_version=20200817a'
+dataset_file <- sprintf('data/%s.tsv', dataset)
+x <- read.table(dataset_file, sep = '\t', header = TRUE)
+
+bam_files <- sprintf(
+	'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/%s.bam', x$group
+)
+s3_bam_files <- gsub('https://s3.msi.umn.edu/', 's3://', bam_files)
+local_bam_files <- gsub('https://s3.msi.umn.edu/gongx030/datasets/', './data/', bam_files)
+
+# download the files to local
+commands <- sprintf('s3cmd get --recursive %s %s', s3_bam_files, local_bam_files)
+lapply(commands, function(command) system(command))
+
+prefix <- '20200820a'
+base_names <- gsub('.bam', '', local_bam_files)
+
+for (i in 1:length(local_bam_files)){
+	r_command <- sprintf("
+devtools::load_all('../compbio')
+treatment_files <- '%s'
+base_name <- '%s'
+macs2.callpeak(treatment_files, base_name, format = 'BAMPE', genome = 'mm10', broad = FALSE, qvalue.cutoff = 0.05, fold.change = TRUE, update = TRUE, call.summits = TRUE, shift = -100, extsize = 200)
+",  local_bam_files[i], base_names[i])
+
+	id <- sprintf('%s_%d', prefix, i)
+  pbs_write_r(id, dir = 'jobs', r_command)
+  pbs_write_pbs(id, dir = 'jobs', queue = 'mesabi', conda = 'r', pmem = 2580, nodes = 1, ppn = 1, wd = getwd(), walltime = '24:00:00')
+}
+
+
+### upload the bigwig files (_treat_pileup.bw) to s3
+local_bw_files <- sprintf('%s_treat_pileup.bw', base_names)
+s3_bw_files <- gsub('./data/', 's3://gongx030/datasets/', local_bw_files)
+commands <- sprintf('s3cmd put %s %s', local_bw_files, s3_bw_files)
+lapply(commands, function(command) system(command))
+commands <- sprintf('s3cmd setacl -P %s', s3_bw_files)
+lapply(commands, function(command) system(command))
+
+
+```
+
 ### [2020-08-19] Upload the /panfs/roc/scratch/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a to MSI
 ```{bash}
 
@@ -405,14 +454,14 @@ library(BSgenome.Mmusculus.UCSC.mm10)
 library(parallel)
 bed_files <- c(
 
-	'EB_Dox_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D0_summits.bed',
+#	'EB_Dox_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D0_summits.bed',
 
-	'EB_NoDox_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D0_summits.bed',
-	'EB_Dox_D3_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D3_Flk1pos_summits.bed',
-	'EB_NoDox_D3_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D3_Flk1pos_summits.bed',
+#	'EB_NoDox_D0' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D0_summits.bed',
+#	'EB_Dox_D3_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_Dox_D3_Flk1pos_summits.bed',
+#	'EB_NoDox_D3_Flk1pos' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170302a/EB_NoDox_D3_Flk1pos_summits.bed',
 
-	'EB_Dox_D3' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170628a/EB_Dox_D3_summits.bed',
-	'EB_NoDox_D3' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170628a/EB_NoDox_D3_summits.bed',
+#	'EB_Dox_D3' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170628a/EB_Dox_D3_summits.bed',
+#	'EB_NoDox_D3' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Naoko_version=20170628a/EB_NoDox_D3_summits.bed',
 
 	'MEF_NoDox' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_NoDox_summits.bed',
 	'MEF_Dox_D1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/MEF_Dox_D1_summits.bed',
@@ -463,7 +512,12 @@ gr_list <- lapply(1:length(local_bed_files), function(i){
 
 gr <- Reduce('c', gr_list)
 
-gr <- gr[!gr %over% blacklist]	# remove the ATAC-seq peaks overlapping with blacklist
+# remove the ATAC-seq peaks overlapping with blacklist
+gr <- gr[!gr %over% blacklist]	
+
+# remove ATAC-seq summits overlapping with the exons
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+gr <- gr[!gr %over% exons(TxDb.Mmusculus.UCSC.mm10.knownGene)]
 
 gr <- resize(gr, width = 200, fix = 'center')
 gr0 <- reduce(gr) # a reduced set of ATAC-seq peaks
@@ -490,7 +544,8 @@ system(sprintf('s3cmd put %s %s', local_gr_file, s3_gr_file))
 system(sprintf('s3cmd setacl -P %s', s3_gr_file))
 ```
 
-### [2020-08-19] Generating a read counts matrix for each ATAC-seq sample, over a union peak set across all ATAC-seq samples
+
+### [2020-08-19] Generating a read counts matrix for each ATAC-seq replicate, over a union peak set across all ATAC-seq samples
 * These data will be used to perform a sample level chromVAR analysis
 * This update inclues the Brg1 KD data
 ```{r}
@@ -499,8 +554,42 @@ gr_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20
 peaks <- readRDS(url(gr_file))
 peaks <- compbio::add.seqinfo(peaks, 'mm10')
 
-# check if the pileup bigwig file exist
-bw_files <- gsub('_summits.bed', '_treat_pileup.bw', bed_files)
+bw_files <- c(
+
+	'EB_Dox_D25_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_Dox_D25_rep1_treat_pileup.bw',
+	'EB_Dox_D25_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_Dox_D25_rep2_treat_pileup.bw',
+	'EB_NoDox_D25_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_rep1_treat_pileup.bw',
+	'EB_NoDox_D25_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_NoDox_D25_rep2_treat_pileup.bw',
+	'EB_Dox_D25_Flk1pos_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_Dox_D25_Flk1pos_rep1_treat_pileup.bw',
+	'EB_Dox_D25_Flk1pos_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/EB_Dox_D25_Flk1pos_rep2_treat_pileup.bw',
+
+	'MEF_NoDox_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_NoDox_rep1_treat_pileup.bw',
+	'MEF_NoDox_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_NoDox_rep2_treat_pileup.bw',
+	'MEF_Dox_D1_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D1_rep1_treat_pileup.bw',
+	'MEF_Dox_D1_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D1_rep2_treat_pileup.bw',
+	'MEF_Dox_D2_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D2_rep1_treat_pileup.bw',
+	'MEF_Dox_D2_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D2_rep2_treat_pileup.bw',
+	'MEF_Dox_D7_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D7_rep1_treat_pileup.bw',
+	'MEF_Dox_D7_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D7_rep2_treat_pileup.bw',
+	'MEF_Dox_D7_Flk1pos_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D7_Flk1pos_rep1_treat_pileup.bw',
+	'MEF_Dox_D7_Flk1pos_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228b/MEF_Dox_D7_Flk1pos_rep2_treat_pileup.bw',
+
+	'MEF_Brg1_KD_D0_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_D0_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_D0_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_D0_rep2_treat_pileup.bw',
+	'MEF_Brg1_KD_Dox_D1_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D1_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_Dox_D1_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D1_rep2_treat_pileup.bw',
+	'MEF_Brg1_KD_Dox_D2_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D2_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_Dox_D2_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D2_rep2_treat_pileup.bw',
+	'MEF_Brg1_KD_Dox_D7_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D7_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_Dox_D7_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_Dox_D7_rep2_treat_pileup.bw',
+	'MEF_Brg1_KD_NoDox_D1_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D1_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_NoDox_D1_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D1_rep2_treat_pileup.bw',
+	'MEF_Brg1_KD_NoDox_D2_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D2_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_NoDox_D2_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D2_rep2_treat_pileup.bw',
+	'MEF_Brg1_KD_NoDox_D7_rep1' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D7_rep1_treat_pileup.bw',
+	'MEF_Brg1_KD_NoDox_D7_rep2' = 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Brg1KO_MEF_reprogramming_version=20200817a/MEF_Brg1_KD_NoDox_D7_rep2_treat_pileup.bw'
+
+)
 s3_bw_files <- gsub('https://s3.msi.umn.edu', 's3://', bw_files)
 commands <- sprintf('s3cmd info %s', s3_bw_files)
 res <- sapply(commands, function(command) system(command))
@@ -513,14 +602,13 @@ lapply(commands, function(command) system(command))
 
 X <- do.call('cbind', mclapply(local_bw_files, function(bw_file){
   flog.info(sprintf('reading %s', bw_file))
-#	ga <- rtracklayer::import(bw_file, format = 'BigWig', which = reduce(peaks))
 	ga <- rtracklayer::import(bw_file, format = 'BigWig')#, which = reduce(peaks))	
 	ga <- add.seqinfo(ga, 'mm10')
   cvg <- coverage(ga, weight = as.numeric(mcols(ga)$score))
   sum(cvg[peaks])
 }, mc.cores = 4))
 
-se <- SummarizedExperiment(assays = SimpleList(counts = X), rowRanges = peaks, colData = data.frame(bed_file = bed_files, bw_file = bw_files, group = names(bw_files)))
+se <- SummarizedExperiment(assays = SimpleList(counts = X), rowRanges = peaks, colData = data.frame(bw_file = bw_files, name = names(bw_files), group = gsub('_rep\\d', '', names(bw_files))))
 
 se_file <- 'https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2ATAC_version=20190228a/all_ATAC.rds'
 s3_se_file <- gsub('https://s3.msi.umn.edu', 's3://', se_file)
