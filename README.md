@@ -38,4 +38,4 @@ The processed sequencing data can be found [here](https://docs.google.com/spread
 
 ## Figures
 
-[Brg1KD_scRNA_seq_D7.ipynb](Brg1KD_scRNA_seq_D7.ipynb): Figure of analysis of D7 single cell RNA-seq including Brg1 KD samples.
+[Brg1KD_scRNA_seq_D7.ipynb](Brg1KD_scRNA_seq_D7.ipynb): D7 single cell RNA-seq including Brg1 KD samples.
