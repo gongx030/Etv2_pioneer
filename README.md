@@ -28,7 +28,7 @@ peaks
 | --- | --- | --- | --- | --- |
 | D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 46 |
 | D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 12 | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
-| D7 Brg1 KD ATAC-seq | Figure 4a-4c | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |  |
+| D7 Brg1 KD ATAC-seq | Figure 4a-4c | [R](Brg1_KD_sustained_Etv2_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |  |
 
 
 [ATAC_seq_preprocess.Rmd](ATAC_seq_preprocess.Rmd) R script for processing ATAC-seq data of ES/EB differentiation and MEF reprogramming induced by Etv2.  
