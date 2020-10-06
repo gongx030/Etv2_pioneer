@@ -121,7 +121,11 @@ saveRDS(se, se_file)
 
 Save the final data onto s3 for the downstream analysis
 ```{r, eval = FALSE}
-s3_saveRDS(se, sprintf('garry_projects/etv2_pioneer/processed_Etv2_scRNAseq.rds'), make_public = TRUE)
+colData(se)$group <- colData(se)$group %>% factor(c('MEF_Dox_D1', 'MEF_NoDox', 'MEF_Dox_D2', 'MEF_Dox_D7a', 'MEF_Dox_D7b'))
+colData(se)$group <- revalue(colData(se)$group, c("MEF_Dox_D1"="MEF_NoDox", "MEF_NoDox"="MEF_Dox_D1"))
+saveRDS(se, 'data/processed_Etv2_scRNAseq.rds')
+system('s3cmd put data/processed_Etv2_scRNAseq.rds s3://gongx030/etv2_pioneer/data/')
+system('s3cmd setacl -P s3://gongx030/etv2_pioneer/data/processed_Etv2_scRNAseq.rds')
 ```
 
 
