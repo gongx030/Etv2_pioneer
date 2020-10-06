@@ -29,14 +29,12 @@ peaks
 |  | Figures | Preview | Colab link | Time |
 | --- | --- | --- | --- | --- |
 | Process scRNA-seq of<br> Etv2 reprogramming | | [R](scRNA_seq_preprocess.Rmd) |  | | |
+| Process ATAC-seq data | | [R](ATAC_seq_preprocess.Rmd) |  |   |  |
 | scRNA-seq of Etv2 induced reprogramming | Figure 1c-1g <br> Supplementary Figure 2 <br> Supplementray Figure 4 | [R](scRNA_seq.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 11 mins |
 | D7 Brg1 KD ATAC-seq | Figure 4a-4c | [R](Brg1_KD_sustained_Etv2_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |  |
 | D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 1.1 hrs |
 | D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 12 | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 
-
-
-[ATAC_seq_preprocess.Rmd](ATAC_seq_preprocess.Rmd) R script for processing ATAC-seq data of ES/EB differentiation and MEF reprogramming induced by Etv2.  
 
 [ChIP_seq_preprocess.Rmd](ChIP_seq_preprocess.Rmd) R script for preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF.  The combined ChIP-seq dataset sheet can be found [here](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing).  
 
