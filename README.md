@@ -28,6 +28,7 @@ peaks
 
 |  | Figures | Preview | Colab link | Time |
 | --- | --- | --- | --- | --- |
+| Generate a union set of Etv2 ChIP-seq peaks | | [R](generate_union_Etv2_peakset.ipynb) | | | |
 | Process scRNA-seq of<br> Etv2 reprogramming | | [R](scRNA_seq_preprocess.Rmd) |  | | |
 | Process ATAC-seq data | | [R](ATAC_seq_preprocess.Rmd) |  |   |  |
 | scRNA-seq of Etv2 induced reprogramming | Figure 1c-1g <br> Supplementary Figure 2 <br> Supplementray Figure 4 | [R](scRNA_seq.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 11 mins |
