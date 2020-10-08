@@ -1,6 +1,6 @@
 
 ### [2020-10-02] `H3K27ac` analysis of Brg1 KD MEF
-
+================================================================================
 * Process the `H3K27ac` ChIP-seq data of Brg1 KD MEFs in [Alver et al.](https://www.nature.com/articles/ncomms14648#Sec6).  Use `Bowtie2` to map the reads to `mm10` and use `MACS2` to call the ChIP-seq peaks.  We will need the [`Fold Enrichment`](https://github.com/macs3-project/MACS/wiki/Build-Signal-Track) file from MACS2.
 
 * `H3K27ac` ChIP-seq data of wildtype MEF: https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/MEF_NoDox_d0_H3K27ac_FE.bw.  This bigwig file is the `Fold Enrichment` file from MACS2. 
@@ -13,11 +13,3 @@ gr <- readRDS(gzcon(url(gr_url)))
 peaks <- gr[gr$group[, 'MEF_Dox_d1_Etv2'] | gr$group[, 'MEF_Dox_d7_Etv2']]
 peaks
 ```
-
-2019-12-16
-================================================================================
-- `chromVAR_ATAC.Rmd` chromVAR analysis of combined ATAC-seq data from ES/EB and MEFs
-
-2019-12-25
-================================================================================
-- `seatac_clustering_analysis_on_D1_Etv2_ChIPseq_peaks.Rmd` Explore the procedure for clustering v-plots based on the SeATAC decoding results.  
