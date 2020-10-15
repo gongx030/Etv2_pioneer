@@ -35,4 +35,4 @@
 
 [find_de_novo_motifs_Etv2_chipseq_peaks.Rmd](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) R script for finding de novo motifs within Etv2 ChIP-seq peaks in EB and MEF.  The de novo motifs were identified by Homer. 
 
-[ChIP-seq Brg1 KO H3K27ac preprocess.sh](H3K27ac ChIP-seq preprocess.sh) bash script for preprocessing the Brg1 KO H3K27ac ChIP-seq in MEF. 
+[ChIP-seq Brg1 KO H3K27ac preprocess.sh](H3K27ac ChIP-seq preprocess.sh) Bash script for preprocessing the Brg1 KO H3K27ac ChIP-seq in MEF. 
