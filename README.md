@@ -22,11 +22,12 @@
 | Overlap of Etv2 ChIP-seq peaks in MEF and EB | Supplementary Figure 8 | [R](Etv2_ChIP_seq_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) | 1 min | 
 | Pathway analysis of early, late and sustained Etv2 peaks | Supplementary Figure 9d | [R](Pathway_Etv2_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Pathway_Etv2_peaks.ipynb) | 3.9 mins | 
 | Etv2 motifs in early, late and sustained Etv2 peaks | Figure 3a and 3b | [R](Etv2_motifs_in_early_Etv2_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_motifs_in_early_Etv2_peaks.ipynb) | 1 min |
-| Early, late and sustained Etv2 peaks in **MEF** | Figure 3e) | [R](early_Etv2_peaks_in_MEF.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |  |
+| Early, late and sustained Etv2 peaks in **MEF** | Figure 3e | [R](early_Etv2_peaks_in_MEF.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |  |
 | D7 Brg1 KD ATAC-seq | Figure 4a-4c | [R](Brg1_KD_sustained_Etv2_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |  |
 | D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 1.1 hrs |
 | D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 12 | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 | D0 ChIP-seq H3K27ac in Brg1 KD samples | Supplementary figure 14 | [R](H3K27ac_Chip_seq_Analysis.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) | 23 mins |
+
 | Lmo2 binding sites | Figure 2f | [R](Lmo2_track.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Lmo2_track.ipynb) | 1 min |
 
 
