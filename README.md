@@ -27,7 +27,6 @@
 | D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 1.1 hrs |
 | D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 12 | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 | D0 ChIP-seq H3K27ac in Brg1 KD samples | Supplementary figure 14 | [R](H3K27ac_Chip_seq_Analysis.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) | 23 mins |
-
 | Lmo2 binding sites | Figure 2f | [R](Lmo2_track.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Lmo2_track.ipynb) | 1 min |
 
 
