@@ -33,7 +33,7 @@
 | Enriched TFBS in commonly <br> up- and down-regulated genes <br> in EB and MEFs on Etv2 induction | Supplementary Figure 5i, 5j, 5k | [R](FBS_in_commonly_regulated_genes.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FBS_in_commonly_regulated_genes.ipynb) | 10 mins |
 | NFR vs NOR at EB D2.5 | Figure 2d | [R](Etv2_ChIP_seq_analysis.ipynb) |  |  |
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming | Figure 2c | [R](Etv2_binding_D1_MEF.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) | 1.5 hrs | 
-| NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming <br> (including additional epigenetic marks) | [R](Etv2_binding_D1_MEF_extended.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) | 1.5 hrs |
+| NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming <br> (including additional epigenetic marks) | Supplementary Figure 6a | [R](Etv2_binding_D1_MEF_extended.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) | 1.5 hrs |
 
 
 [ChIP_seq_preprocess.Rmd](ChIP_seq_preprocess.Rmd) R script for preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF.  The combined ChIP-seq dataset sheet can be found [here](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing).  
