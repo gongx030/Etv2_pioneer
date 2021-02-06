@@ -25,7 +25,6 @@
 | Early, late and sustained Etv2 peaks in **MEF** | Figure 3e | [R](early_Etv2_peaks_in_MEF.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |  |
 | D7 Brg1 KD ATAC-seq | Figure 4c <br> Supplementary Figure 12 | [R](Brg1_KD_sustained_Etv2_peaks.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |  |
 | chromVAR analysis of Brg1 KD ATAC-seq at D7| Figure 4b | [R](chromVAR_Brg1_KD_ATAC_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_Brg1_KD_ATAC_D7.ipynb) | 2 mins |
-| D7 Brg1 KD ATAC-seq (NOR vs NFR) | Figure 4a(*new*) | [R](Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) | 53 mins |
 | D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](Brg1KD_scRNA_seq_D7.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 1.1 hrs |
 | D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 13a-13g | [R](Brg1KD_scRNA_seq_D0.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |  |
 | D0 ChIP-seq H3K27ac in Brg1 KD samples | Supplementary figure 13h | [R](H3K27ac_Chip_seq_Analysis.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) | 23 mins |
@@ -34,6 +33,7 @@
 | NFR vs NOR at EB D2.5 | Figure 2d | [R](Etv2_ChIP_seq_analysis.ipynb) |  |  |
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming | Figure 2c | [R](Etv2_binding_D1_MEF.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) | 1.5 hrs | 
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming <br> (including additional epigenetic marks) | Supplementary Figure 6a | [R](Etv2_binding_D1_MEF_extended.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) | 1.5 hrs |
+| D7 Brg1 KD ATAC-seq (NOR vs NFR) | Figure 4a | [R](Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) | 53 mins |
 
 
 [ChIP_seq_preprocess.Rmd](ChIP_seq_preprocess.Rmd) R script for preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF.  The combined ChIP-seq dataset sheet can be found [here](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing).  
