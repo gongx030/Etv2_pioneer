@@ -34,7 +34,7 @@
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming | Figure 2c | [R](Etv2_binding_D1_MEF.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) | 1.5 hrs | 
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming <br> (including additional epigenetic marks) | Supplementary Figure 6a | [R](Etv2_binding_D1_MEF_extended.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) | 1.5 hrs |
 | D7 Brg1 KD ATAC-seq (NOR vs NFR) | Figure 4a | [R](Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) | 53 mins |
-| scRNA-seq of Etv2 induced reprogramming at MEF and D1 | | [R](scRNA-seq_D1.ipynb) | [R] (https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA-seq_D1.ipynb) | |
+| scRNA-seq of Etv2 induced reprogramming at MEF and D1 | | [R](scRNA-seq_D1.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA-seq_D1.ipynb) | |
 
 
 [ChIP_seq_preprocess.Rmd](ChIP_seq_preprocess.Rmd) R script for preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF.  The combined ChIP-seq dataset sheet can be found [here](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing).  
