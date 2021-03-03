@@ -51,3 +51,4 @@ Figure 2f. https://genome.ucsc.edu/s/gongx030/Etv2_pioneer_Lmo2
 
 ## Fastq datasets
 
+https://docs.google.com/spreadsheets/d/1T3c2zDoSaZWDznwXzm1ZYgpRdAG76lofFHX2Y6HTEAY/edit?usp=sharing
