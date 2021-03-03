@@ -48,3 +48,6 @@
 ### UCSC genome browser track
 
 Figure 2f. https://genome.ucsc.edu/s/gongx030/Etv2_pioneer_Lmo2
+
+## Fastq datasets
+
