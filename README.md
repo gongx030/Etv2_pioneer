@@ -1,4 +1,6 @@
-# The Etv2 Pioneer project
+### The code and datasets for the manuscript: 
+
+# *ETV2 functions as a pioneer factor to regulate and reprogram the endothelial lineage*
 
 
 ## Processed datasets
