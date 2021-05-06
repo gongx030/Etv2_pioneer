@@ -42,6 +42,8 @@
 
 | Description | Reviews | Figure | Colab link | 
 | --- | --- | --- | --- |
+| We look at the expression pattern of 4 categories (HATs, HDACs, Inflammatory response related terms and NFkB related pathways), to comapre the 2 systems ES/EB and MEF. We look at the common up regulated and downregulated genes is the treatment compared to the control, and GSEA for both the systems | Issue #1 & #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Gene_expression_Inflammatory) |
+
 
 
 [ChIP_seq_preprocess.Rmd](ChIP_seq_preprocess.Rmd) R script for preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF.  The combined ChIP-seq dataset sheet can be found [here](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing).  
