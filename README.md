@@ -45,6 +45,8 @@
 | Description | Reviews | Figure | Colab link | 
 | --- | --- | --- | --- |
 | We look at the expression pattern of 4 categories (HATs, HDACs, Inflammatory response related terms and NFkB related pathways), to comapre the 2 systems ES/EB and MEF. We look at the common up regulated and downregulated genes is the treatment compared to the control, and GSEA for both the systems | Reviewer 1: Issue #1 & #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Gene_expression_Inflammatory.ipynb) |
+| We select the genomic ranges or chip seq based on the 5 criteria's highlighted in the pioneer document | Reviewer 3: Issue #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_chipseq_genomicranges_find_v_final.ipynb) |
+| Generating avergae profile plots for ChIP seq (MEF_BRG1) and ATAC-Seq data (MEF's and BRG1_KD) to see the profile for transcription factors selected | Reviewer 3: Issue #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/BRG1_profile_of_TFs.ipynb) |
 
 
 
