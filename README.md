@@ -40,6 +40,15 @@
 | scRNA-seq of Etv2 induced reprogramming at MEF and D1 | | [R](scRNA_seq_D1.ipynb) | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq_D1.ipynb) | |
 
 
+
+## Notebooks for Supplementary Figure
+
+| Description | Figure | Colab link | 
+| --- | --- | --- | --- |
+| We look at the enrichment of signals +/-1kb of Etv2 binding sites using Etv2 ChIP-seq 3h and 12h and Brg1 Control and KO ATAC-seq at Day 4. | Figure 15h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Enriched_heatmap_of_Etv2_chip_seq_data_and_Brg1_floxed_Brg1_KO.ipynb) |
+|  | Figure | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/) | Figure  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/) |
+
+
 ## Notebooks for Reviewer Issues
 
 | Description | Reviews | Figure | Colab link | 
