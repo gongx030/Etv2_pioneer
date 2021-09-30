@@ -15,8 +15,8 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-| Identifying Candidates for shRNA Knock Down testing of additional SWI/SNF Factors  | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_SWI_SNF_shRNA_Candidate_gene_Expression_Testing.ipynb) | 
-| Differential Expressing testing candidate genes for knockdown in MEFs | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
+| Identifying Candidates for shRNA Knock Down testing of additional SWI/SNF Factors  | | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_SWI_SNF_shRNA_Candidate_gene_Expression_Testing.ipynb) | 
+| Differential Expressing testing candidate genes for knockdown in MEFs | | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
 | Generate a union set of Etv2 ChIP-seq peaks | | [R](generate_union_Etv2_peakset.ipynb) | | | |
 | Process scRNA-seq of<br> Etv2 reprogramming | | [R](scRNA_seq_preprocess.Rmd) |  | | |
 | Process ATAC-seq data | | [R](ATAC_seq_preprocess.Rmd) |  |   |  |
