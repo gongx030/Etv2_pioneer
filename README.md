@@ -22,8 +22,8 @@
 | Process ATAC-seq data | | [R](ATAC_seq_preprocess.Rmd) |  |   |  |
 | scRNA-seq of Etv2 induced reprogramming | Figure 1c-1g <br> Supplementary Figure 2 <br> Supplementray Figure 4 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
 | ATAC-seq and combined ATAC-seq/RNA-seq of <br> Etv2 induced MEF reprogramming and ES/EB differentiation | Figure 1h <br> Figure 1i <br> Supplementary Figure 5 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) | 
-| Overlap of Etv2 ChIP-seq peaks in MEF and EB | Supplementary Figure 8 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) | 
-| Pathway analysis of early, late and sustained Etv2 peaks | Supplementary Figure 9d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Pathway_Etv2_peaks.ipynb) |
+| Overlap of Etv2 ChIP-seq peaks in MEF and EB | Supplementary Figure 8a and 8b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) | 
+| Pathway analysis of early, late and sustained Etv2 peaks | Supplementary Figure 8c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Pathway_Etv2_peaks.ipynb) |
 | Etv2 motifs in early, late and sustained Etv2 peaks | Figure 3a and 3b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_motifs_in_early_Etv2_peaks.ipynb) |
 | Early, late and sustained Etv2 peaks in **MEF** | Figure 3e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |
 | D7 Brg1 KD ATAC-seq | Figure 4c <br> Supplementary Figure 12 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
