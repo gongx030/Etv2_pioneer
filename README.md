@@ -28,12 +28,12 @@
 | Early, late and sustained Etv2 peaks in **MEF** | Figure 3e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |
 | D7 Brg1 KD ATAC-seq | Figure 4c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
 | chromVAR analysis of Brg1 KD ATAC-seq at D7| Figure 5a and 5b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_Brg1_KD_ATAC_D7.ipynb) |
-| D7 scRNA-seq including Brg1 KD samples | Figure 4e-4h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 
+| D7 scRNA-seq including Brg1 KD samples | Figure 4c-4f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 
 | D0 scRNA-seq including Brg1 KD samples | Supplementary Figure 13a-13g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
 | D0 ChIP-seq H3K27ac in Brg1 KD samples | Supplementary figure 13h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) |
 | Lmo2 binding sites | Figure 2g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Lmo2_track.ipynb) |
 | Enriched TFBS in commonly <br> up- and down-regulated genes <br> in EB and MEFs on Etv2 induction | Supplementary Figure 5i, 5j, 5k | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FBS_in_commonly_regulated_genes.ipynb) |
-| NFR vs NOR at EB D2.5 | Figure 2d | [R](Etv2_ChIP_seq_analysis.ipynb) |  |  |
+| NFR vs NOR at EB D2.5 | Figure 2d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |  |  |
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming | Figure 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) |
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming <br> (including additional epigenetic marks) | Supplementary Figure 6a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) |
 | D7 Brg1 KD ATAC-seq (NOR vs NFR) | Figure 4a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks_NOR_NFR.ipynb) |
