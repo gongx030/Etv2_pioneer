@@ -17,9 +17,6 @@
 | --- | --- | --- | 
 | Identifying Candidates for shRNA Knock Down testing of additional SWI/SNF Factors  | | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_SWI_SNF_shRNA_Candidate_gene_Expression_Testing.ipynb) | 
 | Differential Expressing testing candidate genes for knockdown in MEFs | | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
-| Generate a union set of Etv2 ChIP-seq peaks | | [R](generate_union_Etv2_peakset.ipynb) | | | |
-| Process scRNA-seq of<br> Etv2 reprogramming | | [R](scRNA_seq_preprocess.Rmd) |  | | |
-| Process ATAC-seq data | | [R](ATAC_seq_preprocess.Rmd) |  |   |  |
 | scRNA-seq of Etv2 induced reprogramming | Figure 1c-1g <br> Supplementary Figure 2 <br> Supplementray Figure 4 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
 | ATAC-seq and combined ATAC-seq/RNA-seq of <br> Etv2 induced MEF reprogramming and ES/EB differentiation | Figure 1h <br> Figure 1i <br> Supplementary Figure 5 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) | 
 | Overlap of Etv2 ChIP-seq peaks in MEF and EB | Supplementary Figure 8a and 8b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) | 
@@ -50,13 +47,6 @@
 
 
 
-## Notebooks for Reviewer Issues
-
-| Description | Reviews | Figure | Colab link | 
-| --- | --- | --- | --- |
-| We look at the expression pattern of 4 categories (HATs, HDACs, Inflammatory response related terms and NFkB related pathways), to comapre the 2 systems ES/EB and MEF. We look at the common up regulated and downregulated genes is the treatment compared to the control, and GSEA for both the systems | Reviewer 1: Issue #1 & #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Gene_expression_Inflammatory.ipynb) |
-| We select the genomic ranges or chip seq based on the 5 criteria's highlighted in the pioneer document | Reviewer 3: Issue #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_chipseq_genomicranges_find_v_final.ipynb) |
-| Generating avergae profile plots for ChIP seq (MEF_BRG1) and ATAC-Seq data (MEF's and BRG1_KD) to see the profile for transcription factors selected | Reviewer 3: Issue #2 |  | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/BRG1_profile_of_TFs.ipynb) |
 
 
 
