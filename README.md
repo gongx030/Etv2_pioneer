@@ -46,7 +46,7 @@
 | Assay Type | link | GSE | 
 | --- | --- | --- |
 | ATACseq| [link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168636) | GSE168636 |
-| CHiPseq | [link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168521) | GSE168521 |
+| ChIPseq | [link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168521) | GSE168521 |
 
 
 
