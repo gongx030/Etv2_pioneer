@@ -37,6 +37,7 @@
 | scRNA-seq of Etv2 induced reprogramming at MEF and D1 | | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq_D1.ipynb) | |
 | We look at the enrichment of signals +/-1kb of Etv2 binding sites using Etv2 ChIP-seq 3h and 12h and Brg1 Control and KO ATAC-seq at Day 4. | Figure 15h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Enriched_heatmap_of_Etv2_chip_seq_data_and_Brg1_floxed_Brg1_KO.ipynb) |
 | chromVAR analysis for the change in chromatin accessibililty of Transcription factors at Brg1 Control and KO ATAC-seq at Day 4. | Figure 15g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_analysis_of_Brg1_floxed_D4_and_Brg1_KO.ipynb) |
+| NOMeseq analysis D0 and D1, MNase and Etv2 D1 enriched heatmap showinga few regions of the NOR cluster becoming NFR | Figure 15g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/2e_NOME_Enriched_Heatmap_with_MNase_and_Etv2.ipynb) |
 
 
 
