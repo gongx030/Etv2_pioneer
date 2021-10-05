@@ -38,7 +38,7 @@
 | We look at the enrichment of signals +/-1kb of Etv2 binding sites using Etv2 ChIP-seq 3h and 12h and Brg1 Control and KO ATAC-seq at Day 4. | Supplementary Figure 15h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Enriched_heatmap_of_Etv2_chip_seq_data_and_Brg1_floxed_Brg1_KO.ipynb) |
 | chromVAR analysis for the change in chromatin accessibililty of Transcription factors at Brg1 Control and KO ATAC-seq at Day 4. | Supplementary Figure 15g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_analysis_of_Brg1_floxed_D4_and_Brg1_KO.ipynb) |
 | NOMeseq analysis D0 and D1, MNase and Etv2 D1 enriched heatmap showinga few regions of the NOR cluster becoming NFR | Figure 2e| [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/2e_NOME_Enriched_Heatmap_with_MNase_and_Etv2.ipynb) |
-| Enriched heatmap showing enrihment at early, late and sustained peaks for MEF Etv2 ChIP and Brg1 KD ChIP data | Supplementary Figure 14b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/2e_NOME_Enriched_Heatmap_with_MNase_and_Etv2.ipynb) |
+| Enriched heatmap showing enrihment at early, late and sustained peaks for MEF Etv2 ChIP and Brg1 KD ChIP data | Supplementary Figure 14b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_ChIP_data_Enriched_Heatmap_at_Etv2_Binding_Sites) |
 
 
 ## GEO datasets
