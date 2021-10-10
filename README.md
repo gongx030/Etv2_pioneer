@@ -59,8 +59,8 @@
 
 |  | Figures | UCSC Genome browser|
 | --- | --- | --- |
-| Lmo2 locus | Figure 2g | [Track] (https://genome.ucsc.edu/s/gongx030/Etv2_pioneer_Lmo2) |
-| All ChIP-seq data | | [Track] (https://genome.ucsc.edu/s/gongx030%40umn.edu/Etv2_pioneer_ms) |
+| Lmo2 locus | Figure 2g | [Track](https://genome.ucsc.edu/s/gongx030/Etv2_pioneer_Lmo2) |
+| All ChIP-seq data | | [Track](https://genome.ucsc.edu/s/gongx030%40umn.edu/Etv2_pioneer_ms) |
 
 ## Fastq datasets
 
