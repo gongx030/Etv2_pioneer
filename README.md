@@ -32,7 +32,7 @@
 | D0 scRNA-seq including Brg1 KD samples | Extended Data Fig.  13a-13g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
 | D0 ChIP-seq H3K27ac in Brg1 KD samples | Extended Data Fig.  13h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) |
 | Lmo2 binding sites | Figure 2g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Lmo2_track.ipynb) |
-| Enriched TFBS in commonly <br> up- and down-regulated genes <br> in EB and MEFs on Etv2 induction | Extended Data Fig.  5i, 5j, 5k | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FBS_in_commonly_regulated_genes.ipynb) |
+| Enriched TFBS in commonly <br> up- and down-regulated genes <br> in EB and MEFs on Etv2 induction | Extended Data Fig.  5i, 5j, 5k | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/TFBS_in_commonly_regulated_genes.ipynb) |
 | NFR vs NOR at EB D2.5 | Figure 2d and 2b <br> Extended Data Fig.  6b-6d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |  |  |
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming | Figure 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) |
 | NFR vs NOR at Etv2 binding sites at D1 MEF reprogramming <br> (including additional epigenetic marks) | Extended Data Fig.  6a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) |
