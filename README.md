@@ -66,6 +66,3 @@ The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.
 | Lmo2 locus | Figure 2g | [Track](https://genome.ucsc.edu/s/gongx030/Etv2_pioneer_Lmo2) |
 | All ChIP-seq data | | [Track](https://genome.ucsc.edu/s/gongx030%40umn.edu/Etv2_pioneer_ms) |
 
-## Fastq datasets
-
-https://docs.google.com/spreadsheets/d/1T3c2zDoSaZWDznwXzm1ZYgpRdAG76lofFHX2Y6HTEAY/edit?usp=sharing
