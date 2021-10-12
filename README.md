@@ -12,6 +12,7 @@
 | A union set of Etv2 ChIP-seq peaks in ES/EB and MEFs | [link](https://s3.msi.umn.edu/gongx030/datasets/dataset=Etv2PioneerChIPseq_version=20191203a/all_Etv2_peaks.rds) | SummarizedExperiment | [R](generate_union_Etv2_peakset.ipynb) |
 | Preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF | [link](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing) | | [R](ChIP_seq_preprocess.Rmd) |
 | Bash script for preprocessing the Brg1 KO H3K27ac ChIP-seq in MEF | | | [bash](ChIP-seq_Brg1_KO_H3K27ac_preprocess.sh) |
+| Fastq datasets for ChIP-seq, ATAC-seq, bulkRNA-seq, scRNA-seq and NOMeseq | [link](https://docs.google.com/spreadsheets/d/1T3c2zDoSaZWDznwXzm1ZYgpRdAG76lofFHX2Y6HTEAY/edit?usp=sharing) | | |
 
 ## Notebooks
 
@@ -53,9 +54,9 @@ The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.
 | --- | --- |
 | ATACseq| [GSE168636](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168636) | 
 | ChIPseq | [GSE168521](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168521) | 
-| RNA |  [GSE185682](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185682) |  
-| scRNA | [GSE185683](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185683) |  
-| NOMe | [GSE185681](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185681) |  
+| RNA-seq |  [GSE185682](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185682) |  
+| scRNA-seq | [GSE185683](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185683) |  
+| NOMe-seq | [GSE185681](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185681) |  
 
 
 ### UCSC genome browser track
