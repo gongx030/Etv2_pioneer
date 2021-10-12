@@ -47,13 +47,14 @@
 
 ## GEO datasets
 
-| Assay Type | link | GSE | 
-| --- | --- | --- |
-| ATACseq| [link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168636) | GSE168636 |
-| ChIPseq | [link](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168521) | GSE168521 |
-| RNA |  |  |
-| scRNA | |  |
-| NOMe | |  |
+The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185684)
+| Assay Type | GSE | 
+| --- | --- |
+| ATACseq| [GSE168636](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168636) | 
+| ChIPseq | [GSE168521](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168521) | 
+| RNA |  [GSE185682](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185682) |  
+| scRNA | [GSE185683](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185683) |  
+| NOMe | [GSE185681](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185681) |  
 
 
 ### UCSC genome browser track
