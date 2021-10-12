@@ -17,7 +17,7 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-| Identifying Candidates for shRNA Knock Down testing of additional SWI/SNF Factors  | Extended Data Fig. 10 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_SWI_SNF_shRNA_Candidate_gene_Expression_Testing.ipynb) | 
+| Identifying Candidates for shRNA Knock Down testing of additional SWI/SNF Factors  | Extended Data Fig. 9 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_SWI_SNF_shRNA_Candidate_gene_Expression_Testing.ipynb) | 
 | Differential Expressing testing candidate genes for knockdown in MEFs | | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
 | scRNA-seq of Etv2 induced reprogramming | Figure 1c-1g <br> Extended Data Fig.  2 <br> Extended Data Fig. 4 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
 | ATAC-seq and combined ATAC-seq/RNA-seq of <br> Etv2 induced MEF reprogramming and ES/EB differentiation | Figure 1h <br> Figure 1i <br> Extended Data Fig.  5 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) | 
@@ -43,7 +43,7 @@
 | Enriched heatmap showing enrihment at early, late and sustained peaks for MEF Etv2 ChIP and Brg1 KD ChIP data | Extended Data Fig.  14b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_ChIP_data_Enriched_Heatmap_at_Etv2_Binding_Sites.ipynb) |
 | V-plots of Elk3 motif centric regions in D4 WT EB and D4 Brg1 KO EB | Figure 5f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
 | Motif analysis of Etv2 ChIP-seq peaks | Figure 2f <br> Extended Data Fig. 7a | [R](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) [R](diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd) |
-| Dynamics of Etv2 peak centric V-plots during reprogramming | Extended Data Fig. 9d-9j | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+| Dynamics of Etv2 peak centric V-plots during reprogramming | Extended Data Fig. 10d-10j | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
 
 ## GEO datasets
 
