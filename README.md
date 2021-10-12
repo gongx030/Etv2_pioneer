@@ -25,7 +25,8 @@
 | Overlap of Etv2 ChIP-seq peaks in MEF and EB | Extended Data Fig.  8a and 8b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) | 
 | Pathway analysis of early, late and sustained Etv2 peaks | Extended Data Fig.  8c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Pathway_Etv2_peaks.ipynb) |
 | Etv2 motifs in early, late and sustained Etv2 peaks | Figure 3a and 3b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_motifs_in_early_Etv2_peaks.ipynb) |
-| Early, late and sustained Etv2 peaks in **MEF** | Figure 3e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |
+| Early, late and sustained Etv2 peaks in MEF | Figure 3e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) |
+| Early, late and sustained Etv2 peaks in EB | Figure 3f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_late_sustained_Etv2_peaks_in_EB.ipynb) |
 | D7 Brg1 KD ATAC-seq | Figure 4c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
 | chromVAR analysis of Brg1 KD ATAC-seq at D7| Figure 5a and 5b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_Brg1_KD_ATAC_D7.ipynb) |
 | D7 scRNA-seq including Brg1 KD samples | Figure 4c-4f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) | 
