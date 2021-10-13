@@ -13,7 +13,7 @@
 | Preprocessing Etv2 ChIP-seq, H3K27ac ChIP-seq and Brg1 ChIP-seq in ES/EB and MEF | [link](https://docs.google.com/spreadsheets/d/1UWiduM3Pv-GsVGmfxFApnyVBI1THMR8n8wHg5st3b5c/edit?usp=sharing) | | [R](ChIP_seq_preprocess.Rmd) |
 | Bash script for preprocessing the Brg1 KO H3K27ac ChIP-seq in MEF | | | [bash](ChIP-seq_Brg1_KO_H3K27ac_preprocess.sh) |
 | Fastq datasets for ChIP-seq, ATAC-seq, bulkRNA-seq, scRNA-seq and NOMeseq | [link](https://docs.google.com/spreadsheets/d/1T3c2zDoSaZWDznwXzm1ZYgpRdAG76lofFHX2Y6HTEAY/edit?usp=sharing) | | |
-
+| MEFs and EBs <br> Supplemenatary table 4 for up-regulated <br> Supplementary table 5 for down-regulated genes |  |xlsx | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis_list_of_upregulated_and_downregulated_genes.ipynb) |
 ## Notebooks
 
 |  | Figures | Colab link | 
