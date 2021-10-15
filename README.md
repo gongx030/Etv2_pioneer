@@ -65,7 +65,7 @@ The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.
 | --- | --- | --- |
 | Lmo2 locus | Figure 2g | [Track](https://genome.ucsc.edu/s/gongx030/Etv2_pioneer_Lmo2) |
 | All ChIP-seq data | | [Track](https://genome.ucsc.edu/s/gongx030%40umn.edu/Etv2_pioneer_ms) |
-| Spib promoter | Figure 14c | [Track](https://genome.ucsc.edu/s/ndsouza/Etv2_pioneer_Spib) |
-| Pecam1 promoter | Figure 14c | [Track](https://genome.ucsc.edu/s/ndsouza/Etv2_pioneer_Pecam1) |
+| Rhoj promoter | Figure 14c | [Track](https://genome.ucsc.edu/s/ndsouza/Etv2_Pioneer_ChIP_Rhoj) |
+| Kdr promoter | Figure 14c | [Track](https://genome.ucsc.edu/s/ndsouza/Etv2_Pioneer_ChIP_Kdr) |
 
 
