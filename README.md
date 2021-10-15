@@ -46,7 +46,7 @@
 | Motif analysis of Etv2 ChIP-seq peaks | Figure 2f <br> Extended Data Fig. 7a | [R](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) [R](diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd) |
 | Dynamics of Etv2 peak centric V-plots during reprogramming | Extended Data Fig. 10d-10j | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
 | Fragment size distribution between Flk1+ cells and unsorted mixture cells | Extended Data Fig. 10a-10c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
-| Upregulated and downregulated in MEFs and EBs | Supplemenatary table 4 <br> Supplementary table 5 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis_list_of_upregulated_and_downregulated_genes.ipynb) |
+| Upregulated and downregulated overlapping in MEFs and EBs | Supplemenatary table 4 <br> Supplementary table 5 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis_list_of_upregulated_and_downregulated_genes.ipynb) |
 
 ## GEO datasets
 
