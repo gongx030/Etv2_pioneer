@@ -20,7 +20,7 @@
 | --- | --- | --- | 
 | Identifying Candidates for shRNA Knock Down testing of additional SWI/SNF Factors  | Extended Data Fig. 9 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_SWI_SNF_shRNA_Candidate_gene_Expression_Testing.ipynb) | 
 | Differential Expressing testing candidate genes for knockdown in MEFs | Extended Data Fig. 12a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
-| scRNA-seq of Etv2 induced reprogramming | Figure 1c-1g <br> Extended Data Fig.  2 <br> Extended Data Fig. 4 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
+| scRNA-seq of Etv2 induced reprogramming | Figure 1c-1f <br> Extended Data Fig.  2 <br> Extended Data Fig. 4 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
 | ATAC-seq and combined ATAC-seq/RNA-seq of <br> Etv2 induced MEF reprogramming and ES/EB differentiation | Figure 1h <br> Figure 1i <br> Extended Data Fig.  5 | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) | 
 | Overlap of Etv2 ChIP-seq peaks in MEF and EB | Extended Data Fig.  8a and 8b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) | 
 | Pathway analysis of early, late and sustained Etv2 peaks | Extended Data Fig.  8c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Pathway_Etv2_peaks.ipynb) |
