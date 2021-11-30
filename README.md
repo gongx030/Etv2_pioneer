@@ -44,7 +44,7 @@
 | NOMeseq analysis D0 and D1, MNase and Etv2 D1 enriched heatmap showinga few regions of the NOR cluster becoming NFR | Figure 2e| [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/2e_NOME_Enriched_Heatmap_with_MNase_and_Etv2.ipynb) |
 | Enriched heatmap showing enrihment at early, late and sustained peaks for MEF Etv2 ChIP and Brg1 KD ChIP data | Extended Data Fig.  14b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_ChIP_data_Enriched_Heatmap_at_Etv2_Binding_Sites.ipynb) |
 | V-plots of Elk3 motif centric regions in D4 WT EB and D4 Brg1 KO EB | Figure 5f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
-| Motif analysis of Etv2 ChIP-seq peaks | Figure 2f <br> Extended Data Fig. 7a | [R](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) [R](diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd) |
+| Motif analysis of Etv2 ChIP-seq peaks | Figure 2f <br> Extended Data Fig. 7e | [R](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd) [R](diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd) |
 | Dynamics of Etv2 peak centric V-plots during reprogramming | Extended Data Fig. 10d-10j | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
 | Fragment size distribution between Flk1+ cells and unsorted mixture cells | Extended Data Fig. 10a-10c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
 | Upregulated and downregulated overlapping in MEFs and EBs | Supplemenatary table 4 <br> Supplementary table 5 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis_list_of_upregulated_and_downregulated_genes.ipynb) |
