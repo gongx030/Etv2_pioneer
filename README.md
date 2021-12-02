@@ -51,12 +51,27 @@
 
 ## Main Figures
 
-# Figure 1
+### Figure 1
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
 | The UMAP plot for the scRNA-seq of 948 undifferentiated MEFs, 3,539 reprogrammed cells at 24 hrs, 2,936 cells at 48 hrs and 7,202 cells at 7 days and 827 FLK1+/KDR cells at 7 days post-induction of ETV2 in MEFs | Fig. 1c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
-| The UMAP plot showing cell clusters from k-means clustering that identified seven distinct cell clusters. | Fig. 1d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
+| The UMAP plot showing cell clusters from k-means clustering that identified seven distinct cell clusters | Fig. 1d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
+| The expression profiles of ETV2 and FLK1/KDR | Fig. 1e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
+| The volcano plot of genes differentially expressed between cluster 1 and cluster 7 | Fig. 1f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+| The PCA of the variations of transcription factor (TF) associated chromatin accessibility of the ATAC-seq of MEF reprogramming (MEFs, 24 hrs, 48 hrs and 7 days post-induction) and EB differentiation (2.5 days and 3 hrs post induction) | Fig. 1h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+| The 31 TF expression levels and motif associated chromatin accessibility consistently showed directional change in both EBs and MEFs (13 up-regulated TFs and 18 down-regulated TFs) | Fig. 1h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+
+### Figure 2
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+| The genomic distribution of EB specific, MEF specific and common ETV2 peaks. The EB and MEF specific ETV2 peaks were more likely distributed at the distal intergenic regions | Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) | 
+| The heatmap shows the read density of MNase-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq in MEFs, surrounding 131,001 ETV2 ChIP-seq peaks at 24 hrs post-induction during MEF reprogramming. The ETV2 peaks were divided into four quartiles based on the mean MNase-seq signals of the central 200-bp region | Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) |
+| The heatmap shows the ratio of NFR / nucleosome read density, read density of BRG1 ChIP-seq and H3K27ac ChIP-seq in EBs (day 2.5), surrounding 18,024 ETV2 ChIP-seq at 3 hrs post-induction. The ETV2 peaks were divided into NFR (5,291 peaks) and nucleosome (8,843 peaks) groups according to the local V-plot and fragment size profiles of ATAC-seq day 2.5 EBs without ETV2 induction | Fig. 2d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |
+| The heatmap generated using NOMe-seq shows among 5,320 ETV2 binding sites that were nucleosome occupied at undifferentiated MEF, 4,744 (89.1%) became significantly nucleosome-free (NFR) while 576 (10.9%) stayed NOR at D1 of reprogramming | Fig. 2e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/2e_NOME_Enriched_Heatmap_with_MNase_and_Etv2_v1.ipynb) | 
+| Sequence motif analysis by DREME and CentriMo identified a common GGAAAT motif that were significantly more enriched in NFR regions compared with the nucleosomes in both MEFs and EBs  | Fig. 2f | [R](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd)  |
+| A region upstream of Lmo2 that was highly enriched for nucleosomes in both cell types, as measured by MNase-seq and ATAC-seq was selected to perform in vitro nucleosomal binding assays  | Fig. 2g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Lmo2_track.ipynb)  |
 
 ## GEO datasets
 
