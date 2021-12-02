@@ -49,6 +49,15 @@
 | Fragment size distribution between Flk1+ cells and unsorted mixture cells | Extended Data Fig. 10a-10c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
 | Upregulated and downregulated overlapping in MEFs and EBs | Supplemenatary table 4 <br> Supplementary table 5 | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis_list_of_upregulated_and_downregulated_genes.ipynb) |
 
+## Main Figures
+
+# Figure 1
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+| The UMAP plot for the scRNA-seq of 948 undifferentiated MEFs, 3,539 reprogrammed cells at 24 hrs, 2,936 cells at 48 hrs and 7,202 cells at 7 days and 827 FLK1+/KDR cells at 7 days post-induction of ETV2 in MEFs | Fig. 1c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
+| The UMAP plot showing cell clusters from k-means clustering that identified seven distinct cell clusters. | Fig. 1d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
+
 ## GEO datasets
 
 The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185684)
