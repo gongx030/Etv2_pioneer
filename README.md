@@ -73,6 +73,15 @@
 | Sequence motif analysis by DREME and CentriMo identified a common GGAAAT motif that were significantly more enriched in NFR regions compared with the nucleosomes in both MEFs and EBs  | Fig. 2f | [R](find_de_novo_motifs_Etv2_chipseq_peaks.Rmd)  |
 | A region upstream of Lmo2 that was highly enriched for nucleosomes in both cell types, as measured by MNase-seq and ATAC-seq was selected to perform in vitro nucleosomal binding assays  | Fig. 2g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Lmo2_track.ipynb)  |
 
+### Figure 3
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+| The average partial Etv2 motif scores in upstream/downstream 500 bp regions surrounding the binding summit of the "early', "late" and "sustained" Etv2 peaks in EB differentiation and MEF reprogramming | Fig. 3a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_motifs_in_early_Etv2_peaks.ipynb) | 
+| The percent of the "early', "late" and "sustained" Etv2 peaks in EBs and MEFs include partial Etv2 motifs in upstream/downstream 50bp regions surrounding the binding summits | Fig. 3b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_motifs_in_early_Etv2_peaks.ipynb) | 
+| The heatmap shows the fold enrichment of ETV2 ChIP-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq at 24 hrs, 48 hrs and 7 days post-induction of ETV2 | Fig. 3g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) | 
+| The heatmap shows the fold enrichment of ETV2 ChIP-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq, at 3 hrs and 12 hrs post-induction of ETV2 in day 2 EBs | Fig. 3h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_late_sustained_Etv2_peaks_in_EB.ipynb) | 
+
 ## GEO datasets
 
 The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185684)
