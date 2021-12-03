@@ -60,7 +60,7 @@
 | The expression profiles of ETV2 and FLK1/KDR | Fig. 1e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) | 
 | The volcano plot of genes differentially expressed between cluster 1 and cluster 7 | Fig. 1f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
 | The PCA of the variations of transcription factor (TF) associated chromatin accessibility of the ATAC-seq of MEF reprogramming (MEFs, 24 hrs, 48 hrs and 7 days post-induction) and EB differentiation (2.5 days and 3 hrs post induction) | Fig. 1h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-| The 31 TF expression levels and motif associated chromatin accessibility consistently showed directional change in both EBs and MEFs (13 up-regulated TFs and 18 down-regulated TFs) | Fig. 1h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+| The 31 TF expression levels and motif associated chromatin accessibility consistently showed directional change in both EBs and MEFs (13 up-regulated TFs and 18 down-regulated TFs) | Fig. 1i | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
 
 ### Figure 2
 
