@@ -120,6 +120,8 @@
 |  The heatmap shows chromatin accessibility for transcription factors for control vs. Brg1 knockout during ES/EB differentiation | Fig. 7f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_analysis_of_Brg1_floxed_D4_and_Brg1_KO.ipynb) |
 |  The heatmap shows the ChIP-seq of sustained ETV2 binding sites in EB differentiation, and ATAC-seq of Control and Brg1 KO EBs at day 4 | Fig. 7g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Enriched_heatmap_of_Etv2_chip_seq_data_and_Brg1_floxed_Brg1_KO.ipynb) |
 |  ATAC-seq V-plots of the genomic regions (640 bp) that are centered at ELK3 motifs | Fig. 7h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
+|  ATAC-seq V-plots of the genomic regions (640 bp) that are centered at ELK3 motifs | Fig. 7h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
+
 
 ## Extended Figures
 
@@ -138,6 +140,79 @@
 |  The violin plots show the scaled expression levels of endothelial markers such as Etv2, Emcn, Lmo2, Flk1/Kdr, Cdh5 and Sox18 in MEFs, day 1, day 2, day 7 post-ETV2 induction, as well as the FLK1+ cells from day 7 | Extended Data Fig. 2a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
 |  The violin plots show the scaled expression levels of endothelial markers in seven cell clusters | Extended Data Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
 |  The biological processes that are significantly associated with the up-regulated in genes in cluster 1 (undifferentiated MEFs) compared with the rest of the cell populations | Extended Data Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+|  GSEA plot indicates significant upregulation of the inflammatory response in MEFs (cluster 1) | Extended Data Fig. 2d |  |
+|  Heatmap representing the gene expression levels scaled by Seurat for upregulated (red) and downregulated (blue) genes in cluster 1 and cluster 2 | Extended Data Fig. 2e |  |
+|  The bar plots show top 10 significant pathways for cluster 1 and cluster 2 for MEFs | Extended Data Fig. 2f |  |
+|  The bar plots show top 10 significant pathways for cluster 1 and cluster 2 for MEFs. | Extended Data Fig. 2g |  |
+
+### Extended Figure 3
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+|  The UMAP shows expression profiles of Tlr3, Nfkb1 and Vav3, Cd38 and Abl1 (members of B cell receptor signaling pathway) in undifferentiated MEFs and post Etv2 induction day 1, day2, day 7 and Flk1+ cells at day 7 | Extended Data Fig. 3a |  |
+| The bar plot shows immune response related pathways significantly upregulated in Flk1+ cells from day 7 post Etv2 induction compared to MEFs | Extended Data Fig. 3b |  |
+|  The bar plot shows immune response related pathways significantly upregulated in ay 1 post Etv2 induction compared to MEFs | Extended Data Fig. 3c |  |
+
+### Extended Figure 5
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+### Extended Figure 6
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+### Extended Figure 7
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+### Extended Figure 9
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+### Extended Figure 10
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+## Supplementary Figure
+
+### Supplementary Figure 1
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+### Supplementary Figure 2
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+### Supplementary Figure 3
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+
+### Supplementary Figure 4
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+
+### Supplementary Figure 5
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+
+### Supplementary Figure 6
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
 
 
 ## GEO datasets
