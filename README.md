@@ -194,6 +194,9 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
+|  The expression profile of Dek expression during MEF reprogramming | Extended Data Fig. 9a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
+|  The expression profile of Znhit1 expression during MEF reprogramming | Extended Data Fig. 9b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
+|  The expression profile of Chd8 expression during MEF reprogramming | Extended Data Fig. 9c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Etv2_Project_Candidate_gene_Expression_Testing.ipynb) |
 
 ### Extended Figure 10
 
