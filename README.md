@@ -120,8 +120,6 @@
 |  The heatmap shows chromatin accessibility for transcription factors for control vs. Brg1 knockout during ES/EB differentiation | Fig. 7f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_analysis_of_Brg1_floxed_D4_and_Brg1_KO.ipynb) |
 |  The heatmap shows the ChIP-seq of sustained ETV2 binding sites in EB differentiation, and ATAC-seq of Control and Brg1 KO EBs at day 4 | Fig. 7g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Enriched_heatmap_of_Etv2_chip_seq_data_and_Brg1_floxed_Brg1_KO.ipynb) |
 |  ATAC-seq V-plots of the genomic regions (640 bp) that are centered at ELK3 motifs | Fig. 7h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
-|  ATAC-seq V-plots of the genomic regions (640 bp) that are centered at ELK3 motifs | Fig. 7h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
-
 
 ## Extended Figures
 
