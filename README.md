@@ -112,6 +112,33 @@
 |  The heatmap shows the piled up ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs (the sustained Etv2 peaks) | Fig. 6a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
 |  The heatmap shows the transcription factors where motif associated chromatin accessibility were significantly changed at day 7 post-ETV2 induction in MEFs (unsorted MEFs or FLK1+ cells), or the Brg1 KD MEFs | Fig. 6b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
 
+### Figure 7
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+|  The heatmap shows chromatin accessibility for transcription factors for control vs. Brg1 knockout during ES/EB differentiation | Fig. 7f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/chromVAR_analysis_of_Brg1_floxed_D4_and_Brg1_KO.ipynb) |
+|  The heatmap shows the ChIP-seq of sustained ETV2 binding sites in EB differentiation, and ATAC-seq of Control and Brg1 KO EBs at day 4 | Fig. 7g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Enriched_heatmap_of_Etv2_chip_seq_data_and_Brg1_floxed_Brg1_KO.ipynb) |
+|  ATAC-seq V-plots of the genomic regions (640 bp) that are centered at ELK3 motifs | Fig. 7h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Elk3_vplots.ipynb) |
+
+## Extended Figures
+
+### Extended Figure 1
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+|  The biological processes that are significantly associated with the up-regulated genes in cluster 7 (FLK1+ cells at day 7 of reprogramming) compared with cluster 1 (undifferentiated MEFs) | Extended Data Fig. 1h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+
+### Extended Figure 2
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+
+|  The violin plots show the scaled expression levels of endothelial markers such as Etv2, Emcn, Lmo2, Flk1/Kdr, Cdh5 and Sox18 in MEFs, day 1, day 2, day 7 post-ETV2 induction, as well as the FLK1+ cells from day 7 | Extended Data Fig. 2a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+|  The violin plots show the scaled expression levels of endothelial markers in seven cell clusters | Extended Data Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+|  The biological processes that are significantly associated with the up-regulated in genes in cluster 1 (undifferentiated MEFs) compared with the rest of the cell populations | Extended Data Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+
 
 ## GEO datasets
 
