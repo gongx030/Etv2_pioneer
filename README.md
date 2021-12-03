@@ -82,6 +82,7 @@
 | The percent of the "early', "late" and "sustained" Etv2 peaks in EBs and MEFs include partial Etv2 motifs in upstream/downstream 50bp regions surrounding the binding summits | Fig. 3b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_motifs_in_early_Etv2_peaks.ipynb) | 
 | The heatmap shows the fold enrichment of ETV2 ChIP-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq at 24 hrs, 48 hrs and 7 days post-induction of ETV2 | Fig. 3g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) | 
 | The heatmap shows the fold enrichment of ETV2 ChIP-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq, at 3 hrs and 12 hrs post-induction of ETV2 in day 2 EBs | Fig. 3h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_late_sustained_Etv2_peaks_in_EB.ipynb) | 
+| The Venn diagram shows the overlap between late ETV2 peaks in MEFs and EBs, as well as the overlap between the genes near the late ETV2 peaks | Fig. 3j | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ |
 
 ### Figure 4
 
