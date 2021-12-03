@@ -82,6 +82,21 @@
 | The heatmap shows the fold enrichment of ETV2 ChIP-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq at 24 hrs, 48 hrs and 7 days post-induction of ETV2 | Fig. 3g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_Etv2_peaks_in_MEF.ipynb) | 
 | The heatmap shows the fold enrichment of ETV2 ChIP-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq, at 3 hrs and 12 hrs post-induction of ETV2 in day 2 EBs | Fig. 3h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/early_late_sustained_Etv2_peaks_in_EB.ipynb) | 
 
+### Figure 4
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+|  VAE to 18,214 Etv2 ChIP-seq peaks during MEF reprogramming and identified six clusters of V-plot according to the central fragment size distribution | Fig. 4a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+|  The six clusters included three types of V-plots where the central Etv2 sites were nucleosome free (C1, C3 and C4), and three types of V-plots where the central Etv2 sites were nucleosome occupied (C2, C5, and C6), represented by aggregated V-plot | Fig. 4b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+|  The six clusters included three types of V-plots where the central Etv2 sites were nucleosome free (C1, C3 and C4), and three types of V-plots where the central Etv2 sites were nucleosome occupied (C2, C5, and C6), represented by aggregated V-plot NucleoATAC | Fig. 4c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+|  The six clusters included three types of V-plots where the central Etv2 sites were nucleosome free (C1, C3 and C4), and three types of V-plots where the central Etv2 sites were nucleosome occupied (C2, C5, and C6), represented by aggregated V-plot | Fig. 4d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+|  The six clusters included three types of V-plots where the central Etv2 sites were nucleosome free (C1, C3 and C4), and three types of V-plots where the central Etv2 sites were nucleosome occupied (C2, C5, and C6), represented by NucleoATAC | Fig. 4e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+|  The bar plot shows the proportion of each V-plot clusters in early, late and sustained Etv2 peaks, as well as in the background peaks | Fig. 4f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+|  The cluster labels of early, late and sustained ETV2 peak that were changed from MEF to D7 Flk1+ cells | Fig. 4g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Nucleosome_phasing.ipynb) |
+| The fragment size distribution of ATAC-seq of FLK1+ cells vs. the mixture population at 12 hours post-ETV2 induction during EB reprogramming and day 7 post-ETV2 induction during MEF reprogramming. In both conditions, the mono-nucleosomes and the di-nucleosomes were significantly increased in the FLK1+ cell populations | Fig. 4h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
+| The aggregated V-plot whose centers are the ETV2 bound sites at FLK1+ cell populations at 12 hours post-ETV2 induction in EB, and at 7 days post-ETV2 induction | Fig. 4i | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
+
+
 ## GEO datasets
 
 The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185684)
