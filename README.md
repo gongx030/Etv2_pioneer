@@ -66,7 +66,7 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-|  | Fig. 2a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) | 
+|  The Venn diagram shows 131,001 and 18,024 Etv2 ChIP-seq peaks at 24 hrs post-induction during MEF reprogramming and 3 hrs post-induction in day 2.5 EBs, respectively | Fig. 2a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) | 
 | The genomic distribution of EB specific, MEF specific and common ETV2 peaks. The EB and MEF specific ETV2 peaks were more likely distributed at the distal intergenic regions | Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) | 
 | The heatmap shows the read density of MNase-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq in MEFs, surrounding 131,001 ETV2 ChIP-seq peaks at 24 hrs post-induction during MEF reprogramming. The ETV2 peaks were divided into four quartiles based on the mean MNase-seq signals of the central 200-bp region | Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) |
 | The heatmap shows the ratio of NFR / nucleosome read density, read density of BRG1 ChIP-seq and H3K27ac ChIP-seq in EBs (day 2.5), surrounding 18,024 ETV2 ChIP-seq at 3 hrs post-induction. The ETV2 peaks were divided into NFR (5,291 peaks) and nucleosome (8,843 peaks) groups according to the local V-plot and fragment size profiles of ATAC-seq day 2.5 EBs without ETV2 induction | Fig. 2d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |
