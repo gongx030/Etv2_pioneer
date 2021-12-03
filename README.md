@@ -66,6 +66,7 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
+|  | Fig. 2a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) | 
 | The genomic distribution of EB specific, MEF specific and common ETV2 peaks. The EB and MEF specific ETV2 peaks were more likely distributed at the distal intergenic regions | Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) | 
 | The heatmap shows the read density of MNase-seq, BRG1 ChIP-seq and H3K27ac ChIP-seq in MEFs, surrounding 131,001 ETV2 ChIP-seq peaks at 24 hrs post-induction during MEF reprogramming. The ETV2 peaks were divided into four quartiles based on the mean MNase-seq signals of the central 200-bp region | Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF.ipynb) |
 | The heatmap shows the ratio of NFR / nucleosome read density, read density of BRG1 ChIP-seq and H3K27ac ChIP-seq in EBs (day 2.5), surrounding 18,024 ETV2 ChIP-seq at 3 hrs post-induction. The ETV2 peaks were divided into NFR (5,291 peaks) and nucleosome (8,843 peaks) groups according to the local V-plot and fragment size profiles of ATAC-seq day 2.5 EBs without ETV2 induction | Fig. 2d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |
@@ -135,7 +136,7 @@
 |  | Figures | Colab link | 
 | --- | --- | --- | 
 |  The violin plots show the scaled expression levels of endothelial markers such as Etv2, Emcn, Lmo2, Flk1/Kdr, Cdh5 and Sox18 in MEFs, day 1, day 2, day 7 post-ETV2 induction, as well as the FLK1+ cells from day 7 | Extended Data Fig. 2a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
-|  The violin plots show the scaled expression levels of endothelial markers in seven cell clusters | Extended Data Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
+|  The violin plots show the scaled expression levels of endothelial markers in seven cell clusters | Extended Data Fig. 2b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |
 |  The biological processes that are significantly associated with the up-regulated in genes in cluster 1 (undifferentiated MEFs) compared with the rest of the cell populations | Extended Data Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
 |  GSEA plot indicates significant upregulation of the inflammatory response in MEFs (cluster 1) | Extended Data Fig. 2d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/MEF_subpopulation_gsea_for_immune_reponse.ipynb) |
 |  Heatmap representing the gene expression levels scaled by Seurat for upregulated (red) and downregulated (blue) genes in cluster 1 and cluster 2 | Extended Data Fig. 2e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/R7_Etv2_pathway_MEF_clusters_1_and_2.ipynb) |
@@ -180,6 +181,14 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
+|  The MNase-seq, BRG1, H3K27ac, H3, H3K9me3, H3K27me3, H3K9ac, H3K4me3, H4K7me1 and Hdac1 ChIP-seq signals surrounding the ETV2 bound sites at day1 post-ETV2 induction during MEF reprogramming, split into nucleosome and nucleosome free region (NFR) according to the MNase-seq signals | Extended Data Fig. 7a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_binding_D1_MEF_extended.ipynb) |
+|  The latent representation of ATAC-seq V-plots (-320bp to + 320bp) where the centers are nucleosome free or occupied by mono nucleosome | Extended Data Fig. 7b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |
+|  The aggregated ETV2 bound sites centric V-plot whose centers were occupied by mono nucleosomes or nucleosome free | Extended Data Fig. 7c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_analysis.ipynb) |
+|  The fragment size profile of ETV2 bound sites centric region (-320bp to +320bp) where the centers are nucleosome free or occupied by mono nucleosomes | Extended Data Fig. 7d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ |
+|  Motif analysis of ETV2 bound sites during EB reprogramming and MEF reprogramming | Extended Data Fig. 7e | [R](diff_Etv2_motifs_between_NFR_and_nucleosome.Rmd) |
+|  The overlap of ETV2 bound sites at day 1, day 2 and day 7 post-ETV2 induction during MEF reprogramming | Extended Data Fig. 7f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) |
+|  The overlap of ETV2 bound sites at 3 hours and 12 hours post-ETV2 induction during EB reprogramming | Extended Data Fig. 7g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Etv2_ChIP_seq_peaks.ipynb) |
+|  The bar plot shows the percent of genes located near the late, early and sustained ETV2 bound sites related to blood vessel development | Extended Data Fig. 7h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Pathway_Etv2_peaks.ipynb) |
 
 ### Extended Figure 9
 
