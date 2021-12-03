@@ -96,6 +96,22 @@
 | The fragment size distribution of ATAC-seq of FLK1+ cells vs. the mixture population at 12 hours post-ETV2 induction during EB reprogramming and day 7 post-ETV2 induction during MEF reprogramming. In both conditions, the mono-nucleosomes and the di-nucleosomes were significantly increased in the FLK1+ cell populations | Fig. 4h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
 | The aggregated V-plot whose centers are the ETV2 bound sites at FLK1+ cell populations at 12 hours post-ETV2 induction in EB, and at 7 days post-ETV2 induction | Fig. 4i | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/FLk1plus_mix.ipynb) |
 
+### Figure 5
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+|  The UMAP plot shows the scRNA-seq of 8,838 cells from day 7 post-induction in control MEFs, 1,502 FLK1+ cells from day 7 post-ETV2 induction in MEFs, 8,248 cells from day 7 post-ETV2 induction in Brg1 KD MEFs, and 8,034 cells at day 7 in Brg1 KD MEFs  | Fig. 5c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) |
+|  The UMAP plot shows the expression level of Etv2  | Fig. 5d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) |
+|  The UMAP plot shows the expression level of Brg1  | Fig. 5e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) |
+|  The UMAP plot shows the expression level of Flk1  | Fig. 5f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D7.ipynb) |
+
+### Figure 6
+
+|  | Figures | Colab link | 
+| --- | --- | --- | 
+|  The heatmap shows the piled up ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs (the sustained Etv2 peaks) | Fig. 6a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
+|  The heatmap shows the transcription factors where motif associated chromatin accessibility were significantly changed at day 7 post-ETV2 induction in MEFs (unsorted MEFs or FLK1+ cells), or the Brg1 KD MEFs | Fig. 6b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
+
 
 ## GEO datasets
 
