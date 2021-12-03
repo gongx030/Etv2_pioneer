@@ -199,7 +199,9 @@
 ### Extended Figure 10
 
 |  | Figures | Colab link | 
-| --- | --- | --- | 
+| --- | --- | --- |
+|  The heatmap shows the ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs | Extended Data Fig. 10a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/) |
+|  Heatmap shows ETV2 ChIP-seq signal surrounding 4,965 sustained ETV2 ChIP-seq peaks present in the D7 post ETV2 induction in WT MEFs and Brg1 KD MEFs | Extended Data Fig. 10b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1_KD_ChIP_data_Enriched_Heatmap_at_Etv2_Binding_Sites.ipynb) |
 
 ## Supplementary Figure
 
@@ -207,35 +209,57 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
+|  The plots show enrichment scores for each Histone Acetyltransferases' | Supplementary Fig. 1a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R4_gsea_analysis_for_MEF_clusters.ipynb) |
+|  The plots show enrichment scores for each Histone Deacetylases' | Supplementary Fig. 1b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R4_gsea_analysis_for_MEF_clusters.ipynb) |
+|  The plots show enrichment scores for each Inflammatory Response | Supplementary Fig. 1c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R4_gsea_analysis_for_MEF_clusters.ipynb) |
+|  The plots show enrichment scores for each NIK/NF-kappaB signaling | Supplementary Fig. 1d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R4_gsea_analysis_for_MEF_clusters.ipynb) |
 
 ### Supplementary Figure 2
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
+|  The plots show enrichment scores for each Histone Acetyltransferases' | Supplementary Fig. 2a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3ab_Copy_of_Expression_of_Inflammatory_related_genes_final.ipynb) <br> [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3_Gene_set_enrichment_analysis_MEF_vs_MEF_DOX_day1.ipynb)|
+|  The plots show enrichment scores for each Histone Deacetylases' | Supplementary Fig. 2b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3ab_Copy_of_Expression_of_Inflammatory_related_genes_final.ipynb) <br> [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3_Gene_set_enrichment_analysis_MEF_vs_MEF_DOX_day1.ipynb) |
+|  The plots show enrichment scores for each Inflammatory Response | Supplementary Fig. 2c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3ab_Copy_of_Expression_of_Inflammatory_related_genes_final.ipynb) <br> [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3_Gene_set_enrichment_analysis_MEF_vs_MEF_DOX_day1.ipynb) |
+|  The plots show enrichment scores for each NIK/NF-kappaB signaling | Supplementary Fig. 2d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3ab_Copy_of_Expression_of_Inflammatory_related_genes_final.ipynb) <br> [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R3_Gene_set_enrichment_analysis_MEF_vs_MEF_DOX_day1.ipynb) |
 
 ### Supplementary Figure 3
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-
+|  The plots show enrichment scores for each Histone Acetyltransferases' | Supplementary Fig. 3a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R5_Expression_of_Inflammatory_pathway_related_genes_literature_data.ipynb) |
+|  The plots show enrichment scores for each Histone Deacetylases' | Supplementary Fig. 3b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R5_Expression_of_Inflammatory_pathway_related_genes_literature_data.ipynb) |
+|  The plots show enrichment scores for each Inflammatory Response | Supplementary Fig. 3c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R5_Expression_of_Inflammatory_pathway_related_genes_literature_data.ipynb) |
+|  The plots show enrichment scores for each NIK/NF-kappaB signaling | Supplementary Fig. 3d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/R5_Expression_of_Inflammatory_pathway_related_genes_literature_data.ipynb) |
 
 ### Supplementary Figure 4
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-
+|  Venn diagram representing the overlap of common genes upregulated in ES/EB and MEF reprogramming post Etv2 induction, also overlapping with the genes from gene ontology terms for Histone Acetyltransferases' | Supplementary Fig. 4a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Overlap_between_MEFs_and_EB_for_HDACs_HATs_Inflammatory_and_NFkB_genes.ipynb) |
+|  Venn diagram representing the overlap of common genes upregulated in ES/EB and MEF reprogramming post Etv2 induction, also overlapping with the genes from gene ontology terms for Histone Deacetylases' | Supplementary Fig. 4b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Overlap_between_MEFs_and_EB_for_HDACs_HATs_Inflammatory_and_NFkB_genes.ipynb) |
+|  Venn diagram representing the overlap of common genes upregulated in ES/EB and MEF reprogramming post Etv2 induction, also overlapping with the genes from gene ontology terms for Inflammatory Response | Supplementary Fig. 4c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Overlap_between_MEFs_and_EB_for_HDACs_HATs_Inflammatory_and_NFkB_genes.ipynb) |
+|  Venn diagram representing the overlap of common genes upregulated in ES/EB and MEF reprogramming post Etv2 induction, also overlapping with the genes from gene ontology terms for NIK/NF-kappaB signaling | Supplementary Fig. 4d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Overlap_between_MEFs_and_EB_for_HDACs_HATs_Inflammatory_and_NFkB_genes.ipynb) |
 
 ### Supplementary Figure 5
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-
+|  The transcription factors whose motif associated chromatin accessibility and expressions were up-regulated in both EB and MEF on Etv2 induction | Supplementary Fig. 5a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The transcription factors whose motif associated chromatin accessibility and expressions were down-regulated in both EB and MEF on Etv2 induction | Supplementary Fig. 5b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
 
 ### Supplementary Figure 6
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-
+|  The PCA analysis of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The PCA analysis of different cell cycle programs | Supplementary Fig. 6b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The bar plot showing cells in the G1 phase are increased with Brg1 KD in MEFs | Supplementary Fig. 6c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The correction of cell cycle effects when combining the single cell RNA-seq data of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The correction of cell cycle effects when combining the single cell RNA-seq data of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6e | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The expression levels of Etv2 in cell-cycle effected adjusted single cell RNA-seq data from undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6f | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The expression levels of Etv2 in cell-cycle effected adjusted single cell RNA-seq data from undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6g | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The H3K27ac ChIP-seq signals of undifferentiated MEFs and Brg1 KD MEFs surrounding the early, late and sustained ETV2 bound sites in ETV2 induced MEF reprogramming | Supplementary Fig. 6h | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) |
 
 ## GEO datasets
 
