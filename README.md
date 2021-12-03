@@ -166,6 +166,15 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
+|  The number of transcription factors whose motifs associated chromatin accessibility were significantly increased or decreased in the FLK1+ cell populations at 12 hours post-Etv2 induction compared with D2.5 EBs | Extended Data Fig. 6a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The number of transcription factors whose motifs associated chromatin accessibility were significantly increased or decreased in the FLK1+ cell population at day 7 post-ETV2 induction compared with undifferentiated MEFs | Extended Data Fig. 6b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The number of transcription factors whose motif associated chromatin accessibility that were commonly increased during EB and MEF reprogramming | Extended Data Fig. 6c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The number of transcription factors whose motif associated chromatin accessibility that were commonly decreased during EB and MEF reprogramming | Extended Data Fig. 6d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The transcription factors whose RNA-seq expression levels and motifs associated chromatin accessibility that were both up-regulated or down-regulated during EB reprogramming | Extended Data Fig. 6e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The transcription factors whose RNA-seq expression levels and motifs associated chromatin accessibility that were both up-regulated or down-regulated during MEF reprogramming | Extended Data Fig. 6f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The commonly up-regulated genes between EBs and MEFs | Extended Data Fig. 6g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/TFBS_in_commonly_regulated_genes.ipynb) |
+|  The commonly down-regulated genes between EBs and MEFs | Extended Data Fig. 6h | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/TFBS_in_commonly_regulated_genes.ipynb) |
+|  The transcription factor motifs that are significantly enriched in 5k region surrounding the transcription start sites of the commonly up- and down-regulated genes in EBs and MEFs | Extended Data Fig. 6i | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/TFBS_in_commonly_regulated_genes.ipynb) |
 
 ### Extended Figure 7
 
