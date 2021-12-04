@@ -203,7 +203,7 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- |
-|  The heatmap shows the ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs | Extended Data Fig. 10a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/) |
+|  The heatmap shows the ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs | Extended Data Fig. 10a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ |
 |  Heatmap shows ETV2 ChIP-seq signal surrounding 4,965 sustained ETV2 ChIP-seq peaks present in the D7 post ETV2 induction in WT MEFs and Brg1 KD MEFs | Extended Data Fig. 10b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1_KD_ChIP_data_Enriched_Heatmap_at_Etv2_Binding_Sites.ipynb) |
 
 ## Supplementary Figure
