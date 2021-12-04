@@ -255,13 +255,13 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- | 
-|  The PCA analysis of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-|  The PCA analysis of different cell cycle programs | Supplementary Fig. 6b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-|  The bar plot showing cells in the G1 phase are increased with Brg1 KD in MEFs | Supplementary Fig. 6c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-|  The correction of cell cycle effects when combining the single cell RNA-seq data of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-|  The correction of cell cycle effects when combining the single cell RNA-seq data of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6e | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-|  The expression levels of Etv2 in cell-cycle effected adjusted single cell RNA-seq data from undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6f | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
-|  The expression levels of Etv2 in cell-cycle effected adjusted single cell RNA-seq data from undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6g | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ATAC_analysis.ipynb) |
+|  The PCA analysis of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
+|  The PCA analysis of different cell cycle programs | Supplementary Fig. 6b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
+|  The bar plot showing cells in the G1 phase are increased with Brg1 KD in MEFs | Supplementary Fig. 6c | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
+|  The correction of cell cycle effects when combining the single cell RNA-seq data of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6d | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
+|  The correction of cell cycle effects when combining the single cell RNA-seq data of undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6e | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
+|  The expression levels of Etv2 in cell-cycle effected adjusted single cell RNA-seq data from undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6f | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
+|  The expression levels of Etv2 in cell-cycle effected adjusted single cell RNA-seq data from undifferentiated MEFs and Brg1 KD MEFs | Supplementary Fig. 6g | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1KD_scRNA_seq_D0.ipynb) |
 |  The H3K27ac ChIP-seq signals of undifferentiated MEFs and Brg1 KD MEFs surrounding the early, late and sustained ETV2 bound sites in ETV2 induced MEF reprogramming | Supplementary Fig. 6h | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/H3K27ac_Chip_seq_Analysis.ipynb) |
 
 ## GEO datasets
