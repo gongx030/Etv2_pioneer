@@ -79,7 +79,7 @@
 | --- | --- | --- | 
 |  The heatmap shows the piled up ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs (the sustained Etv2 peaks) | Fig. 6a | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
 |  The heatmap shows the transcription factors where motif associated chromatin accessibility were significantly changed at day 7 post-ETV2 induction in MEFs (unsorted MEFs or FLK1+ cells), or the Brg1 KD MEFs | Fig. 6b | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_sustained_Etv2_peaks.ipynb) |
-|  The genomic distribution of open ETV2 peaks and closed ETV2 peaks at 7 days post-ETV2 induction in Brg1 KD MEFs | Fig. 6c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ |
+|  The genomic distribution of open ETV2 peaks and closed ETV2 peaks at 7 days post-ETV2 induction in Brg1 KD MEFs | Fig. 6c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/Brg1_KD_D7_open_closed_enriched_heatmap_and_annotating_peaks.ipynb) |
 |   The aggregated V-plot of 1,204 ETV2 binding sites that were closed in MEFs and became open at day 1 post-ETV2 induction in MEFs | Fig. 6d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/ |
 
 ### Figure 7
@@ -169,7 +169,7 @@
 
 |  | Figures | Colab link | 
 | --- | --- | --- |
-|  The heatmap shows the ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs | Extended Data Fig. 10a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/ |
+|  The heatmap shows the ATAC-seq signal surrounding the summit of 12,170 sustained ETV2 ChIP-seq peaks that were present at day 1 and day 7 post-induction of ETV2 in control MEFs | Extended Data Fig. 10a | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1_KD_D7_open_closed_enriched_heatmap_and_annotating_peaks.ipynb) |
 |  Heatmap shows ETV2 ChIP-seq signal surrounding 4,965 sustained ETV2 ChIP-seq peaks present in the D7 post ETV2 induction in WT MEFs and Brg1 KD MEFs | Extended Data Fig. 10b | [R](https://colab.research.google.com/github/gongx030/Etv2_pioneer/blob/master/Brg1_KD_ChIP_data_Enriched_Heatmap_at_Etv2_Binding_Sites.ipynb) |
 
 ## Supplementary Figure
