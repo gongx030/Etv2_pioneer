@@ -141,8 +141,8 @@
 |  The biological processes that are significantly associated with the up-regulated in genes in cluster 1 (undifferentiated MEFs) compared with the rest of the cell populations | Extended Data Fig. 2c | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/scRNA_seq.ipynb) |
 |  GSEA plot indicates significant upregulation of the inflammatory response in MEFs (cluster 1) | Extended Data Fig. 2d | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/MEF_subpopulation_gsea_for_immune_reponse.ipynb) |
 |  Heatmap representing the gene expression levels scaled by Seurat for upregulated (red) and downregulated (blue) genes in cluster 1 and cluster 2 | Extended Data Fig. 2e | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/R7_Etv2_pathway_MEF_clusters_1_and_2.ipynb) |
-|  The bar plots show top 10 significant pathways for cluster 1 and cluster 2 for MEFs | Extended Data Fig. 2f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/R7_Etv2_pathway_MEF_clusters_1_and_2.ipynb) |
-|  The bar plots show top 10 significant pathways for cluster 1 and cluster 2 for MEFs. | Extended Data Fig. 2g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/R7_Etv2_pathway_MEF_clusters_1_and_2.ipynb) |
+|  The bar plots show top 10 significant pathways for cluster 1 MEFs | Extended Data Fig. 2f | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/R7_Etv2_pathway_MEF_clusters_1_and_2.ipynb) |
+|  The bar plots show top 10 significant pathways for cluster 2 MEFs. | Extended Data Fig. 2g | [R](https://colab.research.google.com/github/gongx030/etv2_pioneer/blob/master/R7_Etv2_pathway_MEF_clusters_1_and_2.ipynb) |
 
 ### Extended Figure 3
 
