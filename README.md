@@ -2,6 +2,9 @@
 
 # ETV2 functions as a pioneer factor to regulate and reprogram the endothelial lineage
 
+Wuming Gong, Satyabrata Das, Javier E. Sierra-Pagan, Erik Skie, Nikita Dsouza, Thijs A. Larson, Mary G. Garry, Edgar Luzete-Monteiro, Kenneth S. Zaret, Daniel J. Garry
+
+
 ## Processed datasets
 
 | | Dataset | Format | Script | 
