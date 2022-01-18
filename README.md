@@ -244,6 +244,12 @@ The datasets below belong to a SuperSeries [GSE185684](https://www.ncbi.nlm.nih.
 | scRNA-seq | [GSE185683](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185683) |  
 | NOMe-seq | [GSE185681](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185681) |  
 
+## Mass Spectrometry data
+
+The Mass Spectrometry data of ETV2 interacting proteins in D4 EBs. 
+
+https://github.com/gongx030/Etv2_pioneer/blob/master/massspec.xlsx
+
 
 ### UCSC genome browser track
 
